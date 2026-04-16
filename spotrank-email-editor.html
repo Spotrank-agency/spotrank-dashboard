@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spotrank — Email Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- DOMPurify: sanitize postMessage payloads (bodyHtml, signatureHtml) before innerHTML -->
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js" crossorigin="anonymous"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --cta:#1a56e8; --cta-dark:#1240c4; --cta-ghost:#eef2fd;
+  --ink:#0f1f3d; --muted:#6b7280; --border:#e8e8e8; --stone:#f5f5f7;
+}
+html,body{height:100%;font-family:'Onest',sans-serif;background:#fff;color:var(--ink);font-size:14px;margin:0;overflow:hidden;}
+.editor-wrap{display:flex;flex-direction:column;height:100vh;}
+
+/* Header */
+.ee-header{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);background:#fafafa;flex-shrink:0;}
+.ee-header h2{flex:1;font-size:15px;font-weight:700;margin:0;}
+.ee-badge{font-size:11px;color:var(--muted);background:#f1f5f9;padding:4px 10px;border-radius:20px;}
+.ee-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:18px;color:var(--muted);display:flex;align-items:center;justify-content:center;}
+.ee-close:hover{background:#fee2e2;color:#dc2626;border-color:#fca5a5;}
+
+/* Meta */
+.ee-meta{display:flex;gap:12px;padding:12px 20px;border-bottom:1px solid var(--border);background:#fff;flex-shrink:0;}
+.ee-meta label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px;}
+.ee-meta input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12.5px;font-family:'Onest',sans-serif;color:var(--ink);outline:none;transition:border-color .12s;}
+.ee-meta input:focus{border-color:var(--cta);}
+
+/* Body split */
+.ee-body{display:flex;flex:1;overflow:hidden;}
+.ee-editor{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border);}
+
+/* Toolbar */
+.ee-toolbar{display:flex;align-items:center;gap:2px;flex-wrap:wrap;padding:8px 12px;border-bottom:1px solid var(--border);background:#f8fafc;flex-shrink:0;}
+.ee-tb-btn{width:28px;height:28px;border:none;background:none;border-radius:6px;cursor:pointer;font-size:13px;color:#475569;display:flex;align-items:center;justify-content:center;transition:all .1s;font-family:'Onest',sans-serif;font-weight:700;}
+.ee-tb-btn:hover{background:#e2e8f0;color:#0f172a;}
+.ee-tb-sep{width:1px;height:20px;background:var(--border);margin:0 4px;}
+.ee-tb-select{height:28px;border:1px solid var(--border);border-radius:6px;padding:0 8px;font-size:11.5px;font-family:'Onest',sans-serif;color:#475569;background:#fff;cursor:pointer;outline:none;}
+
+/* Content */
+.ee-content{flex:1;overflow-y:auto;padding:24px 32px;outline:none;font-size:14px;line-height:1.7;color:#1e293b;min-height:0;}
+.ee-content:empty:before{content:attr(data-placeholder);color:#94a3b8;}
+.ee-content a{color:var(--cta);}
+.ee-content h1{font-size:22px;font-weight:700;margin:16px 0 8px;}
+.ee-content h2{font-size:18px;font-weight:600;margin:14px 0 6px;}
+.ee-content blockquote{border-left:3px solid var(--cta);padding-left:14px;color:#64748b;margin:12px 0;}
+.ee-content ul,.ee-content ol{padding-left:20px;margin:8px 0;}
+
+/* Vars bar */
+.ee-vars{padding:8px 12px;border-top:1px solid var(--border);background:#f8fafc;flex-shrink:0;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.ee-vars span{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;}
+.ee-var-chip{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;border:1px solid #dbeafe;background:#eff6ff;color:#1d4ed8;cursor:pointer;font-family:'Onest',sans-serif;transition:all .1s;white-space:nowrap;}
+.ee-var-chip:hover{background:#dbeafe;border-color:#93c5fd;}
+
+/* Preview */
+.ee-preview{width:380px;flex-shrink:0;display:flex;flex-direction:column;background:#f1f5f9;}
+.ee-preview-header{padding:12px 16px;border-bottom:1px solid var(--border);background:#fff;flex-shrink:0;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;}
+.ee-preview-inbox{margin:16px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);flex-shrink:0;}
+.ee-preview-inbox-row{padding:12px 16px;border-bottom:1px solid #f1f5f9;}
+.ee-preview-inbox-row .from{font-size:11px;font-weight:700;color:#0f172a;}
+.ee-preview-inbox-row .subj{font-size:11.5px;font-weight:600;color:#0f172a;margin-top:2px;}
+.ee-preview-inbox-row .prev{font-size:10.5px;color:#94a3b8;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ee-preview-email{margin:0 16px 16px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);flex:1;overflow-y:auto;}
+.ee-preview-email-top{padding:14px 18px;border-bottom:1px solid #f1f5f9;background:#fafafa;}
+.ee-preview-email-body{padding:20px 24px;font-size:13px;line-height:1.7;color:#1e293b;}
+.ee-preview-email-body .var-highlight{background:#dbeafe;color:#1d4ed8;border-radius:3px;padding:0 3px;font-size:.9em;}
+
+/* Footer */
+.ee-footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--border);background:#fafafa;flex-shrink:0;}
+.ee-btn-cancel{padding:9px 16px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--muted);font-weight:600;font-size:13px;cursor:pointer;font-family:'Onest',sans-serif;transition:all .12s;}
+.ee-btn-cancel:hover{background:#f1f5f9;}
+.ee-btn-save{padding:9px 20px;border-radius:8px;border:none;background:var(--cta);color:#fff;font-weight:700;font-size:13px;cursor:pointer;font-family:'Onest',sans-serif;transition:background .12s;}
+.ee-btn-save:hover{background:var(--cta-dark);}
+</style>
+</head>
+<body>
+<div class="editor-wrap">
+  <!-- Header -->
+  <div class="ee-header">
+    <h2>📩 Éditeur email</h2>
+    <div class="ee-badge" id="ee-badge">Aperçu : Mike Torres · HVAC · Austin TX</div>
+    <button class="ee-close" onclick="doClose()">✕</button>
+  </div>
+
+  <!-- Subject + preview -->
+  <div class="ee-meta">
+    <div style="flex:2;">
+      <label>Sujet</label>
+      <input id="ee-subj" placeholder="Ex: ✅ Votre appel est confirmé" oninput="livePreview()" />
+    </div>
+    <div style="flex:1.5;">
+      <label>Preview text</label>
+      <input id="ee-prev" placeholder="Texte affiché avant d'ouvrir..." oninput="livePreview()" />
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="ee-body">
+    <!-- Editor side -->
+    <div class="ee-editor">
+      <div class="ee-toolbar" onmousedown="if(event.target.tagName!=='SELECT'&&!event.target.closest('select'))event.preventDefault()">
+        <select class="ee-tb-select" onmousedown="saveSel()" onchange="fontSize(this.value)">
+          <option value="12">12px</option>
+          <option value="14" selected>14px</option>
+          <option value="16">16px</option>
+          <option value="18">18px</option>
+          <option value="20">20px</option>
+          <option value="24">24px</option>
+          <option value="28">28px</option>
+        </select>
+        <div class="ee-tb-sep"></div>
+        <button class="ee-tb-btn" onclick="fmt('bold')" title="Gras"><b>B</b></button>
+        <button class="ee-tb-btn" onclick="fmt('italic')" title="Italique"><i>I</i></button>
+        <button class="ee-tb-btn" onclick="fmt('underline')" title="Souligné"><u>U</u></button>
+        <div class="ee-tb-sep"></div>
+        <button class="ee-tb-btn" onclick="fmt('insertUnorderedList')" title="Liste">• —</button>
+        <button class="ee-tb-btn" onclick="fmt('insertOrderedList')" title="Numérotée">1.</button>
+        <div class="ee-tb-sep"></div>
+        <button class="ee-tb-btn" onclick="fmt('justifyLeft')" title="Gauche" style="font-size:11px;">≡ G</button>
+        <button class="ee-tb-btn" onclick="fmt('justifyCenter')" title="Centrer" style="font-size:11px;">≡ C</button>
+        <div class="ee-tb-sep"></div>
+        <button class="ee-tb-btn" onclick="insLink()" title="Lien">🔗</button>
+        <button class="ee-tb-btn" onclick="fmt('insertHorizontalRule')" title="Ligne">—</button>
+        <div class="ee-tb-sep"></div>
+        <button class="ee-tb-btn" onclick="fmt('removeFormat')" title="Effacer" style="font-size:11px;">Tx</button>
+      </div>
+      <div class="ee-content" id="ee-body" contenteditable="true" oninput="livePreview()" data-placeholder="Écrivez votre email ici..."></div>
+      <div class="ee-vars">
+        <span>Variables</span>
+        <button class="ee-var-chip" onclick="insVar('{{firstname}}')">{{firstname}}</button>
+        <button class="ee-var-chip" onclick="insVar('{{lastname}}')">{{lastname}}</button>
+        <button class="ee-var-chip" onclick="insVar('{{trade}}')">{{trade}}</button>
+        <button class="ee-var-chip" onclick="insVar('{{city}}')">{{city}}</button>
+        <button class="ee-var-chip" onclick="insVar('{{setter_name}}')">{{setter_name}}</button>
+        <button class="ee-var-chip" onclick="insVar('{{closer_name}}')">{{closer_name}}</button>
+        <button class="ee-var-chip" onclick="insVar('{{company_name}}')">{{company_name}}</button>
+        <button class="ee-var-chip" onclick="insVar('{{booking_link}}')">{{booking_link}}</button>
+        <button class="ee-var-chip" onclick="insVar('{{zoom_link}}')">{{zoom_link}}</button>
+        <button class="ee-var-chip" onclick="insVar('{{payment_link}}')">{{payment_link}}</button>
+        <button class="ee-var-chip" onclick="insVar('{{form_link}}')">{{form_link}}</button>
+        <button class="ee-var-chip" onclick="insVar('{{contact_attempts}}')">{{contact_attempts}}</button>
+      </div>
+    </div>
+
+    <!-- Preview side -->
+    <div class="ee-preview">
+      <div class="ee-preview-header">📬 Aperçu boîte mail</div>
+      <div class="ee-preview-inbox">
+        <div class="ee-preview-inbox-row">
+          <div class="from">contact@spotrank.io</div>
+          <div class="subj" id="ee-prev-subj">Sujet...</div>
+          <div class="prev" id="ee-prev-prev">Preview text...</div>
+        </div>
+      </div>
+      <div class="ee-preview-email">
+        <div class="ee-preview-email-top">
+          <div style="font-size:12px;font-weight:700;color:#0f172a;" id="ee-prev-subj2">Sujet...</div>
+          <div style="font-size:10px;color:#94a3b8;margin-top:2px;">De : contact@spotrank.io · À : Mike Torres</div>
+        </div>
+        <div class="ee-preview-email-body" id="ee-prev-body">Corps vide...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="ee-footer">
+    <div style="display:flex; align-items:center; gap:8px; margin-right:auto;">
+      <div id="sig-toggle" onclick="toggleSig()" style="width:34px;height:20px;background:#1a56e8;border-radius:10px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;">
+        <div style="width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:2px;left:16px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);" id="sig-toggle-dot"></div>
+      </div>
+      <span style="font-size:12px; color:var(--muted);" id="sig-toggle-label">Signature incluse</span>
+    </div>
+    <button class="ee-btn-cancel" onclick="doClose()">Annuler</button>
+    <button class="ee-btn-save" onclick="doSave()">💾 Sauvegarder</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+/*
+ ═══════════════════════════════════════════════════════════════════
+ SPOTRANK — EMAIL EDITOR (spotrank-email-editor.html)
+ ═══════════════════════════════════════════════════════════════════
+
+ RÔLE :
+   Éditeur email WYSIWYG standalone chargé en iframe depuis :
+     1. spotrank-dashboard.html  → page Campaigns (modal-camp-editor)
+     2. spotrank-builder.html    → panneau config du bloc send_email
+
+ ARCHITECTURE :
+   - Éditeur contenteditable (#ee-body) avec toolbar rich text
+   - Champs Sujet + Preview text (#ee-subj, #ee-prev)
+   - Barre de variables {{...}} (insVar)
+   - Prévisualisation boîte mail en temps réel (panneau droit)
+   - Signature email configurable (toggle + buildSig)
+
+ COMMUNICATION PARENT ↔ IFRAME (postMessage) :
+   Reçoit du parent :
+     { type:'LOAD_EMAIL', subject, preview, bodyHtml, badge?, signatureHtml?, showSignature? }
+     { type:'UPDATE_SIGNATURE', signatureHtml }
+   Envoie au parent :
+     { type:'EDITOR_READY' }           → l'iframe est prête
+     { type:'SAVE_EMAIL', subject, preview, bodyHtml, showSignature }
+     { type:'CLOSE_EDITOR' }
+
+ NOTE IMPORTANTE :
+   insLink() utilise prompt() natif — acceptable ici car cet éditeur
+   n'est pas dans une iframe bloquant confirm/prompt. Il est lui-même
+   chargé en iframe mais depuis le navigateur natif.
+
+ ═══════════════════════════════════════════════════════════════════
+*/
+
+/* ── Variables d'état ── */
+let savedRange  = null;        /* Range sauvegardée avant clic sur toolbar (pour conserver la sélection) */
+let showSignature = true;      /* true = signature incluse dans l'email envoyé */
+let signatureHTML = '';        /* HTML de la signature actuelle (buildSig ou injecté par parent) */
+
+/*
+ * DEFAULT_SIG — Signature par défaut en mode standalone (sans parent).
+ * Overridée en runtime par le message UPDATE_SIGNATURE du dashboard.
+ */
+// ── Default signature (used standalone — overridden by parent via postMessage) ──
+const DEFAULT_SIG = {
+  fullName: 'Votre Nom', title: 'Founder & CEO', company: 'Spotrank',
+  phone: '+1 800 SPOTRANK', email: 'contact@spotrank.io', website: 'https://spotrank.com',
+  accentColor: '#1a56e8', linkedin: '', instagram: '', facebook: '', tiktok: '',
+  closingLine: 'Helping local contractors dominate Google.',
+};
+
+/**
+ * Génère le HTML inline de la signature email.
+ * Produit un bloc HTML compatible email (inline styles, pas de CSS externe).
+ * Inclut : nom, titre, coordonnées, icônes réseaux sociaux colorées.
+ * @param {Object} s - Objet signature (DEFAULT_SIG ou reçu par postMessage)
+ * @returns {string} - HTML de la signature
+ */
+function buildSig(s) {
+  const a = s.accentColor || '#1a56e8';
+  const socs = [];
+  if (s.linkedin)  socs.push({url:s.linkedin,  color:'#0A66C2', label:'in'});
+  if (s.instagram) socs.push({url:s.instagram, color:'#E4405F', label:'ig'});
+  if (s.facebook)  socs.push({url:s.facebook,  color:'#1877F2', label:'fb'});
+  if (s.tiktok)    socs.push({url:s.tiktok,    color:'#000',    label:'tk'});
+  return `<div style="border-top:2px solid ${a};padding-top:16px;margin-top:12px;font-family:Arial,Helvetica,sans-serif;">
+    <div style="font-size:14px;font-weight:700;color:#0f172a;">${s.fullName||'Votre Nom'}</div>
+    <div style="font-size:12px;color:${a};font-weight:600;margin-top:1px;">${s.title||''}${s.title&&s.company?' · ':''}${s.company||''}</div>
+    ${s.closingLine?`<div style="font-size:11px;color:#64748b;font-style:italic;margin-top:4px;">${s.closingLine}</div>`:''}
+    <div style="margin-top:8px;font-size:11.5px;color:#475569;line-height:1.8;">
+      ${s.phone?`<span>📞 ${s.phone}</span><br>`:''}
+      ${s.email?`<span>✉️ <a href="mailto:${s.email}" style="color:${a};text-decoration:none;">${s.email}</a></span><br>`:''}
+      ${s.website?`<span>🌐 <a href="${s.website}" style="color:${a};text-decoration:none;">${s.website}</a></span>`:''}
+    </div>
+    ${socs.length?`<div style="margin-top:8px;">${socs.map(sc=>`<a href="${sc.url}" style="display:inline-block;width:22px;height:22px;background:${sc.color};border-radius:5px;text-decoration:none;margin-right:5px;vertical-align:middle;padding:4px;font-size:10px;color:#fff;text-align:center;line-height:14px;font-weight:700;">${sc.label}</a>`).join('')}</div>`:''}
+  </div>`;
+}
+
+// Init default signature
+signatureHTML = buildSig(DEFAULT_SIG);
+
+/**
+ * Toggle l'inclusion de la signature dans l'email.
+ * Met à jour l'UI (toggle CSS) et re-render la prévisualisation.
+ */
+function toggleSig() {
+  showSignature = !showSignature;
+  const toggle = document.getElementById('sig-toggle');
+  const dot = document.getElementById('sig-toggle-dot');
+  const label = document.getElementById('sig-toggle-label');
+  toggle.style.background = showSignature ? '#1a56e8' : '#d4d4d8';
+  dot.style.left = showSignature ? '16px' : '2px';
+  label.textContent = showSignature ? 'Signature incluse' : 'Sans signature';
+  livePreview();
+}
+
+/*
+ * ── PostMessage API ──
+ * Reçoit les instructions du parent (dashboard ou builder) :
+ *   LOAD_EMAIL      → charge un email existant dans l'éditeur
+ *   UPDATE_SIGNATURE → met à jour la signature sans recharger
+ */
+// Sanitize helper: DOMPurify with email-safe profile. Falls back to a minimal
+// allowlist if DOMPurify isn't loaded (CDN blocked).
+function _sanitizeEmailHtml(html) {
+  if (!html) return '';
+  if (typeof DOMPurify !== 'undefined') {
+    return DOMPurify.sanitize(String(html), { USE_PROFILES: { html: true } });
+  }
+  return String(html)
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
+    .replace(/\son\w+\s*=\s*'[^']*'/gi, '')
+    .replace(/javascript\s*:/gi, '');
+}
+
+// ── PostMessage API ──
+window.addEventListener('message', (e) => {
+  // Accept messages only from the parent frame (same-origin iframe embedding).
+  if (e.source !== window.parent) return;
+  const d = e.data;
+  if (!d || !d.type) return;
+
+  /* Charge un email dans l'éditeur — appelé quand on ouvre un bloc send_email */
+  if (d.type === 'LOAD_EMAIL') {
+    document.getElementById('ee-subj').value = typeof d.subject === 'string' ? d.subject : '';
+    document.getElementById('ee-prev').value = typeof d.preview === 'string' ? d.preview : '';
+    document.getElementById('ee-body').innerHTML = _sanitizeEmailHtml(d.bodyHtml || '');
+    if (d.badge) document.getElementById('ee-badge').textContent = String(d.badge);
+    if (d.signatureHtml) signatureHTML = _sanitizeEmailHtml(d.signatureHtml);
+    if (typeof d.showSignature !== 'undefined') { showSignature = d.showSignature; toggleSig(); toggleSig(); /* sync UI */ }
+    livePreview();
+    setTimeout(() => document.getElementById('ee-body').focus(), 100);
+  }
+
+  /* Met à jour la signature en temps réel (ex: après modif dans Settings) */
+  if (d.type === 'UPDATE_SIGNATURE') {
+    signatureHTML = _sanitizeEmailHtml(d.signatureHtml || '');
+    livePreview();
+  }
+});
+
+/* Notifie le parent que l'iframe est prête à recevoir des messages */
+// Notify parent we're ready
+window.parent.postMessage({ type: 'EDITOR_READY' }, window.location.origin || '*');
+
+/*
+ * ── Fonctions de l'éditeur WYSIWYG ──
+ * Utilisent document.execCommand() pour le formatage rich text.
+ * Toutes les actions appelle livePreview() pour mettre à jour la prévisualisation.
+ */
+
+/**
+ * Exécute une commande de formatage rich text (bold, italic, etc.)
+ * @param {string} cmd - Commande execCommand (ex: 'bold', 'insertUnorderedList')
+ * @param {string} val - Valeur optionnelle (pour insertHTML, createLink, etc.)
+ */
+// ── Editor functions ──
+function fmt(cmd, val) {
+  document.getElementById('ee-body').focus();
+  document.execCommand(cmd, false, val || null);
+  livePreview();
+}
+
+/**
+ * Sauvegarde la sélection courante avant un clic sur la toolbar.
+ * Nécessaire car le clic sur un bouton déplace le focus et perd la sélection.
+ * Restaurée dans fontSize() avant d'appliquer la taille.
+ */
+function saveSel() {
+  const sel = window.getSelection();
+  const editor = document.getElementById('ee-body');
+  if (sel && sel.rangeCount > 0 && editor && editor.contains(sel.anchorNode)) {
+    savedRange = sel.getRangeAt(0).cloneRange();
+  }
+}
+
+/**
+ * Applique une taille de police (px) au texte sélectionné.
+ * Restaure la sélection via savedRange avant d'appliquer.
+ * Si rien n'est sélectionné → change la taille de police par défaut de l'éditeur.
+ * @param {string|number} px - Taille en pixels (ex: '14', '18')
+ */
+function fontSize(px) {
+  const editor = document.getElementById('ee-body');
+  editor.focus();
+  if (savedRange) { const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(savedRange); }
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return;
+  const range = sel.getRangeAt(0);
+  if (range.collapsed) { editor.style.fontSize = px + 'px'; return; }
+  const span = document.createElement('span');
+  span.style.fontSize = px + 'px';
+  try { range.surroundContents(span); } catch(e) { const f = range.extractContents(); span.appendChild(f); range.insertNode(span); }
+  sel.removeAllRanges(); const nr = document.createRange(); nr.selectNodeContents(span); sel.addRange(nr);
+  livePreview(); savedRange = null;
+}
+
+/**
+ * Insère une variable {{...}} au curseur dans l'éditeur.
+ * Rendu avec un badge bleu (inline style) pour distinguer visuellement les variables.
+ * @param {string} v - Variable à insérer (ex: '{{firstname}}')
+ */
+function insVar(v) {
+  const editor = document.getElementById('ee-body');
+  editor.focus();
+  document.execCommand('insertHTML', false, `<span style="background:#dbeafe;color:#1d4ed8;border-radius:3px;padding:0 3px;font-size:.9em;">${v}</span>&nbsp;`);
+  livePreview();
+}
+
+/**
+ * Insère un lien hypertexte dans l'éditeur.
+ * Utilise prompt() natif — acceptable ici (pas dans l'iframe dashboard bloquant).
+ */
+function insLink() {
+  const url = prompt('URL du lien :');
+  if (url) { document.getElementById('ee-body').focus(); document.execCommand('createLink', false, url); livePreview(); }
+}
+
+/**
+ * Met à jour la prévisualisation de l'email en temps réel.
+ * Synchronise :
+ *   - La miniature dans la boîte mail simulée (#ee-prev-subj, #ee-prev-prev)
+ *   - L'aperçu de l'email ouvert (#ee-prev-subj2, #ee-prev-body)
+ * Inclut la signature HTML si showSignature = true.
+ */
+function livePreview() {
+  const subj = document.getElementById('ee-subj')?.value || 'Sujet...';
+  const prev = document.getElementById('ee-prev')?.value || 'Preview text...';
+  const body = document.getElementById('ee-body')?.innerHTML || '<span style="color:#94a3b8">Corps vide...</span>';
+  const sig = showSignature ? signatureHTML : '';
+  document.getElementById('ee-prev-subj').textContent = subj;
+  document.getElementById('ee-prev-subj2').textContent = subj;
+  document.getElementById('ee-prev-prev').textContent = prev;
+  document.getElementById('ee-prev-body').innerHTML = body + sig;
+}
+
+/* ── Comportements natifs de l'éditeur ── */
+
+/* Paste : strip les styles HTML du presse-papier → texte brut uniquement */
+// ── Paste: strip styles ──
+document.getElementById('ee-body').addEventListener('paste', e => {
+  e.preventDefault();
+  const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+  document.execCommand('insertHTML', false, text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'));
+  livePreview();
+});
+
+/* Enter : insère <br><br> au lieu de créer un nouveau <div> (comportement email standard) */
+// ── Enter: insert <br> ──
+document.getElementById('ee-body').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.execCommand('insertHTML', false, '<br><br>'); }
+});
+
+/**
+ * Sauvegarde l'email et notifie le parent.
+ * Envoie { type:'SAVE_EMAIL', subject, preview, bodyHtml, showSignature } via postMessage.
+ * Le parent (dashboard ou builder) récupère le contenu et l'associe au bloc send_email.
+ */
+// ── Save / Close → notify parent ──
+function doSave() {
+  window.parent.postMessage({
+    type: 'SAVE_EMAIL',
+    subject: document.getElementById('ee-subj').value,
+    preview: document.getElementById('ee-prev').value,
+    bodyHtml: _sanitizeEmailHtml(document.getElementById('ee-body').innerHTML),
+    showSignature: showSignature,
+  }, window.location.origin || '*');
+}
+
+/**
+ * Ferme l'éditeur en notifiant le parent.
+ * Envoie { type:'CLOSE_EDITOR' } → le parent masque la modal.
+ */
+function doClose() {
+  window.parent.postMessage({ type: 'CLOSE_EDITOR' }, window.location.origin || '*');
+}
+
+/* Escape → ferme l'éditeur */
+// Escape to close
+document.addEventListener('keydown', e => { if (e.key === 'Escape') doClose(); });
+
+/* Prévisualisation initiale avec signature par défaut */
+// Initial preview with signature
+livePreview();
+</script>
+</body>
+</html>

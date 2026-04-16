@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' rx='7' fill='%231a56e8'/%3E%3Cpath d='M14 6C10.69 6 8 8.69 8 12c0 5 6 10 6 10s6-5 6-10C20 8.69 17.31 6 14 6z' fill='white'/%3E%3Ccircle cx='14' cy='12' r='3' fill='%231a56e8'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' rx='7' fill='%231a56e8'/%3E%3Cpath d='M14 6C10.69 6 8 8.69 8 12c0 5 6 10 6 10s6-5 6-10C20 8.69 17.31 6 14 6z' fill='white'/%3E%3Ccircle cx='14' cy='12' r='3' fill='%231a56e8'/%3E%3C/svg%3E">
+<title>Privacy Policy — Spotrank</title>
+<meta name="description" content="Privacy Policy for Spotrank — How we collect, use, and protect your personal information.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://leafy-otter-8c951e.netlify.app/privacy.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;700&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
+<script>
+/*
+ ═══════════════════════════════════════════════════════════════════
+ SPOTRANK — PRIVACY POLICY (privacy.html)
+ ═══════════════════════════════════════════════════════════════════
+
+ RÔLE : Page de politique de confidentialité (CCPA/GDPR).
+   Contenu injecté dynamiquement depuis l'objet COMPANY.
+   privacyEmail : adresse dédiée aux demandes de confidentialité
+   (séparée du supportEmail et du legalEmail).
+
+ COMPANY — ⚙️ Modifier cet objet avant déploiement.
+ ═══════════════════════════════════════════════════════════════════
+*/
+/* ════════════════════════════════════════════
+   COMPANY INFORMATION — Edit this block only
+   ════════════════════════════════════════════ */
+const COMPANY = {
+  name:        "Spotrank LLC",
+  dba:         "Spotrank",
+  state:       "Delaware",
+  address:     "1234 Market Street, Suite 100",    // TODO: replace with real address before prod
+  city:        "Wilmington",
+  stateShort:  "DE",
+  zip:         "19801",
+  country:     "United States",
+  email:       "legal@spotrank.io",
+  privacyEmail:"privacy@spotrank.io",
+  supportEmail:"support@spotrank.io",
+  website:     "https://spotrank.io",
+  phone:       "+1 (555) 000-0000",                // TODO: replace with real phone before prod
+  effectiveDate: "April 11, 2026",
+};
+/* ════════════════════════════════════════════ */
+</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink: #0f1f3d;
+  --ink-mid: #1a2b4a;
+  --muted: #4a5568;
+  --border: #e8e8e8;
+  --stone: #f5f5f7;
+  --cta: #1a56e8;
+  --radius: 12px;
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Onest', sans-serif; color: var(--ink); background: #fff; font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+nav { display: flex; align-items: center; justify-content: space-between; padding: 0 48px; height: 64px; border-bottom: 1px solid var(--border); background: #fff; position: sticky; top: 0; z-index: 10; }
+.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: 'Manrope', sans-serif; font-size: 19px; font-weight: 700; color: var(--ink); letter-spacing: -0.4px; }
+.back-link { font-size: 14px; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+.back-link:hover { color: var(--ink); }
+.page-wrap { max-width: 760px; margin: 0 auto; padding: 64px 24px 120px; }
+.legal-header { margin-bottom: 56px; padding-bottom: 40px; border-bottom: 1px solid var(--border); }
+.legal-eyebrow { font-size: 12px; font-weight: 600; color: var(--cta); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+.legal-title { font-family: 'Onest', sans-serif; font-weight: 700; font-size: 40px; letter-spacing: -1px; line-height: 1.15; color: var(--ink); margin-bottom: 16px; }
+.legal-meta { font-size: 14px; color: var(--muted); display: flex; gap: 24px; flex-wrap: wrap; }
+.toc { background: var(--stone); border-radius: var(--radius); padding: 28px 32px; margin-bottom: 56px; }
+.toc-title { font-size: 13px; font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; }
+.toc ol { list-style: none; display: flex; flex-direction: column; gap: 8px; padding: 0; counter-reset: toc; }
+.toc ol li { counter-increment: toc; display: flex; align-items: baseline; gap: 10px; font-size: 14px; }
+.toc ol li::before { content: counter(toc) "."; color: var(--cta); font-weight: 700; font-size: 13px; min-width: 18px; }
+.toc ol li a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+.toc ol li a:hover { color: var(--cta); }
+.legal-section { margin-bottom: 48px; }
+.legal-section h2 { font-family: 'Onest', sans-serif; font-weight: 700; font-size: 22px; color: var(--ink); margin-bottom: 16px; padding-top: 8px; display: flex; align-items: center; gap: 10px; }
+.section-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--cta); color: #fff; border-radius: 50%; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.legal-section h3 { font-size: 17px; font-weight: 600; color: var(--ink-mid); margin: 20px 0 10px; }
+.legal-section p { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 14px; }
+.legal-section p:last-child { margin-bottom: 0; }
+.legal-section ul { padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.legal-section li { font-size: 15px; color: var(--muted); line-height: 1.65; padding-left: 20px; position: relative; }
+.legal-section li::before { content: '—'; position: absolute; left: 0; color: var(--cta); font-weight: 700; }
+.legal-section strong { color: var(--ink-mid); font-weight: 600; }
+.legal-section a { color: var(--cta); text-decoration: underline; text-underline-offset: 3px; }
+.highlight-box { background: #eef2fd; border: 1px solid #b8ccf7; border-radius: var(--radius); padding: 20px 24px; margin: 20px 0; }
+.highlight-box p { color: var(--ink-mid); margin: 0; font-size: 14px; }
+.rights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+.right-card { background: var(--stone); border-radius: var(--radius); padding: 16px 18px; }
+.right-card-title { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.right-card-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+footer { border-top: 1px solid var(--border); padding: 32px 48px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.footer-copy { font-size: 13px; color: var(--muted); }
+.footer-links { display: flex; gap: 24px; }
+.footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; }
+.footer-links a:hover { color: var(--cta); }
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .page-wrap { padding: 40px 20px 80px; }
+  .legal-title { font-size: 30px; }
+  .rights-grid { grid-template-columns: 1fr; }
+  footer { padding: 24px 20px; flex-direction: column; text-align: center; }
+  .footer-links { justify-content: center; }
+}
+</style>
+
+<script>
+/* ═══════════════════════════════════════
+   LOGO CONFIG — modifie ici uniquement
+   ═══════════════════════════════════════ */
+const LOGO = {
+  text:       "Spotrank",        // Nom complet
+  textBold:   "Spot",            // Partie en couleur foncée
+  textAccent: "rank",            // Partie en couleur accent
+  colorAccent:"#1a56e8",         // Couleur accent
+  colorDark:  "var(--ink, #0f1f3d)", // Couleur texte principal
+  fontFamily: "'Manrope', sans-serif",
+  fontSize:   { nav: "19px", footer: "17px" },
+  svgSize:    { nav: "28", footer: "22" },
+};
+/* ═══════════════════════════════════════ */
+
+function buildLogoSVG(size) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 28 28" fill="none" style="flex-shrink:0;display:block;"><rect width="28" height="28" rx="7" fill="${LOGO.colorAccent}"/><path d="M14 6C10.69 6 8 8.69 8 12c0 5 6 10 6 10s6-5 6-10C20 8.69 17.31 6 14 6z" fill="white"/><circle cx="14" cy="12" r="3" fill="${LOGO.colorAccent}"/></svg>`;
+}
+
+function buildLogoText(fontSize) {
+  return `<span style="font-family:${LOGO.fontFamily};font-size:${fontSize};font-weight:700;letter-spacing:-0.4px;color:${LOGO.colorDark};white-space:nowrap;">${LOGO.textBold}<span style="color:${LOGO.colorAccent};">${LOGO.textAccent}</span></span>`;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Nav logos
+  document.querySelectorAll('[data-logo="nav"]').forEach(el => {
+    el.innerHTML = buildLogoSVG(LOGO.svgSize.nav) + buildLogoText(LOGO.fontSize.nav);
+  });
+  // Footer logos
+  document.querySelectorAll('[data-logo="footer"]').forEach(el => {
+    el.innerHTML = buildLogoSVG(LOGO.svgSize.footer) + buildLogoText(LOGO.fontSize.footer);
+  });
+  // Optin dark logos
+  document.querySelectorAll('[data-logo="dark"]').forEach(el => {
+    el.innerHTML = buildLogoSVG(LOGO.svgSize.nav) + `<span style="font-family:${LOGO.fontFamily};font-size:${LOGO.fontSize.nav};font-weight:700;letter-spacing:-0.4px;color:#ffffff;white-space:nowrap;">${LOGO.textBold}<span style="color:${LOGO.colorAccent};">${LOGO.textAccent}</span></span>`;
+  });
+});
+</script>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><span data-logo="nav" style="display:flex;align-items:center;gap:10px;"></span></a>
+  <a href="index.html" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 11L5 7L9 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Back to home
+  </a>
+</nav>
+
+<div class="page-wrap">
+
+  <div class="legal-header">
+    <p class="legal-eyebrow">Legal</p>
+    <h1 class="legal-title">Privacy Policy</h1>
+    <div class="legal-meta">
+      <span>📅 Effective: <strong id="effective-date"></strong></span>
+      <span>🏢 <span id="company-name"></span></span>
+    </div>
+  </div>
+
+  <div class="toc">
+    <div class="toc-title">Table of Contents</div>
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#information">Information We Collect</a></li>
+      <li><a href="#use">How We Use Your Information</a></li>
+      <li><a href="#sharing">Information Sharing</a></li>
+      <li><a href="#cookies">Cookies & Tracking</a></li>
+      <li><a href="#retention">Data Retention</a></li>
+      <li><a href="#security">Security</a></li>
+      <li><a href="#rights">Your Rights</a></li>
+      <li><a href="#ccpa">California Privacy Rights (CCPA)</a></li>
+      <li><a href="#children">Children's Privacy</a></li>
+      <li><a href="#changes-privacy">Changes to this Policy</a></li>
+      <li><a href="#contact-privacy">Contact Us</a></li>
+    </ol>
+  </div>
+
+  <div class="legal-section" id="overview">
+    <h2><span class="section-num">1</span> Overview</h2>
+    <p>This Privacy Policy describes how <span class="co-name"></span>, doing business as <span class="co-dba"></span> ("Spotrank," "we," "us," or "our"), collects, uses, and protects information about you when you use our website and services.</p>
+    <p>We are committed to protecting your privacy and handling your data with transparency and care. This policy applies to all information collected through our website, services, and any related communications.</p>
+  </div>
+
+  <div class="legal-section" id="information">
+    <h2><span class="section-num">2</span> Information We Collect</h2>
+    <h3>Information You Provide Directly</h3>
+    <ul>
+      <li><strong>Contact information:</strong> Name, email address, phone number, business name</li>
+      <li><strong>Business information:</strong> Trade/industry, city, annual revenue range, primary business challenges</li>
+      <li><strong>Account information:</strong> Login credentials, billing details, subscription preferences</li>
+      <li><strong>Communications:</strong> Messages, emails, and support requests you send to us</li>
+      <li><strong>Customer data:</strong> Contact information of your customers that you share with us for marketing campaign purposes</li>
+    </ul>
+    <h3>Information Collected Automatically</h3>
+    <ul>
+      <li><strong>Usage data:</strong> Pages visited, time on site, clicks, referral source</li>
+      <li><strong>Device information:</strong> Browser type, operating system, IP address</li>
+      <li><strong>Cookie data:</strong> Session cookies, analytics identifiers (see Section 5)</li>
+    </ul>
+    <h3>Information from Third Parties</h3>
+    <ul>
+      <li>Google Analytics and advertising platform data</li>
+      <li>Payment processor data (we do not store full payment card numbers)</li>
+      <li>CRM and marketing tool integrations you authorize</li>
+    </ul>
+  </div>
+
+  <div class="legal-section" id="use">
+    <h2><span class="section-num">3</span> How We Use Your Information</h2>
+    <p>We use the information we collect to:</p>
+    <ul>
+      <li>Provide, operate, and improve our services</li>
+      <li>Process payments and manage your subscription</li>
+      <li>Send service-related communications (onboarding, reports, billing)</li>
+      <li>Run marketing campaigns on your behalf (with your explicit authorization)</li>
+      <li>Respond to your inquiries and provide customer support</li>
+      <li>Analyze usage trends to improve our platform</li>
+      <li>Comply with legal obligations</li>
+      <li>Detect and prevent fraud or abuse</li>
+    </ul>
+    <div class="highlight-box">
+      <p><strong>We do not sell your personal information</strong> to third parties, data brokers, or advertisers. Period.</p>
+    </div>
+  </div>
+
+  <div class="legal-section" id="sharing">
+    <h2><span class="section-num">4</span> Information Sharing</h2>
+    <p>We may share your information only in the following limited circumstances:</p>
+    <ul>
+      <li><strong>Service providers:</strong> Trusted vendors who help us operate our business (payment processors, hosting providers, email platforms, analytics tools) — bound by confidentiality obligations</li>
+      <li><strong>Legal requirements:</strong> When required by law, court order, or governmental authority</li>
+      <li><strong>Business transfers:</strong> In connection with a merger, acquisition, or sale of assets — you will be notified in advance</li>
+      <li><strong>With your consent:</strong> Any other sharing will only occur with your explicit, prior consent</li>
+    </ul>
+  </div>
+
+  <div class="legal-section" id="cookies">
+    <h2><span class="section-num">5</span> Cookies & Tracking</h2>
+    <p>We use cookies and similar tracking technologies to improve your experience. Types of cookies we use:</p>
+    <ul>
+      <li><strong>Essential cookies:</strong> Required for the website to function properly. Cannot be disabled.</li>
+      <li><strong>Analytics cookies:</strong> Help us understand how visitors interact with our site (Google Analytics). You may opt out via <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener">Google's opt-out tool</a>.</li>
+      <li><strong>Marketing cookies:</strong> Used to track the effectiveness of our advertising campaigns.</li>
+    </ul>
+    <p>You can control cookies through your browser settings. Note that disabling certain cookies may impact the functionality of our services.</p>
+  </div>
+
+  <div class="legal-section" id="retention">
+    <h2><span class="section-num">6</span> Data Retention</h2>
+    <p>We retain your personal information for as long as your account is active or as needed to provide services. Upon cancellation:</p>
+    <ul>
+      <li>Account data is retained for 12 months for legal and tax compliance purposes</li>
+      <li>You may request immediate deletion of personal data (subject to legal retention requirements)</li>
+      <li>Anonymized, aggregated analytics data may be retained indefinitely</li>
+    </ul>
+  </div>
+
+  <div class="legal-section" id="security">
+    <h2><span class="section-num">7</span> Security</h2>
+    <p>We implement industry-standard technical and organizational measures to protect your personal information, including SSL/TLS encryption, access controls, and regular security assessments.</p>
+    <p>However, no method of transmission over the internet or electronic storage is 100% secure. We encourage you to use strong, unique passwords and to notify us immediately at <a class="co-email-privacy"></a> if you suspect unauthorized access to your account.</p>
+  </div>
+
+  <div class="legal-section" id="rights">
+    <h2><span class="section-num">8</span> Your Rights</h2>
+    <p>Depending on your location, you may have the following rights regarding your personal data:</p>
+    <div class="rights-grid">
+      <div class="right-card">
+        <div class="right-card-title">✓ Right to Access</div>
+        <div class="right-card-desc">Request a copy of the personal data we hold about you.</div>
+      </div>
+      <div class="right-card">
+        <div class="right-card-title">✓ Right to Correction</div>
+        <div class="right-card-desc">Request correction of inaccurate or incomplete data.</div>
+      </div>
+      <div class="right-card">
+        <div class="right-card-title">✓ Right to Deletion</div>
+        <div class="right-card-desc">Request deletion of your personal data ("right to be forgotten").</div>
+      </div>
+      <div class="right-card">
+        <div class="right-card-title">✓ Right to Portability</div>
+        <div class="right-card-desc">Receive your data in a structured, machine-readable format.</div>
+      </div>
+      <div class="right-card">
+        <div class="right-card-title">✓ Right to Object</div>
+        <div class="right-card-desc">Object to processing of your data for certain purposes.</div>
+      </div>
+      <div class="right-card">
+        <div class="right-card-title">✓ Right to Opt-Out</div>
+        <div class="right-card-desc">Opt out of marketing communications at any time.</div>
+      </div>
+    </div>
+    <p>To exercise any of these rights, contact us at <a class="co-email-privacy"></a>. We will respond within 30 days.</p>
+  </div>
+
+  <div class="legal-section" id="ccpa">
+    <h2><span class="section-num">9</span> California Privacy Rights (CCPA)</h2>
+    <p>If you are a California resident, you have additional rights under the California Consumer Privacy Act (CCPA):</p>
+    <ul>
+      <li><strong>Right to Know:</strong> The categories and specific pieces of personal information we collect about you</li>
+      <li><strong>Right to Delete:</strong> Request deletion of your personal information, subject to certain exceptions</li>
+      <li><strong>Right to Opt-Out:</strong> We do not sell personal information — there is nothing to opt out of</li>
+      <li><strong>Right to Non-Discrimination:</strong> We will not discriminate against you for exercising your CCPA rights</li>
+    </ul>
+    <p>To submit a CCPA request, contact us at <a class="co-email-privacy"></a> with "CCPA Request" in the subject line. We will verify your identity and respond within 45 days.</p>
+  </div>
+
+  <div class="legal-section" id="children">
+    <h2><span class="section-num">10</span> Children's Privacy</h2>
+    <p>Our services are not directed to individuals under the age of 18. We do not knowingly collect personal information from children. If you believe we have inadvertently collected information from a minor, please contact us immediately at <a class="co-email-privacy"></a> and we will delete it promptly.</p>
+  </div>
+
+  <div class="legal-section" id="changes-privacy">
+    <h2><span class="section-num">11</span> Changes to this Policy</h2>
+    <p>We may update this Privacy Policy from time to time. We will notify you of material changes by email and by posting a notice on our website at least 30 days before the changes take effect. The "Effective Date" at the top of this page indicates when the policy was last updated.</p>
+  </div>
+
+  <div class="legal-section" id="contact-privacy">
+    <h2><span class="section-num">12</span> Contact Us</h2>
+    <p>For privacy-related inquiries, requests, or concerns, please contact our Privacy team:</p>
+    <ul>
+      <li><strong>Company:</strong> <span class="co-name"></span></li>
+      <li><strong>Address:</strong> <span class="co-address"></span>, <span class="co-city"></span>, <span class="co-state-short"></span> <span class="co-zip"></span></li>
+      <li><strong>Privacy Email:</strong> <a class="co-email-privacy"></a></li>
+      <li><strong>Phone:</strong> <span class="co-phone"></span></li>
+    </ul>
+    <p>We are committed to resolving any privacy concerns you may have. If you are not satisfied with our response, you have the right to lodge a complaint with your applicable data protection authority.</p>
+  </div>
+
+</div>
+
+<footer>
+  <p class="footer-copy" id="footer-copy"></p>
+  <div class="footer-links">
+    <a href="index.html">Accueil</a>
+    <a href="contact.html">Contact</a>
+    <a href="legal.html">Mentions légales</a>
+    <a href="privacy.html">Confidentialité</a>
+  </div>
+</footer>
+
+<script>
+/*
+ * Injection des informations de confidentialité dans la page.
+ * Identique à legal.html mais cible .co-email-privacy (privacyEmail)
+ * plutôt que .co-email-legal (email légal).
+ */
+document.getElementById('effective-date').textContent = COMPANY.effectiveDate;
+document.getElementById('company-name').textContent   = COMPANY.name;
+document.getElementById('footer-copy').textContent    = `© ${new Date().getFullYear()} ${COMPANY.name}. All rights reserved.`;
+
+document.querySelectorAll('.co-name').forEach(el        => el.textContent = COMPANY.name);
+document.querySelectorAll('.co-dba').forEach(el         => el.textContent = COMPANY.dba);
+document.querySelectorAll('.co-state').forEach(el       => el.textContent = COMPANY.state);
+document.querySelectorAll('.co-state-short').forEach(el => el.textContent = COMPANY.stateShort);
+document.querySelectorAll('.co-city').forEach(el        => el.textContent = COMPANY.city);
+document.querySelectorAll('.co-address').forEach(el     => el.textContent = COMPANY.address);
+document.querySelectorAll('.co-zip').forEach(el         => el.textContent = COMPANY.zip);
+document.querySelectorAll('.co-phone').forEach(el       => el.textContent = COMPANY.phone);
+document.querySelectorAll('.co-email-privacy').forEach(el => {
+  el.textContent = COMPANY.privacyEmail;
+  el.href = `mailto:${COMPANY.privacyEmail}`;
+});
+
+/* Placeholder guard — see legal.html for rationale. */
+(function detectPlaceholders() {
+  const placeholders = [];
+  if (COMPANY.address.includes('1234 Market Street')) placeholders.push('address');
+  if (COMPANY.phone === '+1 (555) 000-0000') placeholders.push('phone');
+  if (placeholders.length) {
+    console.warn('[privacy.html] Placeholder COMPANY values still present:', placeholders.join(', '), '— replace before production.');
+  }
+})();
+</script>
+
+</body>
+</html>

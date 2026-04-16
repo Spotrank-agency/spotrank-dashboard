@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<!--
+ ═══════════════════════════════════════════════════════════════════
+ SPOTRANK — TEMPLATE CLIENT PROLOCAL (template-01-prolocal.html)
+ ═══════════════════════════════════════════════════════════════════
+
+ RÔLE :
+   Template de site web déployé sur Netlify pour chaque client signé.
+   C'est le PRODUIT LIVRÉ AU CLIENT — son site web marketing local.
+
+ WORKFLOW DE DÉPLOIEMENT :
+   1. Client signe → CSM remplit les custom values dans le dashboard
+   2. Bouton "Deploy site" → remplace tous les {{placeholders}} par
+      les valeurs du client et déploie sur Netlify
+   3. Site en ligne sous le domaine du client (ex: smithplumbing.com)
+
+ VARIABLES {{custom_values}} — À REMPLACER AVANT DÉPLOIEMENT :
+   SEO & Meta :
+     {{official_business_name}} — Nom légal de l'entreprise
+     {{services_short}}         — Services en 3-4 mots (ex: "Plumbing & HVAC")
+     {{city_primary}}           — Ville principale servie (ex: "Austin, TX")
+     {{service_areas_short}}    — Zones courtes (ex: "Austin, Round Rock, Cedar Park")
+     {{service_areas}}          — Zones complètes (virgule-séparées pour chips)
+     {{business_phone}}         — Téléphone formaté (ex: "(512) 555-0147")
+     {{business_phone_raw}}     — Téléphone brut pour href tel: (ex: "+15125550147")
+     {{current_website_url}}    — URL canonique du site déployé
+     {{about_short}}            — Description courte (~160 chars, pour meta desc)
+     {{shipping_address}}       — Adresse postale (pour Schema.org)
+     {{hours}}                  — Heures d'ouverture (ex: "Mo-Fr 08:00-18:00")
+
+   Design & Contenu :
+     {{color_theme}}            — 'blue' | 'green' | 'orange' (selon le trade)
+     {{business_initial}}       — Initiale pour le logo nav (ex: "S")
+     {{trade}}                  — Métier (ex: "Plumber", "Roofer")
+     {{trade_headline}}         — Accroche headline (ex: "Expert Plumbing Services")
+     {{about_title}}            — Titre section À propos
+     {{about}}                  — Texte long section À propos
+     {{what_makes_you_stand_out}} — USP (ex: "Same-day service guaranteed")
+     {{year_founded}}           — Année de création (ex: "2008")
+     {{years_experience}}       — Années d'expérience (ex: "15")
+     {{jobs_completed}}         — Nb de jobs réalisés (ex: "1,200+")
+     {{response_time}}          — Délai de réponse (ex: "Under 1 hour")
+     {{response_hours}}         — Disponibilité (ex: "7 days a week")
+     {{gmb_rating}}             — Note Google (ex: "4.9")
+     {{gmb_review_count}}       — Nb d'avis Google (ex: "127")
+
+   Formulaire & FAQ :
+     {{ghl_form_action}}        — URL d'action du form GHL (webhook)
+     {{services}}               — Services (virgule-séparés, génère les cards)
+     {{services_cards}}         — Services alternatif (si format JSON)
+     {{faq_items}}              — FAQ (format JSON ou texte structuré)
+     {{return_offer}}           — Offre de retour (ex: "Free inspection on return")
+     {{return_offer_question}}  — Question retour (ex: "Not satisfied?")
+     {{contact_email}}          — Email de contact
+
+ COLOR THEMES (auto-sélectionné par l'IA selon le trade) :
+   data-theme="blue"   → Plumber, HVAC, Electrician
+   data-theme="green"  → Landscaper, Tree Service, Painter
+   data-theme="orange" → Roofer, General Contractor, Pest Control
+
+ SEO LOCAL :
+   - Schema.org LocalBusiness (JSON-LD) dans le <head>
+   - Meta title/description optimisées avec {ville} + {trade}
+   - Open Graph pour partage réseaux sociaux
+   - robots: index, follow (contrairement aux pages funnel)
+   - Canonical URL vers le domaine client
+
+ ═══════════════════════════════════════════════════════════════════
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- ══ SEO LOCAL — Auto-rempli par Spotrank à l'export ══
+     Toutes les balises ci-dessous sont injectées avec les
+     custom values du client depuis le dashboard. -->
+<!-- ══ SEO LOCAL — Auto-rempli par Spotrank ══ -->
+<title>{{official_business_name}} | {{services_short}} in {{city_primary}}</title>
+<meta name="description" content="{{official_business_name}} offers professional {{services_short}} in {{service_areas_short}}. Licensed & insured. Free estimates. Call {{business_phone}} today.">
+<meta name="keywords" content="{{trade}} {{city_primary}}, {{services_short}} {{city_primary}}, local {{trade}} near me, {{official_business_name}}">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="{{current_website_url}}">
+
+<!-- Open Graph — partage réseaux sociaux -->
+<!-- Open Graph -->
+<meta property="og:title" content="{{official_business_name}} — {{services_short}} in {{city_primary}}">
+<meta property="og:description" content="{{about_short}}">
+<meta property="og:url" content="{{current_website_url}}">
+<meta property="og:type" content="website">
+
+<!--
+  Schema.org LocalBusiness (JSON-LD) — données structurées pour Google.
+  Améliore l'affichage dans les résultats de recherche locaux (Knowledge Panel).
+  Renseigné automatiquement à l'export avec les infos du client.
+-->
+<!-- Schema.org LocalBusiness -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "{{official_business_name}}",
+  "telephone": "{{business_phone}}",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "{{shipping_address}}",
+    "addressLocality": "{{city_primary}}"
+  },
+  "url": "{{current_website_url}}",
+  "description": "{{about_short}}",
+  "areaServed": "{{service_areas}}",
+  "openingHours": "{{hours}}"
+}
+</script>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ════════════════════════════════════════════
+   TEMPLATE 01 — PROLOCAL
+   Spotrank Contractor Template
+   Placeholders: {{key}} remplacés à l'export
+
+   COLOR THEMES (sélectionnés par l'IA selon le trade) :
+   - data-theme="blue"   → Plumber, HVAC, Electrician
+   - data-theme="green"  → Landscaper, Tree Service, Painter
+   - data-theme="orange" → Roofer, General Contractor, Pest
+════════════════════════════════════════════ */
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+/* ── COLOR THEMES ── */
+:root {
+  /* Default → Blue (Plumber / HVAC / Electrician) */
+  --brand:       #1a56e8;
+  --brand-dark:  #1340c0;
+  --brand-light: #e8effd;
+  --brand-mid:   #3b6ff0;
+  --accent:      #f59e0b;
+
+  --ink:    #0f1623;
+  --ink-2:  #1e2d45;
+  --muted:  #5a6a7e;
+  --light:  #f4f6f9;
+  --border: #e2e6ed;
+  --white:  #ffffff;
+
+  --radius:    10px;
+  --radius-lg: 18px;
+  --shadow:    0 2px 12px rgba(0,0,0,.08);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,.12);
+}
+
+[data-theme="green"] {
+  --brand:       #16a34a;
+  --brand-dark:  #14532d;
+  --brand-light: #dcfce7;
+  --brand-mid:   #22c55e;
+  --accent:      #f59e0b;
+}
+
+[data-theme="orange"] {
+  --brand:       #ea580c;
+  --brand-dark:  #9a3412;
+  --brand-light: #ffedd5;
+  --brand-mid:   #f97316;
+  --accent:      #1a56e8;
+}
+
+/* ── BASE ── */
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--white);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+
+.container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+
+/* ── BUTTONS ── */
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--brand); color: #fff;
+  font-family: 'Barlow', sans-serif; font-size: 15px; font-weight: 600;
+  padding: 14px 28px; border-radius: var(--radius);
+  border: none; cursor: pointer;
+  transition: background .18s, transform .12s, box-shadow .18s;
+  box-shadow: 0 4px 14px rgba(0,0,0,.18);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn-primary:hover { background: var(--brand-dark); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.22); }
+
+.btn-outline {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; color: var(--brand);
+  font-family: 'Barlow', sans-serif; font-size: 15px; font-weight: 600;
+  padding: 13px 26px; border-radius: var(--radius);
+  border: 2px solid var(--brand); cursor: pointer;
+  transition: all .18s;
+}
+.btn-outline:hover { background: var(--brand); color: #fff; }
+
+.btn-ghost-white {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.12); color: #fff;
+  font-family: 'Barlow', sans-serif; font-size: 14px; font-weight: 600;
+  padding: 10px 20px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.25); cursor: pointer;
+  transition: background .18s;
+  text-decoration: none;
+}
+.btn-ghost-white:hover { background: rgba(255,255,255,.22); }
+
+/* ── SECTION LABELS ── */
+.section-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .1em;
+  color: var(--brand);
+  background: var(--brand-light);
+  border-radius: 20px; padding: 4px 12px;
+  margin-bottom: 12px;
+}
+.section-label::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--brand); }
+
+/* ════════════════════════════
+   NAV
+════════════════════════════ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255,255,255,.95); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  height: 66px;
+  display: flex; align-items: center;
+}
+.nav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%;
+  max-width: 1160px; margin: 0 auto; padding: 0 24px;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px; font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.nav-logo-mark {
+  width: 36px; height: 36px;
+  background: var(--brand);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 18px; font-weight: 800;
+}
+.nav-phone {
+  display: flex; align-items: center; gap: 16px;
+}
+.nav-phone-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px; font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+.nav-phone-num a { color: inherit; }
+.nav-phone-num a:hover { color: var(--brand); }
+
+/* ════════════════════════════
+   HERO
+════════════════════════════ */
+.hero {
+  padding-top: 66px;
+  background: var(--ink);
+  position: relative;
+  overflow: hidden;
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+}
+
+/* Subtle texture overlay */
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: 
+    radial-gradient(ellipse 80% 80% at 60% 50%, rgba(255,255,255,.03) 0%, transparent 70%),
+    repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(255,255,255,.02) 60px, rgba(255,255,255,.02) 61px),
+    repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255,255,255,.02) 60px, rgba(255,255,255,.02) 61px);
+  pointer-events: none;
+}
+
+/* Brand color top bar */
+.hero::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--brand);
+}
+
+.hero-inner {
+  position: relative; z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 48px;
+  align-items: center;
+  width: 100%;
+  max-width: 1160px; margin: 0 auto; padding: 64px 24px;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.hero-badge-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+.hero-title {
+  font-size: clamp(38px, 5vw, 58px);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.05;
+  margin-bottom: 20px;
+}
+.hero-title span { color: var(--brand-mid); }
+
+.hero-subtitle {
+  font-size: 17px; font-weight: 400;
+  color: rgba(255,255,255,.65);
+  line-height: 1.6;
+  margin-bottom: 28px;
+  max-width: 480px;
+}
+
+.hero-trust {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  margin-bottom: 32px;
+}
+.hero-trust-item {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 500;
+  color: rgba(255,255,255,.75);
+}
+.hero-trust-item svg { color: var(--brand-mid); flex-shrink: 0; }
+
+.hero-cta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* ── LEAD FORM CARD ── */
+.lead-form-card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.3);
+  position: relative;
+}
+.lead-form-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: var(--brand);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+.form-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px; font-weight: 800;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.form-sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+
+.form-group { margin-bottom: 12px; }
+.form-input {
+  width: 100%;
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--light);
+  transition: border-color .15s, background .15s;
+  outline: none;
+}
+.form-input:focus { border-color: var(--brand); background: #fff; }
+.form-input::placeholder { color: #9aabb8; }
+.form-textarea { min-height: 80px; resize: vertical; }
+
+.form-consent {
+  font-size: 11.5px; color: var(--muted);
+  line-height: 1.5;
+  margin: 12px 0;
+}
+
+.form-submit {
+  width: 100%;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px; font-weight: 800; letter-spacing: .03em;
+  text-transform: uppercase;
+  padding: 15px;
+  border-radius: 9px;
+  background: var(--brand); color: #fff;
+  border: none; cursor: pointer;
+  transition: background .18s, transform .12s;
+  box-shadow: 0 4px 14px rgba(0,0,0,.2);
+}
+.form-submit:hover { background: var(--brand-dark); transform: translateY(-1px); }
+
+.form-guarantee {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 12px; color: var(--muted);
+  margin-top: 10px;
+}
+
+/* ════════════════════════════
+   GOOGLE REVIEWS STRIP
+════════════════════════════ */
+.reviews-strip {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 22px 0;
+}
+.reviews-strip-inner {
+  display: flex; align-items: center; gap: 32px; flex-wrap: wrap;
+  justify-content: center;
+}
+.reviews-gmb {
+  display: flex; align-items: center; gap: 14px;
+}
+.reviews-gmb-logo {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 14px; font-weight: 600; color: var(--ink);
+}
+.gmb-stars { display: flex; gap: 2px; }
+.gmb-star { color: #f59e0b; font-size: 18px; }
+.gmb-score {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 26px; font-weight: 800; color: var(--ink);
+}
+.gmb-count { font-size: 13px; color: var(--muted); }
+
+.reviews-divider { width: 1px; height: 40px; background: var(--border); }
+
+.reviews-cards {
+  display: flex; gap: 16px; overflow-x: auto;
+  scrollbar-width: none;
+}
+.reviews-cards::-webkit-scrollbar { display: none; }
+
+.review-card-mini {
+  flex-shrink: 0;
+  background: var(--light);
+  border-radius: 10px;
+  padding: 12px 16px;
+  width: 220px;
+  border: 1px solid var(--border);
+}
+.rcm-stars { display: flex; gap: 2px; margin-bottom: 4px; }
+.rcm-star { color: #f59e0b; font-size: 13px; }
+.rcm-text {
+  font-size: 12px; color: var(--ink-2);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.rcm-author { font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 600; }
+
+/* ════════════════════════════
+   TRUST BADGES BAR
+════════════════════════════ */
+.trust-bar {
+  background: var(--brand);
+  padding: 18px 0;
+}
+.trust-bar-inner {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; flex-wrap: wrap;
+}
+.trust-badge {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 28px;
+  color: #fff;
+  font-size: 14px; font-weight: 600;
+  border-right: 1px solid rgba(255,255,255,.2);
+}
+.trust-badge:last-child { border-right: none; }
+.trust-badge svg { opacity: .85; flex-shrink: 0; }
+
+/* ════════════════════════════
+   ABOUT
+════════════════════════════ */
+.section { padding: 80px 0; }
+.section-sm { padding: 60px 0; }
+.section-alt { background: var(--light); }
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+.about-img-wrap {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.about-img-wrap img {
+  width: 100%; height: 420px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+}
+.about-img-badge {
+  position: absolute; bottom: 20px; left: 20px;
+  background: var(--brand);
+  color: #fff;
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px; font-weight: 800;
+  box-shadow: var(--shadow-lg);
+}
+.about-img-badge span { font-size: 13px; font-weight: 400; opacity: .8; display: block; margin-top: 2px; }
+
+.about-content { }
+.about-title { font-size: clamp(32px, 4vw, 44px); margin-bottom: 16px; }
+.about-body { font-size: 16px; color: var(--muted); line-height: 1.75; margin-bottom: 24px; }
+.about-highlights { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+.about-highlight {
+  display: flex; align-items: flex-start; gap: 12px;
+  font-size: 15px; color: var(--ink-2);
+}
+.ah-icon {
+  width: 28px; height: 28px;
+  background: var(--brand-light);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ════════════════════════════
+   SERVICES
+════════════════════════════ */
+.section-header { text-align: center; margin-bottom: 48px; }
+.section-title { font-size: clamp(30px, 4vw, 42px); margin-bottom: 10px; }
+.section-sub { font-size: 16px; color: var(--muted); max-width: 540px; margin: 0 auto; }
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.service-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  transition: box-shadow .2s, transform .15s, border-color .2s;
+  position: relative;
+  overflow: hidden;
+}
+.service-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--brand);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .25s ease;
+}
+.service-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); border-color: var(--brand-light); }
+.service-card:hover::before { transform: scaleX(1); }
+.service-icon {
+  width: 48px; height: 48px;
+  background: var(--brand-light);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+  font-size: 24px;
+}
+.service-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px; font-weight: 800;
+  margin-bottom: 8px;
+}
+.service-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+.service-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 13px; font-weight: 600; color: var(--brand);
+  margin-top: 14px;
+}
+
+/* ════════════════════════════
+   WHY US
+════════════════════════════ */
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.why-card {
+  text-align: center;
+  padding: 28px 20px;
+  background: #fff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+.why-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 48px; font-weight: 800;
+  color: var(--brand);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.why-label { font-size: 14px; font-weight: 600; color: var(--ink-2); margin-bottom: 6px; }
+.why-desc { font-size: 13px; color: var(--muted); }
+
+/* ════════════════════════════
+   FULL REVIEWS
+════════════════════════════ */
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.review-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+.review-stars { display: flex; gap: 3px; margin-bottom: 10px; }
+.review-star { color: #f59e0b; font-size: 16px; }
+.review-text { font-size: 14px; color: var(--ink-2); line-height: 1.7; font-style: italic; margin-bottom: 14px; }
+.review-author { display: flex; align-items: center; gap: 10px; }
+.review-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--brand);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.review-name { font-size: 13px; font-weight: 700; color: var(--ink); }
+.review-date { font-size: 11px; color: var(--muted); }
+.review-google-badge {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 10px; color: var(--muted); margin-top: 3px;
+}
+
+/* ════════════════════════════
+   GALLERY
+════════════════════════════ */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: 200px 200px;
+  gap: 12px;
+}
+.gallery-item {
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--light);
+  position: relative;
+}
+.gallery-item:first-child {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+.gallery-item img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform .4s ease;
+}
+.gallery-item:hover img { transform: scale(1.04); }
+.gallery-placeholder {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; color: var(--muted);
+  background: var(--light);
+  font-size: 13px;
+}
+.gallery-placeholder svg { opacity: .3; }
+
+/* ════════════════════════════
+   CTA BANNER
+════════════════════════════ */
+.cta-banner {
+  background: var(--brand);
+  border-radius: var(--radius-lg);
+  padding: 56px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 32px;
+  position: relative;
+  overflow: hidden;
+}
+.cta-banner::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(255,255,255,.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-banner-text { position: relative; }
+.cta-banner-title {
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 800; color: #fff;
+  margin-bottom: 8px;
+}
+.cta-banner-sub { font-size: 16px; color: rgba(255,255,255,.75); }
+.cta-banner-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; position: relative; }
+.btn-white {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #fff; color: var(--brand);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 17px; font-weight: 800;
+  padding: 14px 28px; border-radius: var(--radius);
+  border: none; cursor: pointer;
+  transition: opacity .18s, transform .12s;
+  box-shadow: 0 4px 14px rgba(0,0,0,.15);
+}
+.btn-white:hover { opacity: .92; transform: translateY(-2px); }
+
+/* ════════════════════════════
+   FAQ
+════════════════════════════ */
+.faq-list { max-width: 740px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.faq-item {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.faq-q {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px;
+  cursor: pointer;
+  font-size: 15px; font-weight: 600;
+  color: var(--ink);
+  user-select: none;
+  transition: background .12s;
+}
+.faq-q:hover { background: var(--light); }
+.faq-icon {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--brand-light);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--brand);
+  font-size: 16px; font-weight: 700;
+  flex-shrink: 0;
+  transition: transform .2s;
+}
+.faq-item.open .faq-icon { transform: rotate(45deg); }
+.faq-a {
+  display: none;
+  padding: 0 20px 18px;
+  font-size: 14px; color: var(--muted); line-height: 1.75;
+  border-top: 1px solid var(--border);
+}
+.faq-item.open .faq-a { display: block; }
+
+/* ════════════════════════════
+   SERVICE AREAS
+════════════════════════════ */
+.areas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+.area-chip {
+  display: flex; align-items: center; gap: 7px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13.5px; font-weight: 500; color: var(--ink-2);
+  transition: border-color .15s, background .15s;
+}
+.area-chip:hover { border-color: var(--brand); background: var(--brand-light); color: var(--brand); }
+.area-chip svg { color: var(--brand); flex-shrink: 0; }
+
+/* ════════════════════════════
+   FOOTER
+════════════════════════════ */
+footer {
+  background: var(--ink);
+  padding: 56px 0 32px;
+  color: rgba(255,255,255,.65);
+}
+.footer-inner {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 40px;
+}
+.footer-brand-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px; font-weight: 800;
+  color: #fff; margin-bottom: 10px;
+}
+.footer-tagline { font-size: 14px; color: rgba(255,255,255,.45); margin-bottom: 20px; }
+.footer-contact-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; color: rgba(255,255,255,.65);
+  margin-bottom: 8px;
+}
+.footer-contact-item a { color: rgba(255,255,255,.85); }
+.footer-contact-item a:hover { color: var(--brand-mid); }
+
+.footer-col-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: rgba(255,255,255,.35);
+  margin-bottom: 14px;
+}
+.footer-links { display: flex; flex-direction: column; gap: 8px; }
+.footer-links a {
+  font-size: 14px; color: rgba(255,255,255,.6);
+  transition: color .15s;
+}
+.footer-links a:hover { color: #fff; }
+
+.footer-bottom {
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.footer-bottom p { font-size: 12.5px; color: rgba(255,255,255,.3); }
+.footer-bottom a { color: rgba(255,255,255,.4); transition: color .15s; }
+.footer-bottom a:hover { color: rgba(255,255,255,.7); }
+
+.footer-badge {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11.5px; color: rgba(255,255,255,.25);
+}
+.footer-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); opacity: .7; }
+
+/* ════════════════════════════
+   STICKY MOBILE CTA
+════════════════════════════ */
+.sticky-cta {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 90;
+  background: var(--ink);
+  border-top: 1px solid rgba(255,255,255,.1);
+  padding: 12px 20px;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+.sticky-cta-text { font-size: 13px; font-weight: 500; color: rgba(255,255,255,.7); }
+.sticky-cta-num { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; color: #fff; }
+
+/* ════════════════════════════
+   RESPONSIVE
+════════════════════════════ */
+@media (max-width: 900px) {
+  .hero-inner { grid-template-columns: 1fr; gap: 32px; padding: 48px 24px; }
+  .lead-form-card { max-width: 480px; }
+  .about-grid { grid-template-columns: 1fr; }
+  .services-grid { grid-template-columns: 1fr 1fr; }
+  .why-grid { grid-template-columns: 1fr 1fr; }
+  .reviews-grid { grid-template-columns: 1fr; }
+  .gallery-grid { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+  .gallery-item:first-child { grid-column: span 2; grid-row: span 1; }
+  .cta-banner { flex-direction: column; text-align: center; }
+  .footer-inner { grid-template-columns: 1fr; gap: 32px; }
+  .trust-badge { padding: 6px 16px; font-size: 12.5px; }
+  .sticky-cta { display: flex; }
+  body { padding-bottom: 72px; }
+}
+
+@media (max-width: 600px) {
+  .services-grid { grid-template-columns: 1fr; }
+  .why-grid { grid-template-columns: 1fr 1fr; }
+  .gallery-grid { grid-template-columns: 1fr 1fr; }
+  .trust-bar-inner { flex-direction: column; gap: 8px; }
+  .trust-badge { border-right: none; border-bottom: 1px solid rgba(255,255,255,.15); width: 100%; justify-content: center; }
+  .trust-badge:last-child { border-bottom: none; }
+  .nav-phone-num { font-size: 16px; }
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.hero-content { animation: fadeUp .6s ease both; }
+.hero-form { animation: fadeUp .6s .15s ease both; }
+</style>
+</head>
+
+<!-- 
+  SPOTRANK TEMPLATE 01 — ProLocal
+  
+  COLOR THEME — Choisir selon le trade :
+  data-theme="blue"   → Plumber, HVAC, Electrician, Pool Service
+  data-theme="green"  → Landscaper, Tree Service, Pest Control, Painter (extérieur)
+  data-theme="orange" → Roofer, General Contractor, Concrete, Flooring
+-->
+<body data-theme="{{color_theme}}">
+
+<!-- ════════ NAV ════════ -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <div class="nav-logo-mark">{{business_initial}}</div>
+      {{official_business_name}}
+    </div>
+    <div class="nav-phone">
+      <div class="nav-phone-num"><a href="tel:{{business_phone_raw}}">{{business_phone}}</a></div>
+      <a href="#quote" class="btn-primary" style="padding:10px 20px; font-size:14px;">Free Quote</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════ HERO ════════ -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <div class="hero-badge-dot"></div>
+        Serving {{service_areas_short}}
+      </div>
+      <h1 class="hero-title">
+        {{trade_headline}}<br>
+        <span>in {{city_primary}}</span>
+      </h1>
+      <p class="hero-subtitle">{{about_short}}</p>
+
+      <div class="hero-trust">
+        <div class="hero-trust-item">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 1l1.8 3.6L14 5.3l-3 2.9.7 4.1L8 10.4l-3.7 1.9.7-4.1-3-2.9 4.2-.7z"/></svg>
+          Licensed & Insured
+        </div>
+        <div class="hero-trust-item">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="7"/><path d="M8 4v4l3 2"/></svg>
+          {{response_time}}
+        </div>
+        <div class="hero-trust-item">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8l4 4 8-8"/></svg>
+          Free Estimates
+        </div>
+        <div class="hero-trust-item">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 1l1.8 3.6L14 5.3l-3 2.9.7 4.1L8 10.4l-3.7 1.9.7-4.1-3-2.9 4.2-.7z"/></svg>
+          5-Star Rated
+        </div>
+      </div>
+
+      <div class="hero-cta">
+        <a href="#quote" class="btn-primary">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 2h12v8l-4 2H2V2z"/></svg>
+          Get a Free Quote
+        </a>
+        <a href="tel:{{business_phone_raw}}" class="btn-ghost-white">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 2h3l1.5 3.5-1.8 1.1a9 9 0 0 0 3.7 3.7l1.1-1.8L14 10v3a1 1 0 0 1-1 1A12 12 0 0 1 2 3a1 1 0 0 1 1-1z"/></svg>
+          {{business_phone}}
+        </a>
+      </div>
+    </div>
+
+    <!-- Lead Capture Form -->
+    <div class="hero-form" id="quote">
+      <div class="lead-form-card">
+        <div class="form-title">Get Your Free Estimate</div>
+        <div class="form-sub">No obligation · Response within 1 hour</div>
+
+        <form action="{{ghl_form_action}}" method="POST" onsubmit="return handleFormSubmit(event)">
+          <div class="form-group">
+            <input class="form-input" type="text" name="full_name" placeholder="Full Name *" required>
+          </div>
+          <div class="form-group">
+            <input class="form-input" type="tel" name="phone" placeholder="Phone Number *" required>
+          </div>
+          <div class="form-group">
+            <input class="form-input" type="text" name="city" placeholder="Your City / Zip Code">
+          </div>
+          <div class="form-group">
+            <textarea class="form-input form-textarea" name="message" placeholder="Describe your project briefly…"></textarea>
+          </div>
+          <div class="form-consent">
+            By submitting, you agree to receive SMS/email communications. Reply STOP to opt out.
+            <a href="privacy.html" style="color:var(--brand);">Privacy Policy</a>
+          </div>
+          <button type="submit" class="form-submit">
+            → Send My Free Quote Request
+          </button>
+        </form>
+        <div class="form-guarantee">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 1l1.8 3.6L14 5.3l-3 2.9.7 4.1L8 10.4l-3.7 1.9.7-4.1-3-2.9 4.2-.7z"/></svg>
+          100% free · No pressure · Fast response
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ GOOGLE REVIEWS STRIP ════════ -->
+<section class="reviews-strip">
+  <div class="container">
+    <div class="reviews-strip-inner">
+      <div class="reviews-gmb">
+        <div class="reviews-gmb-logo">
+          <!-- Google G SVG -->
+          <svg width="22" height="22" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Google Reviews
+        </div>
+        <div>
+          <div class="gmb-stars">
+            <span class="gmb-star">★</span><span class="gmb-star">★</span><span class="gmb-star">★</span><span class="gmb-star">★</span><span class="gmb-star">★</span>
+          </div>
+          <div style="display:flex; align-items:baseline; gap:6px;">
+            <span class="gmb-score">{{gmb_rating}}</span>
+            <span class="gmb-count">{{gmb_review_count}} reviews</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="reviews-divider"></div>
+
+      <div class="reviews-cards" id="reviews-strip-cards">
+        <!-- Populated by JS / GHL embed -->
+        <div class="review-card-mini">
+          <div class="rcm-stars"><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span></div>
+          <div class="rcm-text">"Incredible service, showed up on time and got the job done right."</div>
+          <div class="rcm-author">— Sarah M.</div>
+        </div>
+        <div class="review-card-mini">
+          <div class="rcm-stars"><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span></div>
+          <div class="rcm-text">"Best in {{city_primary}}. Honest pricing and professional crew."</div>
+          <div class="rcm-author">— James K.</div>
+        </div>
+        <div class="review-card-mini">
+          <div class="rcm-stars"><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span></div>
+          <div class="rcm-text">"Called in the morning, they were there by noon. Highly recommend!"</div>
+          <div class="rcm-author">— Maria T.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ TRUST BAR ════════ -->
+<div class="trust-bar">
+  <div class="trust-bar-inner">
+    <div class="trust-badge">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 1l6 2v5c0 3.5-3 6-6 7C5 14 2 11.5 2 8V3l6-2z"/></svg>
+      Licensed & Insured
+    </div>
+    <div class="trust-badge">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="7"/><path d="M8 4v4l3 2"/></svg>
+      {{years_experience}}+ Years Experience
+    </div>
+    <div class="trust-badge">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8l4 4 8-8"/></svg>
+      Free Estimates
+    </div>
+    <div class="trust-badge">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 2h3l1.5 3.5-1.8 1.1a9 9 0 0 0 3.7 3.7l1.1-1.8L14 10v3a1 1 0 0 1-1 1A12 12 0 0 1 2 3a1 1 0 0 1 1-1z"/></svg>
+      Available 7 Days / Week
+    </div>
+    <div class="trust-badge">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 1l1.8 3.6L14 5.3l-3 2.9.7 4.1L8 10.4l-3.7 1.9.7-4.1-3-2.9 4.2-.7z"/></svg>
+      5-Star Rated on Google
+    </div>
+  </div>
+</div>
+
+<!-- ════════ ABOUT ════════ -->
+<section class="section" id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-img-wrap">
+        <!-- Replace with actual photo -->
+        <div style="width:100%;height:420px;background:linear-gradient(135deg, var(--brand-light) 0%, var(--light) 100%);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;">
+          <div style="text-align:center;color:var(--muted);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <p style="margin-top:12px;font-size:13px;opacity:.5;">{{official_business_name}} Photo</p>
+          </div>
+        </div>
+        <div class="about-img-badge">
+          Est. {{year_founded}}
+          <span>Serving {{city_primary}} & surroundings</span>
+        </div>
+      </div>
+
+      <div class="about-content">
+        <div class="section-label">About Us</div>
+        <h2 class="about-title">{{about_title}}</h2>
+        <p class="about-body">{{about}}</p>
+
+        <div class="about-highlights">
+          <div class="about-highlight">
+            <div class="ah-icon">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--brand)" stroke-width="2"><path d="M2 8l4 4 8-8"/></svg>
+            </div>
+            <span>{{what_makes_you_stand_out}}</span>
+          </div>
+          <div class="about-highlight">
+            <div class="ah-icon">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--brand)" stroke-width="2"><path d="M2 8l4 4 8-8"/></svg>
+            </div>
+            <span>Locally owned & operated in {{city_primary}}</span>
+          </div>
+          <div class="about-highlight">
+            <div class="ah-icon">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--brand)" stroke-width="2"><path d="M2 8l4 4 8-8"/></svg>
+            </div>
+            <span>{{hours}}</span>
+          </div>
+        </div>
+
+        <a href="#quote" class="btn-primary">Get a Free Estimate →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ WHY US ════════ -->
+<section class="section-sm section-alt">
+  <div class="container">
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-num">{{years_experience}}+</div>
+        <div class="why-label">Years Experience</div>
+        <div class="why-desc">Serving {{city_primary}} and the surrounding area</div>
+      </div>
+      <div class="why-card">
+        <div class="why-num">{{jobs_completed}}+</div>
+        <div class="why-label">Projects Completed</div>
+        <div class="why-desc">Residential & commercial work done right</div>
+      </div>
+      <div class="why-card">
+        <div class="why-num">{{gmb_rating}}</div>
+        <div class="why-label">Google Rating</div>
+        <div class="why-desc">Based on {{gmb_review_count}} verified reviews</div>
+      </div>
+      <div class="why-card">
+        <div class="why-num">{{response_hours}}h</div>
+        <div class="why-label">Response Time</div>
+        <div class="why-desc">We get back to you fast — always</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ SERVICES ════════ -->
+<section class="section" id="services">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Our Services</div>
+      <h2 class="section-title">What We Do Best</h2>
+      <p class="section-sub">Professional {{trade}} services for homeowners and businesses in {{service_areas_short}}.</p>
+    </div>
+
+    <div class="services-grid" id="services-grid">
+      <!-- Generated from {{services}} list by JS or hardcoded per client -->
+      {{services_cards}}
+    </div>
+  </div>
+</section>
+
+<!-- ════════ GALLERY ════════ -->
+<section class="section section-alt" id="gallery">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Our Work</div>
+      <h2 class="section-title">Recent Projects in {{city_primary}}</h2>
+    </div>
+    <div class="gallery-grid">
+      <div class="gallery-item">
+        <div class="gallery-placeholder">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Project Photo 1</span>
+        </div>
+      </div>
+      <div class="gallery-item"><div class="gallery-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Photo 2</span></div></div>
+      <div class="gallery-item"><div class="gallery-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Photo 3</span></div></div>
+      <div class="gallery-item"><div class="gallery-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Photo 4</span></div></div>
+      <div class="gallery-item"><div class="gallery-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Photo 5</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ REVIEWS (full) ════════ -->
+<section class="section" id="reviews">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Google Reviews</div>
+      <h2 class="section-title">What Our Customers Say</h2>
+      <p class="section-sub">Real reviews from real clients in {{service_areas_short}}.</p>
+    </div>
+    <div class="reviews-grid">
+      <div class="review-card">
+        <div class="review-stars"><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span></div>
+        <p class="review-text">"Absolutely outstanding service. They came out the same day, gave me a fair price, and did a perfect job. I'll be using them again for sure."</p>
+        <div class="review-author">
+          <div class="review-avatar">S</div>
+          <div>
+            <div class="review-name">Sarah M.</div>
+            <div class="review-date">2 weeks ago</div>
+            <div class="review-google-badge">
+              <svg width="10" height="10" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+              Google Review
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="review-stars"><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span></div>
+        <p class="review-text">"Best {{trade}} in {{city_primary}}. Honest, fast, and professional. The team was respectful of our property and cleaned up after themselves."</p>
+        <div class="review-author">
+          <div class="review-avatar">J</div>
+          <div>
+            <div class="review-name">James K.</div>
+            <div class="review-date">1 month ago</div>
+            <div class="review-google-badge"><svg width="10" height="10" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Google Review</div>
+          </div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="review-stars"><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span></div>
+        <p class="review-text">"I called in the morning and they had someone at my door by noon. Pricing was very fair and the work was excellent. Will definitely recommend to neighbors."</p>
+        <div class="review-author">
+          <div class="review-avatar">M</div>
+          <div>
+            <div class="review-name">Maria T.</div>
+            <div class="review-date">3 weeks ago</div>
+            <div class="review-google-badge"><svg width="10" height="10" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Google Review</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:28px;">
+      <a href="{{gmb_profile_url}}" target="_blank" class="btn-outline">See All {{gmb_review_count}} Reviews on Google →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ CTA BANNER ════════ -->
+<section class="section-sm">
+  <div class="container">
+    <div class="cta-banner">
+      <div class="cta-banner-text">
+        <h2 class="cta-banner-title">Ready to Get Started?</h2>
+        <p class="cta-banner-sub">Get a free, no-obligation estimate from {{official_business_name}}. Fast response guaranteed.</p>
+      </div>
+      <div class="cta-banner-actions">
+        <a href="#quote" class="btn-white">Get Free Quote →</a>
+        <a href="tel:{{business_phone_raw}}" class="btn-ghost-white">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 2h3l1.5 3.5-1.8 1.1a9 9 0 0 0 3.7 3.7l1.1-1.8L14 10v3a1 1 0 0 1-1 1A12 12 0 0 1 2 3a1 1 0 0 1 1-1z"/></svg>
+          {{business_phone}}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ FAQ ════════ -->
+<section class="section section-alt" id="faq">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">FAQ</div>
+      <h2 class="section-title">Common Questions</h2>
+    </div>
+    <div class="faq-list">
+      {{faq_items}}
+      <!-- Default FAQs (overridden per client) -->
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Do you serve {{city_primary}} and surrounding areas?
+          <div class="faq-icon">+</div>
+        </div>
+        <div class="faq-a">Yes! We proudly serve {{service_areas}}. Contact us to confirm service in your specific area.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          How quickly can you respond to a quote request?
+          <div class="faq-icon">+</div>
+        </div>
+        <div class="faq-a">We typically respond within 1 hour during business hours. For emergencies, call us directly at {{business_phone}}.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Are you licensed and insured?
+          <div class="faq-icon">+</div>
+        </div>
+        <div class="faq-a">Absolutely. {{official_business_name}} is fully licensed and insured, giving you complete peace of mind on every job.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Do you offer free estimates?
+          <div class="faq-icon">+</div>
+        </div>
+        <div class="faq-a">Yes, all estimates are 100% free with no obligation. Fill out the form above or call us to schedule yours today.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          {{return_offer_question}}
+          <div class="faq-icon">+</div>
+        </div>
+        <div class="faq-a">{{return_offer}}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ SERVICE AREAS ════════ -->
+<section class="section" id="areas">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Service Areas</div>
+      <h2 class="section-title">{{trade}} Services Near You</h2>
+      <p class="section-sub">We serve homeowners and businesses throughout the following areas.</p>
+    </div>
+    <div class="areas-grid" id="areas-grid">
+      <!-- Generated from {{service_areas}} -->
+    </div>
+  </div>
+</section>
+
+<!-- ════════ FOOTER ════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand-name">{{official_business_name}}</div>
+        <p class="footer-tagline">{{trade}} services in {{service_areas_short}}</p>
+        <div class="footer-contact-item">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 2h3l1.5 3.5-1.8 1.1a9 9 0 0 0 3.7 3.7l1.1-1.8L14 10v3a1 1 0 0 1-1 1A12 12 0 0 1 2 3a1 1 0 0 1 1-1z"/></svg>
+          <a href="tel:{{business_phone_raw}}">{{business_phone}}</a>
+        </div>
+        <div class="footer-contact-item">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4zm0 0l6 5 6-5"/></svg>
+          <a href="mailto:{{contact_email}}">{{contact_email}}</a>
+        </div>
+        <div class="footer-contact-item">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="7"/><path d="M8 4v4l3 2"/></svg>
+          {{hours}}
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Services</div>
+        <div class="footer-links" id="footer-services">
+          <!-- from {{services}} -->
+          <a href="#services">View All Services</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Quick Links</div>
+        <div class="footer-links">
+          <a href="#about">About Us</a>
+          <a href="#reviews">Reviews</a>
+          <a href="#areas">Service Areas</a>
+          <a href="#faq">FAQ</a>
+          <a href="#quote">Get a Quote</a>
+          <a href="privacy.html">Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© {{year}} {{official_business_name}}. All rights reserved.</p>
+      <div class="footer-badge">
+        <div class="footer-badge-dot"></div>
+        Site by Spotrank
+      </div>
+      <div style="display:flex;gap:12px;">
+        <a href="privacy.html">Privacy</a>
+        <a href="legal.html">Terms</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ════════ STICKY MOBILE CTA ════════ -->
+<div class="sticky-cta">
+  <div>
+    <div class="sticky-cta-text">Get your free estimate</div>
+    <div class="sticky-cta-num">{{business_phone}}</div>
+  </div>
+  <a href="tel:{{business_phone_raw}}" class="btn-primary" style="padding:12px 20px;">Call Now</a>
+</div>
+
+<script>
+/*
+ ═══════════════════════════════════════════════════════════════════
+ TEMPLATE RUNTIME JS — Exécuté côté client après déploiement.
+ Gère : FAQ accordion, zones de service, grille de services,
+        formulaire de contact, scroll animé, IntersectionObserver.
+ ═══════════════════════════════════════════════════════════════════
+*/
+
+/* ══ FAQ Toggle ══
+ * Accordion simple — un seul item ouvert à la fois.
+ * Classe .open sur .faq-item gère l'animation CSS (max-height).
+ */
+// ── FAQ Toggle ──
+function toggleFaq(el) {
+  const item = el.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+/* ══ Service Areas ══
+ * {{service_areas}} est injecté comme chaîne CSV à l'export.
+ * Ex: "Austin, Round Rock, Cedar Park, Pflugerville"
+ * Chaque ville devient un chip avec icône pin dans #areas-grid.
+ * Garde le guard !servicesRaw.includes('{{') pour éviter d'afficher
+ * les placeholders non remplacés en cas d'export incomplet.
+ */
+// ── Service Areas ──
+// {{service_areas}} is injected as comma-separated string at deploy time.
+// Client-supplied names go through textContent so any HTML in the config
+// cannot execute. The pin SVG is built via createElementNS (static markup).
+const serviceAreasRaw = "{{service_areas}}";
+const areasList = serviceAreasRaw.split(',').map(a => a.trim()).filter(Boolean);
+const areasGrid = document.getElementById('areas-grid');
+if (areasGrid && areasList.length && !serviceAreasRaw.includes('{{')) {
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const makePin = () => {
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('width', '12'); svg.setAttribute('height', '12');
+    svg.setAttribute('viewBox', '0 0 16 16'); svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', '2');
+    const circle = document.createElementNS(SVG_NS, 'circle');
+    circle.setAttribute('cx', '8'); circle.setAttribute('cy', '7'); circle.setAttribute('r', '4');
+    const path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('d', 'M8 3v0M4.5 11.5C3.2 13 2 14 2 14s2-1 6-1 6 1 6 1-1.2-1-2.5-2.5');
+    svg.appendChild(circle); svg.appendChild(path);
+    return svg;
+  };
+  areasGrid.textContent = '';
+  areasList.forEach(area => {
+    const chip = document.createElement('div');
+    chip.className = 'area-chip';
+    chip.appendChild(makePin());
+    chip.append(' ' + area);
+    areasGrid.appendChild(chip);
+  });
+}
+
+/* ══ Services Grid ══
+ * {{services}} est injecté comme chaîne CSV à l'export.
+ * Ex: "Drain Cleaning, Water Heater, Leak Detection, Pipe Repair"
+ * Chaque service génère une card avec icône cyclique (SERVICE_ICONS[i % 10]).
+ * Guard !servicesRaw.includes('{{') : évite le rendu des placeholders bruts.
+ */
+// ── Services Grid ──
+// {{services}} comma-separated list. Client-supplied service names go
+// through textContent to neutralize any HTML injected via the deploy config.
+const servicesRaw = "{{services}}";
+const cityPrimary = "{{city_primary}}";
+const SERVICE_ICONS = ['🔧','⚡','🏠','🌿','🔨','🪣','🏗️','🛡️','🚿','🌡️'];
+const servicesGrid = document.getElementById('services-grid');
+if (servicesGrid && servicesRaw && !servicesRaw.includes('{{')) {
+  const servicesList = servicesRaw.split(',').map(s => s.trim()).filter(Boolean);
+  const safeCity = cityPrimary && !cityPrimary.includes('{{') ? cityPrimary : 'your area';
+  servicesGrid.textContent = '';
+  servicesList.forEach((svc, i) => {
+    const card = document.createElement('div');
+    card.className = 'service-card';
+
+    const icon = document.createElement('div');
+    icon.className = 'service-icon';
+    icon.textContent = SERVICE_ICONS[i % SERVICE_ICONS.length];
+
+    const name = document.createElement('div');
+    name.className = 'service-name';
+    name.textContent = svc;
+
+    const desc = document.createElement('p');
+    desc.className = 'service-desc';
+    desc.textContent = `Professional ${svc.toLowerCase()} services in ${safeCity} and surrounding areas. Licensed and insured.`;
+
+    const link = document.createElement('a');
+    link.href = '#quote';
+    link.className = 'service-link';
+    link.textContent = 'Get a Quote →';
+
+    card.appendChild(icon);
+    card.appendChild(name);
+    card.appendChild(desc);
+    card.appendChild(link);
+    servicesGrid.appendChild(card);
+  });
+}
+
+/* ══ Form Submit ══
+ * Formulaire de devis/contact héroïque (section #quote).
+ * En prod : soumis à {{ghl_form_action}} (webhook GHL).
+ * En démo : feedback visuel immédiat (bouton vert "Sent!").
+ */
+// ── Form Submit ──
+function handleFormSubmit(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('.form-submit');
+  btn.textContent = '✓ Sent! We\'ll be in touch shortly.';
+  btn.style.background = '#16a34a';
+  btn.disabled = true;
+  // In production: submit to GHL form endpoint
+  return false;
+}
+
+/* ══ Smooth scroll ══
+ * Intercepte tous les liens #anchor pour un scroll fluide.
+ */
+// ── Smooth scroll for anchor links ──
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  });
+});
+
+/* ══ Animate on scroll ══
+ * IntersectionObserver : fade-in + slide-up au scroll (threshold: 10%).
+ * Appliqué aux cards services, why-cards, review-cards, area-chips.
+ * Départ : opacity:0, translateY(16px) → arrivée : opacity:1, translateY(0).
+ */
+// ── Animate on scroll (simple IntersectionObserver) ──
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.service-card, .why-card, .review-card, .area-chip').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(16px)';
+  el.style.transition = 'opacity .4s ease, transform .4s ease';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>

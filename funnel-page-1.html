@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>How Spotrank Gets You More Jobs — Watch This First</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' rx='7' fill='%231a56e8'/%3E%3Cpath d='M14 6C10.69 6 8 8.69 8 12c0 5 6 10 6 10s6-5 6-10C20 8.69 17.31 6 14 6z' fill='white'/%3E%3Ccircle cx='14' cy='12' r='3' fill='%231a56e8'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink: #0f1f3d; --ink-mid: #1a2b4a; --muted: #4a5568;
+  --cta: #1a56e8; --cta-dark: #1240c4;
+  --stone: #f5f5f7; --border: #e8e8e8;
+  --gold: #f59e0b; --green: #22c55e;
+  --radius: 16px; --radius-lg: 24px;
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Onest', sans-serif; color: var(--ink); background: #fff; -webkit-font-smoothing: antialiased; line-height: 1.6; }
+
+nav { display: flex; align-items: center; justify-content: center; padding: 0 48px; height: 64px; border-bottom: 1px solid var(--border); }
+.nav-logo { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
+
+/* PROGRESS */
+.progress-wrap { background: var(--stone); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: center; gap: 0; }
+.prog-step { display: flex; align-items: center; gap: 8px; padding: 7px 18px; border-radius: 100px; font-size: 13px; font-weight: 600; transition: all 0.3s; }
+.prog-step.active { background: var(--cta); color: #fff; }
+.prog-step.done { background: #f0fdf4; color: #15803d; }
+.prog-step.pending { color: var(--muted); }
+.prog-num { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+.prog-step.active .prog-num { background: rgba(255,255,255,0.2); }
+.prog-step.done .prog-num { background: #bbf7d0; color: #15803d; }
+.prog-step.pending .prog-num { background: var(--border); }
+.prog-line { width: 40px; height: 2px; background: var(--border); margin: 0 4px; transition: background 0.3s; }
+.prog-line.done { background: var(--green); }
+
+/* SECTIONS */
+#step-video { padding: 64px 24px; }
+#step-calendar { display: none; padding: 64px 24px; }
+.step-wrap { max-width: 800px; margin: 0 auto; }
+
+.step-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #eef2fd; border: 1px solid #b8ccf7;
+  border-radius: 100px; padding: 6px 16px;
+  font-size: 13px; font-weight: 600; color: var(--cta); margin-bottom: 20px;
+}
+.step-title { font-weight: 700; font-size: 38px; letter-spacing: -1px; line-height: 1.15; color: var(--ink); margin-bottom: 12px; }
+.step-sub { font-size: 16px; color: var(--muted); line-height: 1.7; margin-bottom: 32px; max-width: 600px; }
+
+.action-hero-label {
+  font-family: 'Onest', sans-serif;
+  font-size: 32px; font-weight: 700;
+  color: var(--ink); letter-spacing: -0.8px;
+  line-height: 1.15; margin-bottom: 0;
+}
+@media (max-width: 768px) { .action-hero-label { font-size: 24px; } }
+
+/* Warning banner */
+.video-warning {
+  display: flex; align-items: flex-start; gap: 14px;
+  background: #fff7ed; border: 1.5px solid #fed7aa;
+  border-radius: var(--radius); padding: 18px 20px;
+  margin-bottom: 24px;
+}
+.video-warning-icon { font-size: 22px; flex-shrink: 0; line-height: 1.2; }
+.video-warning-title { font-size: 14px; font-weight: 700; color: #92400e; margin-bottom: 4px; }
+.video-warning-text { font-size: 13px; color: #b45309; line-height: 1.6; }
+.video-warning-text strong { color: #92400e; font-weight: 700; }
+
+/* VIDEO */
+.video-wrap { position: relative; border-radius: var(--radius-lg); overflow: hidden; background: var(--ink); aspect-ratio: 16/9; box-shadow: 0 24px 64px rgba(15,31,61,0.2); margin-bottom: 24px; }
+.video-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: linear-gradient(135deg, #0f1f3d 0%, #1a3060 100%); cursor: pointer; transition: opacity 0.2s; }
+.video-placeholder:hover { opacity: 0.92; }
+.play-btn { width: 80px; height: 80px; border-radius: 50%; background: var(--cta); border: 3px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+.video-placeholder:hover .play-btn { transform: scale(1.08); }
+.video-label { color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+.vdot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* VIDEO PROGRESS BAR */
+.video-progress-wrap { background: var(--stone); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; }
+.vp-label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
+.vp-bar { background: var(--border); border-radius: 4px; height: 6px; overflow: hidden; }
+.vp-fill { background: var(--cta); height: 100%; width: 0%; border-radius: 4px; transition: width 0.5s; }
+.vp-text { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+/* UNLOCK CTA */
+.unlock-cta {
+  background: var(--stone); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 24px 28px;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  opacity: 0.35; pointer-events: none; transition: opacity 0.6s, border-color 0.3s;
+}
+.unlock-cta.unlocked { opacity: 1; pointer-events: all; border-color: var(--cta); }
+.unlock-label { font-size: 15px; font-weight: 700; color: var(--ink); }
+.unlock-sub { font-size: 13px; color: var(--muted); margin-top: 3px; }
+.lock-icon { font-size: 18px; margin-right: 4px; }
+.btn-primary { background: var(--cta); color: #fff; font-family: 'Onest', sans-serif; font-size: 15px; font-weight: 700; padding: 14px 28px; border-radius: 10px; border: none; cursor: pointer; white-space: nowrap; display: inline-block; text-decoration: none; transition: background 0.2s, transform 0.15s; touch-action: manipulation; }
+.btn-primary:hover { background: var(--cta-dark); transform: translateY(-1px); }
+
+/* Proof row */
+.proof-row { display: flex; align-items: center; gap: 14px; margin-top: 20px; flex-wrap: wrap; }
+.proof-avs { display: flex; }
+.proof-av { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; margin-left: -8px; }
+.proof-av:first-child { margin-left: 0; }
+.proof-txt { font-size: 13px; color: var(--muted); }
+.proof-txt strong { color: var(--ink); }
+.proof-stars { color: var(--gold); font-size: 12px; display: block; margin-bottom: 2px; }
+
+/* CALENDAR */
+.calendar-inner { max-width: 920px; margin: 0 auto; }
+.cal-header { text-align: center; margin-bottom: 36px; }
+
+/* QUALIFICATION FORM */
+.qual-form { max-width: 560px; margin: 0 auto 40px; background: var(--stone); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px 36px; }
+.qual-form-title { font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 4px; letter-spacing: -0.4px; }
+.qual-form-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+.qual-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.qual-row.full { grid-template-columns: 1fr; }
+.qual-field { display: flex; flex-direction: column; gap: 4px; }
+.qual-label { font-size: 12px; font-weight: 600; color: var(--ink-mid); }
+.qual-input, .qual-select { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-family: 'Onest', sans-serif; font-size: 14px; color: var(--ink); outline: none; transition: border-color 0.2s; background: #fff; }
+.qual-input:focus, .qual-select:focus { border-color: var(--cta); }
+.qual-input::placeholder { color: #a0aec0; }
+.qual-sep { height: 1px; background: var(--border); margin: 20px 0; }
+.qual-sep-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.qual-owner-row { display: flex; gap: 10px; }
+.qual-owner-btn { flex: 1; padding: 11px; border: 1.5px solid var(--border); border-radius: 10px; background: #fff; font-family: 'Onest', sans-serif; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; transition: all 0.15s; text-align: center; }
+.qual-owner-btn:hover { border-color: var(--cta); color: var(--cta); }
+.qual-owner-btn.selected { border-color: var(--cta); background: #eef2fd; color: var(--cta); }
+.qual-submit { width: 100%; padding: 14px; border: none; border-radius: 10px; background: var(--cta); color: #fff; font-family: 'Onest', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.2s, transform 0.15s; margin-top: 20px; }
+.qual-submit:hover { background: var(--cta-dark); transform: translateY(-1px); }
+.qual-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.qual-error { font-size: 12px; color: #dc2626; margin-top: 4px; display: none; }
+.trade-search-wrap { position: relative; }
+.trade-search-input { width:100%;padding:11px 14px 11px 36px;border:1.5px solid var(--border);border-radius:10px;font-family:'Onest',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s;background:#fff; }
+.trade-search-input:focus { border-color:var(--cta); }
+.trade-search-input::placeholder { color:#a0aec0; }
+.trade-search-icon { position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none; }
+.trade-dropdown { position:absolute;top:100%;left:0;right:0;max-height:220px;overflow-y:auto;background:#fff;border:1.5px solid var(--cta);border-top:none;border-radius:0 0 10px 10px;z-index:50;display:none;box-shadow:0 8px 24px rgba(0,0,0,.1); }
+.trade-dropdown.open { display:block; }
+.trade-dropdown-wrap { position:absolute;top:100%;left:0;right:0;z-index:50;display:none; }
+.trade-dropdown-wrap.open { display:block; }
+.trade-dropdown-fade { position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,#fff);border-radius:0 0 10px 10px;pointer-events:none;z-index:1;transition:opacity .2s; }
+.trade-option { padding:10px 14px;font-size:13px;color:var(--ink);cursor:pointer;transition:background .1s; }
+.trade-option:hover { background:var(--stone); }
+.trade-option.highlighted { background:#eef2fd;color:var(--cta);font-weight:600; }
+@media (max-width: 768px) { .qual-row { grid-template-columns: 1fr; } .qual-form { padding: 24px 20px; } }
+.urgency-badge { display: inline-flex; align-items: center; gap: 8px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 100px; padding: 6px 16px; font-size: 13px; font-weight: 600; color: #c2410c; margin-bottom: 16px; }
+.urgency-dot { width: 7px; height: 7px; border-radius: 50%; background: #f97316; animation: pulse 1.5s infinite; }
+.cal-embed { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 8px 32px rgba(15,31,61,0.06); }
+.cal-embed iframe { width: 100%; min-height: 680px; border: none; display: block; }
+.cal-reassurance { display: flex; align-items: center; justify-content: center; gap: 32px; margin-top: 20px; flex-wrap: wrap; }
+.cal-re-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+
+/* Mini testimonials */
+.mini-testi { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 48px; }
+.mini-card { background: var(--stone); border-radius: 12px; padding: 18px 20px; }
+.mini-stars { color: var(--gold); font-size: 12px; margin-bottom: 8px; }
+.mini-text { font-size: 13px; color: var(--ink-mid); line-height: 1.6; font-style: italic; margin-bottom: 10px; }
+.mini-name { font-size: 12px; font-weight: 700; color: var(--ink); }
+.mini-trade { font-size: 11px; color: var(--muted); }
+.mini-verified { display: inline-flex; align-items: center; gap: 3px; background: #f0fdf4; border-radius: 4px; padding: 1px 6px; font-size: 10px; font-weight: 600; color: #15803d; }
+
+footer { border-top: 1px solid var(--border); padding: 24px 48px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-top: 48px; }
+.footer-copy { font-size: 12px; color: var(--muted); }
+.footer-links { display: flex; gap: 20px; }
+.footer-links a { font-size: 12px; color: var(--muted); text-decoration: none; }
+
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .progress-wrap { padding: 10px 16px; }
+  .prog-step { padding: 6px 10px; font-size: 11px; }
+  .prog-line { width: 20px; }
+  #step-video, #step-calendar { padding: 40px 20px; }
+  .step-title { font-size: 26px; }
+  .unlock-cta { flex-direction: column; text-align: center; }
+  .mini-testi { grid-template-columns: 1fr; }
+  .cal-reassurance { gap: 16px; }
+  footer { padding: 20px; flex-direction: column; text-align: center; }
+  .footer-links { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="nav-logo" data-logo="nav"></a>
+</nav>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="prog-step active" id="pill1">
+    <span class="prog-num">1</span> Watch the video
+  </div>
+  <div class="prog-line" id="line1"></div>
+  <div class="prog-step pending" id="pill2">
+    <span class="prog-num">2</span> Book your call
+  </div>
+</div>
+
+<!-- ══════════ STEP 1 — VIDEO ══════════ -->
+<div id="step-video">
+  <div class="step-wrap">
+
+    <div class="step-eyebrow">Step 1 of 2 — Watch the video</div>
+    <div class="action-hero-label">▶ Watch the <span style="color:var(--cta);">6-minute</span> video</div>
+    <p style="font-size:14px;color:var(--muted);margin:8px 0 20px;">See exactly how we get your phone ringing in 10 days — then book your free call.</p>
+
+    <div class="video-wrap" id="videoWrap">
+      <div class="video-placeholder" id="videoPlaceholder" onclick="playVideo()">
+        <div class="play-btn">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="video-label">
+          <span class="vdot"></span>
+          Watch now · 6 minutes
+        </div>
+      </div>
+    </div>
+
+    <!-- Video progress indicator -->
+    <div class="video-progress-wrap" id="videoProgressWrap" style="display:none;">
+      <div class="vp-label">⏱ Video progress</div>
+      <div class="vp-bar"><div class="vp-fill" id="vpFill"></div></div>
+      <div class="vp-text" id="vpText">Watch the full video to unlock your booking</div>
+    </div>
+
+    <!-- DEV unlock button removed — use window.unlockCTA() from console if needed during testing -->
+
+    <!-- Unlock CTA -->
+    <div class="step-eyebrow" style="margin-bottom:10px;">Step 2 of 2 — Book your call</div>
+    <div class="unlock-cta" id="unlockCta">
+      <div>
+        <div class="unlock-label"><span class="lock-icon" id="lockIcon">🔒</span> <span id="unlockSub">Watch the video to unlock booking</span></div>
+      </div>
+      <button class="btn-primary" onclick="goToStep2()">Pick my time slot →</button>
+    </div>
+
+    <!-- Social proof -->
+    <div class="proof-row">
+      <div class="proof-avs">
+        <div class="proof-av" style="background:#3b82f6;">CM</div>
+        <div class="proof-av" style="background:#1a56e8;">AR</div>
+        <div class="proof-av" style="background:#f59e0b;">JD</div>
+        <div class="proof-av" style="background:#8b5cf6;">WB</div>
+        <div class="proof-av" style="background:#ef4444;">MF</div>
+      </div>
+      <div>
+        <span class="proof-stars">★★★★★</span>
+        <span class="proof-txt"><strong>200+ contractors</strong> already working with us · avg. 4.9/5</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════ STEP 2 — FORM + CALENDAR ══════════ -->
+<div id="step-calendar">
+  <div class="calendar-inner">
+
+    <div class="cal-header">
+      <div class="step-eyebrow" style="margin-bottom:10px;">Step 2 of 2</div>
+      <h2 class="step-title">Almost there — tell us about your business</h2>
+      <p class="step-sub" style="margin:0 auto;text-align:center;">Quick info so we can prepare a personalized audit for your call.</p>
+    </div>
+
+    <!-- Qualification Form -->
+    <div class="qual-form" id="qual-form">
+      <div class="qual-form-title">Your info</div>
+      <div class="qual-form-sub">Takes 30 seconds — we use this to prepare your free audit.</div>
+
+      <div class="qual-row">
+        <div class="qual-field">
+          <label class="qual-label">First name <span style="color:#dc2626;">*</span></label>
+          <input class="qual-input" id="qf-firstname" placeholder="John" required>
+        </div>
+        <div class="qual-field">
+          <label class="qual-label">Phone <span style="color:#dc2626;">*</span></label>
+          <input class="qual-input" id="qf-phone" type="tel" placeholder="+1 555 000 0000" required>
+        </div>
+      </div>
+
+      <div class="qual-row">
+        <div class="qual-field">
+          <label class="qual-label">Business name <span style="color:#dc2626;">*</span></label>
+          <input class="qual-input" id="qf-business" placeholder="Smith Plumbing LLC" required>
+        </div>
+        <div class="qual-field">
+          <label class="qual-label">City <span style="color:#dc2626;">*</span></label>
+          <input class="qual-input" id="qf-city" placeholder="Austin" required>
+        </div>
+        <div class="qual-field">
+          <label class="qual-label">State <span style="color:#dc2626;">*</span></label>
+          <select class="qual-select" id="qf-state" required>
+            <option value="" disabled selected>Select</option>
+            <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option>
+            <option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option>
+            <option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option>
+            <option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option>
+            <option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option>
+            <option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option>
+            <option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option>
+            <option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+            <option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option>
+            <option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
+            <option>DC</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="qual-row full">
+        <div class="qual-field">
+          <label class="qual-label">Your trade <span style="color:#dc2626;">*</span></label>
+          <div class="trade-search-wrap">
+            <svg class="trade-search-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
+            <input class="trade-search-input" id="qf-trade-input" placeholder="Search your trade…" autocomplete="off"
+              onfocus="openTradeDropdown()" oninput="filterTrades(this.value)" onblur="matchTradeOnBlur()">
+            <input type="hidden" id="qf-trade">
+            <div class="trade-dropdown-wrap" id="trade-dropdown-wrap">
+              <div class="trade-dropdown open" id="trade-dropdown" onscroll="updateTradeFade()"></div>
+              <div class="trade-dropdown-fade" id="trade-fade"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="qual-sep"></div>
+      <div class="qual-sep-label">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2"/></svg>
+        Online presence
+      </div>
+
+      <div class="qual-row full">
+        <div class="qual-field">
+          <label class="qual-label">Do you have a website? <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+          <div class="qual-owner-row">
+            <button type="button" class="qual-owner-btn" onclick="toggleWebsite('yes',this)">Yes</button>
+            <button type="button" class="qual-owner-btn" onclick="toggleWebsite('no',this)">No</button>
+          </div>
+        </div>
+      </div>
+      <div class="qual-row full" id="qf-website-row" style="display:none;margin-top:-4px;">
+        <div class="qual-field">
+          <label class="qual-label">Website URL</label>
+          <input class="qual-input" id="qf-website" placeholder="https://smithplumbing.com">
+        </div>
+      </div>
+
+      <div class="qual-row full" style="margin-top:4px;">
+        <div class="qual-field">
+          <label class="qual-label">Do you have a Google Business Profile? <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+          <div class="qual-owner-row">
+            <button type="button" class="qual-owner-btn" onclick="toggleGMB('yes',this)">Yes</button>
+            <button type="button" class="qual-owner-btn" onclick="toggleGMB('no',this)">No / Not sure</button>
+          </div>
+        </div>
+      </div>
+      <div class="qual-row full" id="qf-gmb-row" style="display:none;margin-top:-4px;">
+        <div class="qual-field">
+          <button type="button" onclick="searchGMB()" style="width:100%;padding:11px 16px;border:1.5px dashed var(--cta);border-radius:10px;background:#eef2fd;color:var(--cta);font-family:'Onest',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
+            Find my business on Google Maps
+          </button>
+          <p style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5;">Click above, find your business, then copy the URL from your browser and paste it below. </p>
+          <input class="qual-input" id="qf-gmaps" placeholder="Paste the link from Google Maps here" style="margin-top:6px;">
+        </div>
+      </div>
+
+      <div class="qual-sep"></div>
+      <div class="qual-sep-label">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 2h12v10l-4 2H2V2z"/><path d="M5 6h6M5 9h4"/></svg>
+        Quick qualification
+      </div>
+
+      <div class="qual-row">
+        <div class="qual-field">
+          <label class="qual-label">Jobs per month <span style="color:#dc2626;">*</span></label>
+          <select class="qual-select" id="qf-jobs" required>
+            <option value="" disabled selected>How many?</option>
+            <option value="1-5">1 – 5 jobs</option>
+            <option value="5-15">5 – 15 jobs</option>
+            <option value="15-30">15 – 30 jobs</option>
+            <option value="30+">30+ jobs</option>
+          </select>
+        </div>
+        <div class="qual-field">
+          <label class="qual-label">How do you get clients? <span style="color:#dc2626;">*</span></label>
+          <select class="qual-select" id="qf-source" required>
+            <option value="" disabled selected>Select one</option>
+            <option value="word_of_mouth">Word of mouth only</option>
+            <option value="online_ads">Online ads (Google/Facebook)</option>
+            <option value="directory">Directory / Yelp / Angi</option>
+            <option value="nothing">No marketing at all</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="qual-row full">
+        <div class="qual-field">
+          <label class="qual-label">Are you the business owner? <span style="color:#dc2626;">*</span></label>
+          <div class="qual-owner-row">
+            <button type="button" class="qual-owner-btn" onclick="selectOwner('yes',this)">Yes — I'm the owner</button>
+            <button type="button" class="qual-owner-btn" onclick="selectOwner('no',this)">No — I'm an employee</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="qual-error" id="qf-error">Please fill in all fields before continuing.</div>
+
+      <button class="qual-submit" onclick="submitQualForm()">
+        Continue — Pick your time slot →
+      </button>
+
+      <p style="margin-top:14px;font-size:11px;color:#6b7280;text-align:center;line-height:1.5;">
+        By continuing, you agree to our <a href="privacy.html" target="_blank" style="color:#1a56e8;text-decoration:underline;">Privacy Policy</a> and <a href="legal.html" target="_blank" style="color:#1a56e8;text-decoration:underline;">Terms</a>.
+        We'll contact you by phone, SMS, and email about your audit call.
+      </p>
+    </div>
+
+    <!-- Calendar (hidden until form submitted) -->
+    <div id="cal-section" style="display:none;">
+      <div style="text-align:center;margin-bottom:24px;">
+        <div class="urgency-badge">
+          <span class="urgency-dot"></span>
+          Limited spots — only a few left this week
+        </div>
+        <h3 style="font-size:24px;font-weight:700;color:var(--ink);margin-top:12px;">Pick your free strategy call</h3>
+        <p style="font-size:14px;color:var(--muted);margin-top:6px;">30 minutes. We audit your online presence live — free, no strings.</p>
+      </div>
+
+      <div class="cal-embed">
+        <iframe
+          id="zoom-scheduler-iframe"
+          src="about:blank"
+          frameborder="0"
+          style="width:100%;height:680px;border:none;display:block;">
+        </iframe>
+      </div>
+
+      <div class="cal-reassurance">
+        <div class="cal-re-item">🔒 No credit card required</div>
+        <div class="cal-re-item">⏱ 30-minute call</div>
+        <div class="cal-re-item">🎯 100% free, no commitment</div>
+        <div class="cal-re-item">📞 Real human, not a bot</div>
+      </div>
+    </div>
+
+    <!-- Mini testimonials -->
+    <div class="mini-testi">
+      <div class="mini-card">
+        <div class="mini-stars">★★★★★</div>
+        <p class="mini-text">"Got my first lead 10 days after launch. Best investment for my business."</p>
+        <div class="mini-name">Armand R. <span class="mini-verified">✓ Verified</span></div>
+        <div class="mini-trade">Electrician</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-stars">★★★★★</div>
+        <p class="mini-text">"Google reviews went from 8 to 67 in 3 months. My phone doesn't stop."</p>
+        <div class="mini-name">Wendy B. <span class="mini-verified">✓ Verified</span></div>
+        <div class="mini-trade">Landscaper</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-stars">★★★★★</div>
+        <p class="mini-text">"Within 2 weeks we started getting leads. Conversion rate went way up."</p>
+        <div class="mini-name">Manny F. <span class="mini-verified">✓ Verified</span></div>
+        <div class="mini-trade">Painter</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <p class="footer-copy" id="footer-copy"></p>
+  <div class="footer-links">
+    <a href="legal.html">Terms</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="contact.html">Contact</a>
+  </div>
+</footer>
+
+<script>
+/*
+ ═══════════════════════════════════════════════════════════════════
+ SPOTRANK — FUNNEL PAGE 1 (funnel-page-1.html)
+ ═══════════════════════════════════════════════════════════════════
+
+ RÔLE :
+   Page d'acquisition principale pour les leads Ads (Google/Facebook).
+   Étape 1 du funnel : VSL + formulaire de qualification + booking Zoom.
+   URL : https://leafy-otter-8c951e.netlify.app/funnel-page-1.html
+
+ PARCOURS UTILISATEUR :
+   1. Lead arrive depuis une publicité Google/Facebook
+   2. Regarde la VSL YouTube de 6 minutes (#step-video)
+   3. Le CTA "Book your call" se déverrouille à 4 minutes (UNLOCK_AT = 240s)
+   4. Clique → goToStep2() → affiche l'étape 2 (#step-calendar)
+   5. Remplit le formulaire de qualification (9 champs obligatoires)
+   6. submitQualForm() → sendQualData() (Supabase Edge Function /api/leads/qualify)
+   7. Iframe Zoom Scheduler s'affiche avec firstname/phone pré-remplis
+   8. Lead réserve son appel → déclenche le flow "booked" dans le dashboard
+   9. Redirigé vers funnel-page-2.html (confirmation + instructions)
+
+ DONNÉES TRANSMISES à l'API :
+   firstname, phone, business, trade, city, state,
+   has_website, website_url (optionnel),
+   has_gmb, gmaps_url (optionnel),
+   jobs (tranche mensuelle), source (acquisition), is_owner,
+   source:'ads', pipeline:'sales', stage:'booked', vsl_watched:true
+
+ VARIABLES D'ENTRÉE À CONFIGURER EN PROD :
+   VIDEO_ID   → remplacer 'YOUR_VIDEO_ID' par l'id YouTube réel
+   Zoom URL   → remplacer l'URL du scheduler dans submitQualForm()
+
+ NOTE : robots noindex/nofollow — page non indexée par Google.
+ ═══════════════════════════════════════════════════════════════════
+*/
+
+/*
+ * ── LOGO ──
+ * Le logo est construit dynamiquement en JS pour être réutilisable
+ * sur toutes les pages du funnel sans dépendance externe.
+ */
+/* ── LOGO ── */
+const LOGO = { textBold:"Spot", textAccent:"rank", colorAccent:"#1a56e8", colorDark:"#0f1f3d", fontFamily:"'Manrope', sans-serif" };
+
+/**
+ * Génère le HTML du logo Spotrank (SVG + texte typé).
+ * @param {number} svgSize - Taille du logo SVG en pixels
+ * @param {string} txtSize - Taille du texte CSS (ex: '19px')
+ * @returns {string} - HTML du logo
+ */
+function buildLogo(svgSize, txtSize) {
+  return `<svg width="${svgSize}" height="${svgSize}" viewBox="0 0 28 28" fill="none" style="flex-shrink:0;"><rect width="28" height="28" rx="7" fill="${LOGO.colorAccent}"/><path d="M14 6C10.69 6 8 8.69 8 12c0 5 6 10 6 10s6-5 6-10C20 8.69 17.31 6 14 6z" fill="white"/><circle cx="14" cy="12" r="3" fill="${LOGO.colorAccent}"/></svg><span style="font-family:${LOGO.fontFamily};font-size:${txtSize};font-weight:700;letter-spacing:-0.4px;color:${LOGO.colorDark};">${LOGO.textBold}<span style="color:${LOGO.colorAccent};">${LOGO.textAccent}</span></span>`;
+}
+document.addEventListener('DOMContentLoaded', () => {
+  /* Inject logo in nav + footer copyright */
+  document.querySelectorAll('[data-logo="nav"]').forEach(el => { el.innerHTML = buildLogo(28,'19px'); });
+  document.getElementById('footer-copy').textContent = `© ${new Date().getFullYear()} Spotrank LLC. All rights reserved.`;
+});
+
+/*
+ * ═══════════════════════════════════════════════════════════════════
+ * VIDEO LOGIC — VSL YouTube avec déverrouillage progressif.
+ *
+ * MÉCANISME :
+ *   - playVideo()     → remplace le placeholder par l'iframe YouTube
+ *   - startProgress() → setInterval toutes les 1s, incrémente elapsed
+ *   - À UNLOCK_AT (240s = 4 min) → clearInterval + unlockCTA()
+ *   - unlockCTA()     → retire la classe opacity/pointer-events du CTA
+ *   - goToStep2()     → cache #step-video, affiche #step-calendar
+ *
+ * OBJECTIF UX :
+ *   Forcer le visionnage d'au moins 4 minutes de VSL avant
+ *   de pouvoir booker un appel → leads mieux qualifiés.
+ *
+ * ⚠️  VIDEO_ID = 'YOUR_VIDEO_ID' → à remplacer avant lancement.
+ * ═══════════════════════════════════════════════════════════════════
+ */
+
+/* ── VIDEO LOGIC ── */
+/* ⚙️  Replace YOUR_VIDEO_ID with your actual YouTube video ID */
+const VIDEO_ID = 'YOUR_VIDEO_ID';
+const VIDEO_DURATION = 360; /* Durée totale de la VSL en secondes (6 min) */
+const UNLOCK_AT = 240;      /* Déverrouillage à 4 min (240s) — 2 min avant la fin */
+
+let videoStarted = false; /* true dès que le lead clique Play */
+let elapsed = 0;          /* secondes écoulées depuis le début de la vidéo */
+let timer = null;         /* référence du setInterval de progression */
+
+/**
+ * Lance la vidéo YouTube en remplaçant le placeholder par une iframe embed.
+ * Active l'autoplay et masque les suggestions YouTube (modestbranding, rel=0).
+ * Affiche la barre de progression et démarre le timer.
+ */
+function playVideo() {
+  const wrap = document.getElementById('videoWrap');
+  // Build via createElement so VIDEO_ID (if ever sourced from a config/URL
+  // param) cannot break out of the iframe src attribute.
+  wrap.textContent = '';
+  const iframe = document.createElement('iframe');
+  iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(VIDEO_ID) + '?autoplay=1&rel=0&modestbranding=1';
+  iframe.setAttribute('allow', 'autoplay; fullscreen');
+  iframe.setAttribute('allowfullscreen', '');
+  iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:20px;display:block;';
+  wrap.appendChild(iframe);
+  document.getElementById('videoProgressWrap').style.display = 'block';
+  startProgress();
+}
+
+/**
+ * Démarre le timer de progression de la vidéo.
+ * Toutes les secondes : met à jour la barre + le texte de countdown.
+ * À UNLOCK_AT secondes → clearInterval + unlockCTA().
+ */
+function startProgress() {
+  videoStarted = true;
+  timer = setInterval(() => {
+    elapsed++;
+    const pct = Math.min(100, Math.round((elapsed / VIDEO_DURATION) * 100));
+    document.getElementById('vpFill').style.width = pct + '%';
+    const remaining = Math.max(0, UNLOCK_AT - elapsed);
+    if (remaining > 0) {
+      document.getElementById('vpText').textContent = `Keep watching — unlocks in ${Math.ceil(remaining/60)} min ${remaining%60}s`;
+    }
+    if (elapsed >= UNLOCK_AT) {
+      clearInterval(timer);
+      unlockCTA();
+    }
+  }, 1000);
+}
+
+/**
+ * Déverrouille le CTA de booking après UNLOCK_AT secondes visionnées.
+ * Retire opacity:0.35 et pointer-events:none du bouton de booking.
+ * Scroll automatique vers le CTA pour attirer l'attention.
+ * Aussi appelé manuellement via le bouton DEV (🛠 DEV: unlock) en démo.
+ */
+function unlockCTA() {
+  const cta = document.getElementById('unlockCta');
+  cta.classList.add('unlocked');
+  document.getElementById('lockIcon').textContent = '';
+  document.getElementById('unlockSub').textContent = 'Unlocked — pick your time slot now 🎯';
+  document.getElementById('vpText').textContent = '✓ Video watched — you\'re good to go!';
+  cta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/**
+ * Passe à l'étape 2 (formulaire + calendrier).
+ * Met à jour la barre de progression (étape 1 = done, étape 2 = active).
+ * Cache #step-video, affiche #step-calendar, scroll en haut.
+ */
+function goToStep2() {
+  document.getElementById('pill1').className = 'prog-step done';
+  document.getElementById('pill1').innerHTML = '<span class="prog-num">✓</span> Watch the video';
+  document.getElementById('line1').className = 'prog-line done';
+  document.getElementById('pill2').className = 'prog-step active';
+  document.getElementById('step-video').style.display = 'none';
+  document.getElementById('step-calendar').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════════
+ * SEARCHABLE TRADE DROPDOWN
+ * Input de recherche avec dropdown filtré en temps réel.
+ * ALL_TRADES : liste de ~80 trades US (contractors).
+ * Valeur sélectionnée stockée dans l'input caché #qf-trade.
+ * Fermeture automatique au clic en dehors du champ.
+ * ═══════════════════════════════════════════════════════════════════
+ */
+
+/* ── SEARCHABLE TRADE DROPDOWN ── */
+/*
+ * ALL_TRADES — Liste complète des métiers contractors US.
+ * Correspond aux trades acceptés par Spotrank (sourced depuis Angi/HomeAdvisor).
+ */
+const ALL_TRADES = [
+  'Additions & Remodeling','Air Conditioning','Appliances','Appraiser',
+  'Architects & Engineers','Art & Mirror Mounting','Audio/Visual & Computers','Awnings',
+  'Brick & Stone','Cabinets','Carpenters','Carpet & Upholstery Cleaning',
+  'Ceilings','Central Vacuum','Cleaning & Maid Services','Commercial Contractors',
+  'Concrete','Construction','Countertops','Decks',
+  'Demolition Service','Designers & Decorators','Disability Services','Disaster Recovery Services',
+  'Docks','Doors','Drywall & Plaster','Electrical',
+  'Excavation','Fans','Fences','Fireplace & Wood Stoves',
+  'Flooring & Carpet','Foundations','Fountains & Ponds','Furniture Assembly',
+  'Furniture Repair & Refinish','Garage & Garage Doors','General Contractors','Glass & Mirrors',
+  'Gutters','Handyman Services','Heating & Furnace Systems','Home Inspection',
+  'Home Maintenance','Home Services','Hot Tubs, Spas & Saunas','Household Help',
+  'HVAC','Insulation','Landscaping','Lawn & Garden Care',
+  'Lifting & Moving Heavy Items','Locksmith','Metal Fabrication','Mold & Asbestos Services',
+  'Moving','New Home Builders','Organizers','Outdoor Playgrounds',
+  'Packing & Unpacking Services','Painting','Paving','Permit Services',
+  'Pest Control','Plumbing','Powdercoating','Remodeling',
+  'Roofing','Sandblasting Service','Septic Tanks & Wells','Sheds & Enclosures',
+  'Siding','Sign Making Service','Skylights','Snow Removal Service',
+  'Solar','Sports Equipment Assembly','Stained Glass','Swimming Pools',
+  'Tennis Or Game Court','Tile','Tree Service','Wall Coverings',
+  'Waste Material Removal','Water Treatment System','Waterproofing','Window Coverings',
+  'Windows','Yard & Garden Work'
+];
+
+/** Ouvre le dropdown et filtre selon la valeur courante de l'input. */
+function openTradeDropdown() {
+  filterTrades(document.getElementById('qf-trade-input').value);
+  document.getElementById('trade-dropdown-wrap').classList.add('open');
+}
+
+/**
+ * Filtre les trades selon la requête de recherche.
+ * Affiche tous les trades si query vide.
+ * Scrolle en haut du dropdown après chaque filtre.
+ * @param {string} query - Texte saisi dans l'input de recherche
+ */
+function filterTrades(query) {
+  const dd = document.getElementById('trade-dropdown');
+  const q = query.toLowerCase();
+  const filtered = q ? ALL_TRADES.filter(t => t.toLowerCase().includes(q)) : ALL_TRADES;
+  // Build options via createElement (no string-escaping gymnastics on onclick,
+  // and the textContent path means trade names with quotes/backslashes stay safe).
+  dd.textContent = '';
+  if (!filtered.length) {
+    const none = document.createElement('div');
+    none.className = 'trade-option';
+    none.style.cssText = 'color:var(--muted);pointer-events:none;';
+    none.textContent = 'No match found';
+    dd.appendChild(none);
+  } else {
+    filtered.forEach(t => {
+      const opt = document.createElement('div');
+      opt.className = 'trade-option';
+      opt.dataset.trade = t;
+      opt.textContent = t;
+      // preventDefault on mousedown keeps focus on the input so matchTradeOnBlur
+      // doesn't fire before our click selectTrade() runs (race on blur vs click).
+      opt.addEventListener('mousedown', e => e.preventDefault());
+      opt.addEventListener('click', () => selectTrade(t));
+      dd.appendChild(opt);
+    });
+  }
+  document.getElementById('trade-dropdown-wrap').classList.add('open');
+  dd.scrollTop = 0;
+  updateTradeFade();
+}
+
+/**
+ * Auto-sélectionne le trade au blur si la valeur tapée matche exactement
+ * (insensible à la casse) un trade de ALL_TRADES. Corrige le cas où
+ * l'utilisateur tape "Plumbing" au clavier sans jamais cliquer l'option :
+ * le champ caché #qf-trade restait vide → submit échouait silencieusement.
+ */
+function matchTradeOnBlur() {
+  const input = document.getElementById('qf-trade-input');
+  const hidden = document.getElementById('qf-trade');
+  const typed = (input.value || '').trim().toLowerCase();
+  if (!typed) { hidden.value = ''; return; }
+  const match = ALL_TRADES.find(t => t.toLowerCase() === typed);
+  if (match) {
+    hidden.value = match;
+    input.value = match;
+  } else {
+    // Typed something that doesn't match — clear the hidden input so
+    // validation catches it instead of submitting an invalid trade.
+    hidden.value = '';
+  }
+}
+
+/**
+ * Sélectionne un trade — remplit l'input visible et l'input caché (#qf-trade).
+ * Ferme le dropdown après sélection.
+ * @param {string} val - Trade sélectionné
+ */
+function selectTrade(val) {
+  document.getElementById('qf-trade').value = val;
+  document.getElementById('qf-trade-input').value = val;
+  document.getElementById('trade-dropdown-wrap').classList.remove('open');
+}
+
+/**
+ * Met à jour l'opacité du dégradé en bas du dropdown.
+ * Masque le fade quand le scroll est en bas (plus de contenu).
+ */
+function updateTradeFade() {
+  const dd = document.getElementById('trade-dropdown');
+  const fade = document.getElementById('trade-fade');
+  if (!dd || !fade) return;
+  const atBottom = dd.scrollHeight - dd.scrollTop - dd.clientHeight < 10;
+  fade.style.opacity = atBottom ? '0' : '1';
+}
+
+/* Ferme le dropdown trade au clic en dehors */
+// Close dropdown on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('.trade-search-wrap')) {
+    document.getElementById('trade-dropdown-wrap')?.classList.remove('open');
+  }
+});
+
+/*
+ * ═══════════════════════════════════════════════════════════════════
+ * QUALIFICATION FORM
+ * Formulaire en 3 sections :
+ *   1. Infos contact (prénom, téléphone, business, ville, état, trade)
+ *   2. Online presence (site web optionnel, GMB optionnel + recherche Maps)
+ *   3. Quick qualification (jobs/mois, source clients, propriétaire ?)
+ *
+ * Variables d'état : selectedOwner, hasWebsite, hasGMB
+ * (boutons toggle — non gérés par l'état des inputs natifs)
+ * ═══════════════════════════════════════════════════════════════════
+ */
+
+/* ── QUALIFICATION FORM ── */
+let selectedOwner = null; /* 'yes' | 'no' — est-ce le propriétaire ? */
+let hasWebsite = null;    /* 'yes' | 'no' — a-t-il un site web ? */
+let hasGMB = null;        /* 'yes' | 'no' — a-t-il un Google Business Profile ? */
+
+/**
+ * Sélectionne l'option "propriétaire" (oui/non) avec highlight du bouton actif.
+ * @param {string}      val - 'yes' | 'no'
+ * @param {HTMLElement} btn - Bouton cliqué (pour .selected)
+ */
+function selectOwner(val, btn) {
+  selectedOwner = val;
+  btn.parentElement.querySelectorAll('.qual-owner-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+/**
+ * Toggle l'affichage du champ URL de site web.
+ * Si "Yes" → affiche #qf-website-row.
+ * @param {string}      val - 'yes' | 'no'
+ * @param {HTMLElement} btn - Bouton cliqué
+ */
+function toggleWebsite(val, btn) {
+  hasWebsite = val;
+  btn.parentElement.querySelectorAll('.qual-owner-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('qf-website-row').style.display = val === 'yes' ? '' : 'none';
+}
+
+/**
+ * Toggle l'affichage du champ Google Maps URL.
+ * Si "Yes" → affiche #qf-gmb-row avec bouton "Find on Google Maps".
+ * @param {string}      val - 'yes' | 'no'
+ * @param {HTMLElement} btn - Bouton cliqué
+ */
+function toggleGMB(val, btn) {
+  hasGMB = val;
+  btn.parentElement.querySelectorAll('.qual-owner-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('qf-gmb-row').style.display = val === 'yes' ? '' : 'none';
+}
+
+/**
+ * Ouvre Google Maps dans un nouvel onglet avec le nom du business + ville pré-remplis.
+ * Permet au lead de trouver sa fiche GMB et de coller l'URL dans le champ #qf-gmaps.
+ * Utilise le nom du business et la ville déjà saisis dans le formulaire.
+ */
+function searchGMB() {
+  const business = document.getElementById('qf-business').value.trim();
+  const city = document.getElementById('qf-city').value.trim();
+  const state = document.getElementById('qf-state').value || '';
+  const query = encodeURIComponent((business + ' ' + city + ' ' + state + ' USA').trim() || 'my business');
+  window.open('https://www.google.com/maps/search/' + query, '_blank');
+}
+
+/**
+ * Valide et soumet le formulaire de qualification.
+ * Champs obligatoires : firstname, phone, business, trade, city, state,
+ *                        jobs (tranche), source (acquisition), is_owner.
+ * Champs optionnels  : website_url, gmaps_url.
+ *
+ * Si valide :
+ *   1. sendQualData(fields) → POST /api/leads/qualify (non bloquant, silently fails)
+ *   2. Cache le formulaire (#qual-form), affiche le calendrier (#cal-section)
+ *   3. Charge l'iframe Zoom Scheduler avec firstname + phone pré-remplis
+ *   4. Scroll vers le calendrier
+ */
+function submitQualForm() {
+  const fields = {
+    firstname: document.getElementById('qf-firstname').value.trim(),
+    phone: document.getElementById('qf-phone').value.trim(),
+    business: document.getElementById('qf-business').value.trim(),
+    trade: document.getElementById('qf-trade').value,
+    city: document.getElementById('qf-city').value.trim(),
+    state: document.getElementById('qf-state').value,
+    has_website: hasWebsite,
+    website_url: document.getElementById('qf-website')?.value?.trim() || null,
+    has_gmb: hasGMB,
+    gmaps_url: document.getElementById('qf-gmaps')?.value?.trim() || null,
+    jobs: document.getElementById('qf-jobs').value,
+    source: document.getElementById('qf-source').value,
+    is_owner: selectedOwner,
+  };
+
+  /* Validation : tous les champs obligatoires doivent être remplis */
+  const missing = !fields.firstname || !fields.phone || !fields.business || !fields.trade || !fields.city || !fields.state || !fields.jobs || !fields.source || !fields.is_owner;
+  if (missing) {
+    document.getElementById('qf-error').style.display = 'block';
+    return;
+  }
+  document.getElementById('qf-error').style.display = 'none';
+
+  /* Envoi des données au backend (non bloquant) */
+  // Send to backend (Supabase Edge Function)
+  sendQualData(fields);
+
+  /* Affichage du calendrier Zoom */
+  // Hide form, show calendar
+  document.getElementById('qual-form').style.display = 'none';
+  document.getElementById('cal-section').style.display = 'block';
+
+  // Load Zoom scheduler with pre-filled name/email
+  /* ⚙️  URL Zoom Scheduler — remplacer 'ads-boost-services/spotrankio' par le bon alias en prod */
+  const schedulerUrl = `https://scheduler.zoom.us/ads-boost-services/spotrankio?embed=true&name=${encodeURIComponent(fields.firstname)}&phone=${encodeURIComponent(fields.phone)}`;
+  document.getElementById('zoom-scheduler-iframe').src = schedulerUrl;
+
+  // Smooth scroll to calendar
+  document.getElementById('cal-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/**
+ * Envoie les données de qualification au backend Supabase.
+ * Endpoint : POST /api/leads/qualify
+ * Ajoute : source:'ads', pipeline:'sales', stage:'booked', vsl_watched:true.
+ * Silently fails (try/catch) — ne bloque jamais le booking du lead.
+ * En prod : crée ou met à jour le lead dans la table Supabase `leads`.
+ * @param {Object} fields - Données du formulaire de qualification
+ */
+async function sendQualData(fields) {
+  try {
+    await fetch('/api/leads/qualify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...fields,
+        source: 'ads',
+        pipeline: 'sales',
+        stage: 'booked',       /* Lead direct en stage 'booked' — a vu la VSL */
+        vsl_watched: true,
+        created_at: new Date().toISOString(),
+      }),
+    });
+  } catch(e) {
+    // Silently fail — don't block the booking
+    console.log('Qual data send failed (expected in demo):', e);
+  }
+}
+</script>
+
+</body>
+</html>

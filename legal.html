@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' rx='7' fill='%231a56e8'/%3E%3Cpath d='M14 6C10.69 6 8 8.69 8 12c0 5 6 10 6 10s6-5 6-10C20 8.69 17.31 6 14 6z' fill='white'/%3E%3Ccircle cx='14' cy='12' r='3' fill='%231a56e8'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' rx='7' fill='%231a56e8'/%3E%3Cpath d='M14 6C10.69 6 8 8.69 8 12c0 5 6 10 6 10s6-5 6-10C20 8.69 17.31 6 14 6z' fill='white'/%3E%3Ccircle cx='14' cy='12' r='3' fill='%231a56e8'/%3E%3C/svg%3E">
+<title>Terms of Service — Spotrank</title>
+<meta name="description" content="Terms of Service for Spotrank — Digital marketing agency for contractors.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://leafy-otter-8c951e.netlify.app/legal.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;700&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
+<script>
+/*
+ ═══════════════════════════════════════════════════════════════════
+ SPOTRANK — TERMS OF SERVICE (legal.html)
+ ═══════════════════════════════════════════════════════════════════
+
+ RÔLE : Page des Conditions Générales d'Utilisation.
+   Contenu légal injecté dynamiquement depuis l'objet COMPANY.
+   Permet de mettre à jour toutes les infos légales depuis un seul endroit.
+
+ COMPANY — ⚙️ Modifier cet objet avant déploiement.
+ Tous les éléments .co-* dans la page HTML sont remplis depuis ici.
+ ═══════════════════════════════════════════════════════════════════
+*/
+/* ════════════════════════════════════════════
+   COMPANY INFORMATION — Edit this block only
+   ════════════════════════════════════════════ */
+const COMPANY = {
+  name:        "Spotrank LLC",
+  dba:         "Spotrank",
+  state:       "Delaware",          // State of incorporation
+  address:     "1234 Market Street, Suite 100",    // TODO: replace with real address before prod
+  city:        "Wilmington",
+  stateShort:  "DE",
+  zip:         "19801",
+  country:     "United States",
+  email:       "legal@spotrank.io",
+  supportEmail:"support@spotrank.io",
+  website:     "https://spotrank.io",
+  phone:       "+1 (555) 000-0000",                // TODO: replace with real phone before prod
+  effectiveDate: "April 11, 2026",
+};
+/* ════════════════════════════════════════════ */
+
+/* Placeholder guard — logs a loud warning if demo values are still present.
+ * Legal / T&C pages with fake addresses can expose the company to compliance
+ * issues (US state business registration rules require an accurate address).
+ * Visible only to site owners opening DevTools, so no UX impact for users. */
+(function detectPlaceholders() {
+  const placeholders = [];
+  if (COMPANY.address.includes('1234 Market Street')) placeholders.push('address');
+  if (COMPANY.phone === '+1 (555) 000-0000') placeholders.push('phone');
+  if (placeholders.length) {
+    console.warn('[legal.html] Placeholder COMPANY values still present:', placeholders.join(', '), '— replace before production.');
+  }
+})();
+</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink: #0f1f3d;
+  --ink-mid: #1a2b4a;
+  --muted: #4a5568;
+  --border: #e8e8e8;
+  --stone: #f5f5f7;
+  --cta: #1a56e8;
+  --radius: 12px;
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Onest', sans-serif; color: var(--ink); background: #fff; font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+
+/* NAV */
+nav { display: flex; align-items: center; justify-content: space-between; padding: 0 48px; height: 64px; border-bottom: 1px solid var(--border); background: #fff; position: sticky; top: 0; z-index: 10; }
+.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: 'Manrope', sans-serif; font-size: 19px; font-weight: 700; color: var(--ink); letter-spacing: -0.4px; }
+.back-link { font-size: 14px; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+.back-link:hover { color: var(--ink); }
+
+/* LAYOUT */
+.page-wrap { max-width: 760px; margin: 0 auto; padding: 64px 24px 120px; }
+.legal-header { margin-bottom: 56px; padding-bottom: 40px; border-bottom: 1px solid var(--border); }
+.legal-eyebrow { font-size: 12px; font-weight: 600; color: var(--cta); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+.legal-title { font-family: 'Onest', sans-serif; font-weight: 700; font-size: 40px; letter-spacing: -1px; line-height: 1.15; color: var(--ink); margin-bottom: 16px; }
+.legal-meta { font-size: 14px; color: var(--muted); display: flex; gap: 24px; flex-wrap: wrap; }
+.legal-meta span { display: flex; align-items: center; gap: 6px; }
+
+/* TOC */
+.toc { background: var(--stone); border-radius: var(--radius); padding: 28px 32px; margin-bottom: 56px; }
+.toc-title { font-size: 13px; font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; }
+.toc ol { list-style: none; display: flex; flex-direction: column; gap: 8px; padding: 0; counter-reset: toc; }
+.toc ol li { counter-increment: toc; display: flex; align-items: baseline; gap: 10px; font-size: 14px; }
+.toc ol li::before { content: counter(toc) "."; color: var(--cta); font-weight: 700; font-size: 13px; min-width: 18px; }
+.toc ol li a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+.toc ol li a:hover { color: var(--cta); }
+
+/* SECTIONS */
+.legal-section { margin-bottom: 48px; }
+.legal-section h2 { font-family: 'Onest', sans-serif; font-weight: 700; font-size: 22px; color: var(--ink); margin-bottom: 16px; padding-top: 8px; display: flex; align-items: center; gap: 10px; }
+.section-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--cta); color: #fff; border-radius: 50%; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.legal-section p { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 14px; }
+.legal-section p:last-child { margin-bottom: 0; }
+.legal-section ul, .legal-section ol { padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.legal-section li { font-size: 15px; color: var(--muted); line-height: 1.65; padding-left: 20px; position: relative; }
+.legal-section li::before { content: '—'; position: absolute; left: 0; color: var(--cta); font-weight: 700; }
+.legal-section strong { color: var(--ink-mid); font-weight: 600; }
+.legal-section a { color: var(--cta); text-decoration: underline; text-underline-offset: 3px; }
+
+/* HIGHLIGHT BOX */
+.highlight-box { background: #eef2fd; border: 1px solid #b8ccf7; border-radius: var(--radius); padding: 20px 24px; margin: 20px 0; }
+.highlight-box p { color: var(--ink-mid); margin: 0; font-size: 14px; }
+
+/* DIVIDER */
+hr.section-divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+/* FOOTER */
+footer { border-top: 1px solid var(--border); padding: 32px 48px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.footer-copy { font-size: 13px; color: var(--muted); }
+.footer-links { display: flex; gap: 24px; }
+.footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; }
+.footer-links a:hover { color: var(--cta); }
+
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .page-wrap { padding: 40px 20px 80px; }
+  .legal-title { font-size: 30px; }
+  footer { padding: 24px 20px; flex-direction: column; text-align: center; }
+  .footer-links { justify-content: center; }
+}
+</style>
+
+<script>
+/* ═══════════════════════════════════════
+   LOGO CONFIG — modifie ici uniquement
+   ═══════════════════════════════════════ */
+const LOGO = {
+  text:       "Spotrank",        // Nom complet
+  textBold:   "Spot",            // Partie en couleur foncée
+  textAccent: "rank",            // Partie en couleur accent
+  colorAccent:"#1a56e8",         // Couleur accent
+  colorDark:  "var(--ink, #0f1f3d)", // Couleur texte principal
+  fontFamily: "'Manrope', sans-serif",
+  fontSize:   { nav: "19px", footer: "17px" },
+  svgSize:    { nav: "28", footer: "22" },
+};
+/* ═══════════════════════════════════════ */
+
+function buildLogoSVG(size) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 28 28" fill="none" style="flex-shrink:0;display:block;"><rect width="28" height="28" rx="7" fill="${LOGO.colorAccent}"/><path d="M14 6C10.69 6 8 8.69 8 12c0 5 6 10 6 10s6-5 6-10C20 8.69 17.31 6 14 6z" fill="white"/><circle cx="14" cy="12" r="3" fill="${LOGO.colorAccent}"/></svg>`;
+}
+
+function buildLogoText(fontSize) {
+  return `<span style="font-family:${LOGO.fontFamily};font-size:${fontSize};font-weight:700;letter-spacing:-0.4px;color:${LOGO.colorDark};white-space:nowrap;">${LOGO.textBold}<span style="color:${LOGO.colorAccent};">${LOGO.textAccent}</span></span>`;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Nav logos
+  document.querySelectorAll('[data-logo="nav"]').forEach(el => {
+    el.innerHTML = buildLogoSVG(LOGO.svgSize.nav) + buildLogoText(LOGO.fontSize.nav);
+  });
+  // Footer logos
+  document.querySelectorAll('[data-logo="footer"]').forEach(el => {
+    el.innerHTML = buildLogoSVG(LOGO.svgSize.footer) + buildLogoText(LOGO.fontSize.footer);
+  });
+  // Optin dark logos
+  document.querySelectorAll('[data-logo="dark"]').forEach(el => {
+    el.innerHTML = buildLogoSVG(LOGO.svgSize.nav) + `<span style="font-family:${LOGO.fontFamily};font-size:${LOGO.fontSize.nav};font-weight:700;letter-spacing:-0.4px;color:#ffffff;white-space:nowrap;">${LOGO.textBold}<span style="color:${LOGO.colorAccent};">${LOGO.textAccent}</span></span>`;
+  });
+});
+</script>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><span data-logo="nav" style="display:flex;align-items:center;gap:10px;"></span></a>
+  <a href="index.html" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 11L5 7L9 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Back to home
+  </a>
+</nav>
+
+<div class="page-wrap">
+
+  <div class="legal-header">
+    <p class="legal-eyebrow">Legal</p>
+    <h1 class="legal-title">Terms of Service</h1>
+    <div class="legal-meta">
+      <span>📅 Effective: <strong id="effective-date"></strong></span>
+      <span>🏢 <span id="company-name"></span></span>
+      <span>📍 <span id="company-state"></span></span>
+    </div>
+  </div>
+
+  <div class="toc">
+    <div class="toc-title">Table of Contents</div>
+    <ol>
+      <li><a href="#acceptance">Acceptance of Terms</a></li>
+      <li><a href="#services">Services Description</a></li>
+      <li><a href="#eligibility">Eligibility</a></li>
+      <li><a href="#account">Account & Subscription</a></li>
+      <li><a href="#payment">Payment & Billing</a></li>
+      <li><a href="#cancellation">Cancellation & Refunds</a></li>
+      <li><a href="#ip">Intellectual Property</a></li>
+      <li><a href="#data">Data & Privacy</a></li>
+      <li><a href="#disclaimer">Disclaimers</a></li>
+      <li><a href="#liability">Limitation of Liability</a></li>
+      <li><a href="#indemnification">Indemnification</a></li>
+      <li><a href="#governing">Governing Law & Disputes</a></li>
+      <li><a href="#changes">Changes to Terms</a></li>
+      <li><a href="#contact-legal">Contact</a></li>
+    </ol>
+  </div>
+
+  <div class="highlight-box">
+    <p><strong>Please read these Terms of Service carefully.</strong> By accessing or using Spotrank's services, you agree to be bound by these Terms. If you do not agree, do not use our services.</p>
+  </div>
+
+  <!-- 1 -->
+  <div class="legal-section" id="acceptance">
+    <h2><span class="section-num">1</span> Acceptance of Terms</h2>
+    <p>These Terms of Service ("Terms") constitute a legally binding agreement between you ("Client," "you," or "your") and <span class="co-name"></span>, a limited liability company organized under the laws of the State of <span class="co-state"></span>, doing business as <span class="co-dba"></span> ("Company," "we," "us," or "our").</p>
+    <p>By signing up for, accessing, or using any of our services, you acknowledge that you have read, understood, and agree to be bound by these Terms and our Privacy Policy, incorporated herein by reference.</p>
+  </div>
+
+  <!-- 2 -->
+  <div class="legal-section" id="services">
+    <h2><span class="section-num">2</span> Services Description</h2>
+    <p>Spotrank provides digital marketing services tailored for contractors, tradespeople, and home service businesses, including but not limited to:</p>
+    <ul>
+      <li>Professional website design and development</li>
+      <li>Local SEO optimization and Google Business Profile management</li>
+      <li>Automated review generation and reputation management</li>
+      <li>Google Ads campaign management</li>
+      <li>CRM setup, automation, and missed call text-back systems</li>
+      <li>SMS and email marketing campaigns</li>
+      <li>Monthly performance reporting and strategy consulting</li>
+    </ul>
+    <p>The specific services provided to you are outlined in your subscription plan and any applicable Service Order Form or Statement of Work signed between the parties.</p>
+  </div>
+
+  <!-- 3 -->
+  <div class="legal-section" id="eligibility">
+    <h2><span class="section-num">3</span> Eligibility</h2>
+    <p>You must be at least 18 years of age and legally authorized to enter into binding contracts to use our services. By using our services, you represent and warrant that:</p>
+    <ul>
+      <li>You are at least 18 years old</li>
+      <li>You have the legal authority to bind the business entity you represent</li>
+      <li>Your use of our services does not violate any applicable laws or regulations</li>
+      <li>All information you provide to us is accurate, current, and complete</li>
+    </ul>
+  </div>
+
+  <!-- 4 -->
+  <div class="legal-section" id="account">
+    <h2><span class="section-num">4</span> Account & Subscription</h2>
+    <p>Upon subscribing to our services, you will be onboarded through our intake process. You are responsible for maintaining the confidentiality of any credentials and access provided to you.</p>
+    <p>All subscriptions begin with a <strong>3-month minimum commitment period</strong>, after which the subscription renews on a month-to-month basis unless cancelled pursuant to Section 6. You agree to provide accurate billing and business information at all times.</p>
+  </div>
+
+  <!-- 5 -->
+  <div class="legal-section" id="payment">
+    <h2><span class="section-num">5</span> Payment & Billing</h2>
+    <p>All fees are charged in U.S. Dollars (USD) and are due at the beginning of each billing cycle. By providing a payment method, you authorize us to charge all amounts due under your selected plan.</p>
+    <ul>
+      <li><strong>Billing cycle:</strong> Monthly, beginning on your subscription start date</li>
+      <li><strong>Failed payments:</strong> If a payment fails, we will attempt to charge again within 3 business days. Services may be suspended after two failed attempts.</li>
+      <li><strong>Price changes:</strong> We will provide at least 30 days' written notice before any price increase takes effect.</li>
+      <li><strong>Taxes:</strong> Prices do not include applicable sales, use, or VAT taxes, for which you are solely responsible.</li>
+    </ul>
+  </div>
+
+  <!-- 6 -->
+  <div class="legal-section" id="cancellation">
+    <h2><span class="section-num">6</span> Cancellation & Refunds</h2>
+    <p>You may cancel your subscription at any time after the initial 3-month commitment period with <strong>30 days' written notice</strong> sent to <a class="co-email-legal"></a>.</p>
+    <p>Upon cancellation:</p>
+    <ul>
+      <li>You will continue to receive services through the end of the current paid billing period</li>
+      <li>No refunds will be issued for the current billing period or any previous periods</li>
+      <li>Access to any tools, dashboards, or integrations set up by Spotrank will be terminated</li>
+      <li>Ownership of your website and any deliverables created for you will transfer upon full payment of outstanding balances</li>
+    </ul>
+    <div class="highlight-box">
+      <p><strong>No refunds for the initial 3-month commitment.</strong> We invest significant resources in onboarding and setup during the first 90 days. By subscribing, you agree to fulfill the minimum commitment period.</p>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="legal-section" id="ip">
+    <h2><span class="section-num">7</span> Intellectual Property</h2>
+    <p>Upon full payment of all amounts owed, you own all custom deliverables created specifically for your business (website content, copy, graphics created for your brand). Spotrank retains ownership of:</p>
+    <ul>
+      <li>All proprietary tools, software, automations, and systems used to deliver services</li>
+      <li>Templates, frameworks, and methodologies developed by Spotrank</li>
+      <li>The Spotrank brand, trademarks, and trade dress</li>
+    </ul>
+    <p>You grant Spotrank a non-exclusive license to use your brand name, logo, and business information solely for the purpose of delivering services and, with your permission, for portfolio and case study purposes.</p>
+  </div>
+
+  <!-- 8 -->
+  <div class="legal-section" id="data">
+    <h2><span class="section-num">8</span> Data & Privacy</h2>
+    <p>Your use of our services is governed by our <a href="privacy.html">Privacy Policy</a>, which is incorporated into these Terms by reference. You are responsible for ensuring you have all necessary rights and permissions to share any customer data with us for the purpose of running your marketing campaigns.</p>
+    <p>You represent and warrant that any customer data you provide complies with applicable data protection laws, including the California Consumer Privacy Act (CCPA) and applicable state regulations.</p>
+  </div>
+
+  <!-- 9 -->
+  <div class="legal-section" id="disclaimer">
+    <h2><span class="section-num">9</span> Disclaimers</h2>
+    <p>OUR SERVICES ARE PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. TO THE FULLEST EXTENT PERMITTED BY LAW, SPOTRANK DISCLAIMS ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO:</p>
+    <ul>
+      <li>Warranties of merchantability, fitness for a particular purpose, and non-infringement</li>
+      <li>Guarantees of specific results, rankings, lead volume, or revenue outcomes</li>
+      <li>Uninterrupted or error-free service delivery</li>
+    </ul>
+    <p>Digital marketing results vary based on market conditions, competition, client participation, and factors outside our control. While we share historical client results as examples, past performance does not guarantee future results.</p>
+  </div>
+
+  <!-- 10 -->
+  <div class="legal-section" id="liability">
+    <h2><span class="section-num">10</span> Limitation of Liability</h2>
+    <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL SPOTRANK, ITS OFFICERS, DIRECTORS, EMPLOYEES, OR AGENTS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOST PROFITS OR REVENUE, WHETHER INCURRED DIRECTLY OR INDIRECTLY.</p>
+    <p>In all cases, Spotrank's total aggregate liability to you for any claims arising out of or relating to these Terms or our services shall not exceed the total amount paid by you to Spotrank in the <strong>three (3) months immediately preceding the claim</strong>.</p>
+  </div>
+
+  <!-- 11 -->
+  <div class="legal-section" id="indemnification">
+    <h2><span class="section-num">11</span> Indemnification</h2>
+    <p>You agree to indemnify, defend, and hold harmless Spotrank and its officers, directors, employees, agents, and successors from and against any claims, damages, losses, liabilities, costs, and expenses (including reasonable attorneys' fees) arising out of or relating to:</p>
+    <ul>
+      <li>Your use of our services in violation of these Terms</li>
+      <li>Any content or data you provide to us</li>
+      <li>Your violation of any applicable law or third-party right</li>
+      <li>Any dispute between you and your customers</li>
+    </ul>
+  </div>
+
+  <!-- 12 -->
+  <div class="legal-section" id="governing">
+    <h2><span class="section-num">12</span> Governing Law & Disputes</h2>
+    <p>These Terms shall be governed by and construed in accordance with the laws of the State of <span class="co-state"></span>, without regard to its conflict of law provisions.</p>
+    <p><strong>Dispute Resolution:</strong> Any dispute arising out of or relating to these Terms shall first be subject to good-faith negotiation. If unresolved within 30 days, disputes shall be submitted to binding arbitration administered by the American Arbitration Association (AAA) under its Commercial Arbitration Rules, with proceedings conducted in <span class="co-city"></span>, <span class="co-state-short"></span>.</p>
+    <p>You waive any right to participate in a class action lawsuit or class-wide arbitration against Spotrank.</p>
+  </div>
+
+  <!-- 13 -->
+  <div class="legal-section" id="changes">
+    <h2><span class="section-num">13</span> Changes to Terms</h2>
+    <p>We reserve the right to modify these Terms at any time. We will provide at least <strong>30 days' notice</strong> of material changes via email to the address on file. Your continued use of our services after the effective date of the revised Terms constitutes your acceptance of the changes.</p>
+  </div>
+
+  <!-- 14 -->
+  <div class="legal-section" id="contact-legal">
+    <h2><span class="section-num">14</span> Contact</h2>
+    <p>For legal inquiries regarding these Terms, please contact us at:</p>
+    <ul>
+      <li><strong>Company:</strong> <span class="co-name"></span></li>
+      <li><strong>Address:</strong> <span class="co-address"></span>, <span class="co-city"></span>, <span class="co-state-short"></span> <span class="co-zip"></span></li>
+      <li><strong>Email:</strong> <a class="co-email-legal"></a></li>
+      <li><strong>Phone:</strong> <span class="co-phone"></span></li>
+    </ul>
+  </div>
+
+</div>
+
+<footer>
+  <p class="footer-copy" id="footer-copy"></p>
+  <div class="footer-links">
+    <a href="index.html">Accueil</a>
+    <a href="contact.html">Contact</a>
+    <a href="legal.html">Mentions légales</a>
+    <a href="privacy.html">Confidentialité</a>
+  </div>
+</footer>
+
+<script>
+/*
+ * Injection des informations légales dans la page.
+ * Cible les éléments par ID (effectiveDate, companyName) et par classe
+ * (.co-name, .co-dba, .co-state, .co-address, etc.).
+ * Un seul endroit à modifier : l'objet COMPANY en tête de fichier.
+ */
+/* Inject company info dynamically */
+document.getElementById('effective-date').textContent  = COMPANY.effectiveDate;
+document.getElementById('company-name').textContent    = COMPANY.name;
+document.getElementById('company-state').textContent   = COMPANY.state;
+document.getElementById('footer-copy').textContent     = `© ${new Date().getFullYear()} ${COMPANY.name}. All rights reserved.`;
+
+document.querySelectorAll('.co-name').forEach(el       => el.textContent = COMPANY.name);
+document.querySelectorAll('.co-dba').forEach(el        => el.textContent = COMPANY.dba);
+document.querySelectorAll('.co-state').forEach(el      => el.textContent = COMPANY.state);
+document.querySelectorAll('.co-state-short').forEach(el=> el.textContent = COMPANY.stateShort);
+document.querySelectorAll('.co-city').forEach(el       => el.textContent = COMPANY.city);
+document.querySelectorAll('.co-address').forEach(el    => el.textContent = COMPANY.address);
+document.querySelectorAll('.co-zip').forEach(el        => el.textContent = COMPANY.zip);
+document.querySelectorAll('.co-phone').forEach(el      => el.textContent = COMPANY.phone);
+document.querySelectorAll('.co-email-legal').forEach(el => {
+  el.textContent = COMPANY.email;
+  el.href = `mailto:${COMPANY.email}`;
+});
+</script>
+
+</body>
+</html>

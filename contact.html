@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' rx='7' fill='%231a56e8'/%3E%3Cpath d='M14 6C10.69 6 8 8.69 8 12c0 5 6 10 6 10s6-5 6-10C20 8.69 17.31 6 14 6z' fill='white'/%3E%3Ccircle cx='14' cy='12' r='3' fill='%231a56e8'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' rx='7' fill='%231a56e8'/%3E%3Cpath d='M14 6C10.69 6 8 8.69 8 12c0 5 6 10 6 10s6-5 6-10C20 8.69 17.31 6 14 6z' fill='white'/%3E%3Ccircle cx='14' cy='12' r='3' fill='%231a56e8'/%3E%3C/svg%3E">
+<title>Contact Us — Spotrank</title>
+<meta name="description" content="Get in touch with Spotrank. Book a free strategy call or send us a message. We help contractors get more jobs with AI, smart websites, and 5-star reviews.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://leafy-otter-8c951e.netlify.app/contact.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;700&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
+<script>
+/*
+ ═══════════════════════════════════════════════════════════════════
+ SPOTRANK — PAGE CONTACT (contact.html)
+ ═══════════════════════════════════════════════════════════════════
+
+ RÔLE : Page de contact de l'agence Spotrank.
+   - Formulaire de contact (handleSubmit)
+   - Infos de contact injectées dynamiquement depuis COMPANY
+   - Lien de booking (Calendly/optin) injecté depuis COMPANY.calendlyUrl
+   - FAQ accordion
+
+ COMPANY — Objet de configuration unique à modifier avant déploiement.
+ Toutes les infos légales et de contact sont injectées dans la page
+ depuis cet objet au chargement. ⚙️ À mettre à jour en prod.
+ ═══════════════════════════════════════════════════════════════════
+*/
+/* ════════════════════════════════════════════
+   COMPANY INFORMATION — Edit this block only
+   ════════════════════════════════════════════ */
+const COMPANY = {
+  name:        "Spotrank LLC",
+  dba:         "Spotrank",
+  state:       "Delaware",
+  address:     "1234 Market Street, Suite 100",
+  city:        "Wilmington",
+  stateShort:  "DE",
+  zip:         "19801",
+  country:     "United States",
+  email:       "legal@spotrank.io",
+  supportEmail:"support@spotrank.io",
+  website:     "https://spotrank.io",
+  phone:       "+1 (555) 000-0000",
+  responseTime:"within 24 hours",
+  calendlyUrl: "https://leafy-otter-8c951e.netlify.app/optin.html",
+};
+/* ════════════════════════════════════════════ */
+</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink: #0f1f3d;
+  --ink-mid: #1a2b4a;
+  --muted: #4a5568;
+  --border: #e8e8e8;
+  --stone: #f5f5f7;
+  --stone-dark: #d8d8d8;
+  --cta: #1a56e8;
+  --cta-dark: #1240c4;
+  --gold: #f59e0b;
+  --radius: 12px;
+  --radius-lg: 20px;
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Onest', sans-serif; color: var(--ink); background: #fff; font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+
+nav { display: flex; align-items: center; justify-content: space-between; padding: 0 48px; height: 64px; border-bottom: 1px solid var(--border); background: #fff; position: sticky; top: 0; z-index: 10; }
+.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: 'Manrope', sans-serif; font-size: 19px; font-weight: 700; color: var(--ink); letter-spacing: -0.4px; }
+.back-link { font-size: 14px; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+.back-link:hover { color: var(--ink); }
+
+/* HERO */
+.contact-hero { max-width: 1100px; margin: 0 auto; padding: 80px 48px 64px; }
+.hero-eyebrow { font-size: 12px; font-weight: 600; color: var(--cta); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+.hero-title { font-family: 'Onest', sans-serif; font-weight: 700; font-size: 52px; letter-spacing: -1.5px; line-height: 1.1; color: var(--ink); margin-bottom: 16px; }
+.hero-sub { font-size: 18px; color: var(--muted); font-weight: 400; max-width: 540px; line-height: 1.65; }
+
+/* MAIN GRID */
+.contact-grid { max-width: 1100px; margin: 0 auto; padding: 0 48px 100px; display: grid; grid-template-columns: 1fr 1.1fr; gap: 64px; align-items: start; }
+
+/* LEFT — Info */
+.contact-info { display: flex; flex-direction: column; gap: 32px; }
+
+/* CTA Card */
+.cta-card { background: var(--cta); border-radius: var(--radius-lg); padding: 36px; position: relative; overflow: hidden; }
+.cta-card::before { content: ''; position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; border-radius: 50%; background: rgba(255,255,255,0.07); }
+.cta-card-eyebrow { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+.cta-card-title { font-weight: 700; font-size: 22px; color: #fff; line-height: 1.3; margin-bottom: 10px; }
+.cta-card-sub { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.6; margin-bottom: 24px; }
+.btn-white { display: inline-block; background: #fff; color: var(--cta); font-family: 'Onest', sans-serif; font-size: 15px; font-weight: 600; padding: 13px 28px; border-radius: 10px; text-decoration: none; transition: opacity 0.2s, transform 0.15s; }
+.btn-white:hover { opacity: 0.92; transform: translateY(-1px); }
+
+/* Info cards */
+.info-cards { display: flex; flex-direction: column; gap: 12px; }
+.info-card { background: var(--stone); border-radius: var(--radius); padding: 20px 22px; display: flex; align-items: flex-start; gap: 14px; }
+.info-icon { width: 40px; height: 40px; border-radius: 10px; background: #fff; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.info-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.info-value { font-size: 15px; font-weight: 500; color: var(--ink); }
+.info-value a { color: var(--cta); text-decoration: none; }
+.info-value a:hover { text-decoration: underline; }
+
+/* Response time badge */
+.response-badge { display: inline-flex; align-items: center; gap: 8px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 100px; padding: 8px 16px; font-size: 13px; font-weight: 500; color: #15803d; }
+.response-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* RIGHT — Form */
+.contact-form-wrap { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 40px; }
+.form-title { font-weight: 700; font-size: 22px; color: var(--ink); margin-bottom: 6px; }
+.form-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-mid); margin-bottom: 7px; }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; font-family: 'Onest', sans-serif; font-size: 14px; color: var(--ink);
+  border: 1.5px solid var(--border); border-radius: 10px; padding: 13px 16px;
+  background: #fff; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: var(--cta); box-shadow: 0 0 0 3px rgba(26,86,232,0.1);
+}
+.form-group input::placeholder, .form-group textarea::placeholder { color: #b0b0b0; }
+.form-group select { appearance: none; cursor: pointer; }
+.form-group textarea { resize: vertical; min-height: 110px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.btn-submit { width: 100%; font-family: 'Onest', sans-serif; font-size: 16px; font-weight: 600; color: #fff; background: var(--cta); border: none; cursor: pointer; padding: 16px; border-radius: 10px; transition: background 0.2s, transform 0.15s; margin-top: 6px; }
+.btn-submit:hover { background: var(--cta-dark); transform: translateY(-1px); }
+.form-disclaimer { font-size: 12px; color: var(--muted); text-align: center; margin-top: 12px; line-height: 1.5; }
+
+/* Success */
+.form-success { display: none; text-align: center; padding: 32px 24px; }
+.success-icon { font-size: 52px; margin-bottom: 16px; }
+.success-title { font-weight: 700; font-size: 22px; color: var(--ink); margin-bottom: 8px; }
+.success-sub { font-size: 15px; color: var(--muted); line-height: 1.6; }
+
+/* FAQ */
+.contact-faq { max-width: 760px; margin: 0 auto; padding: 0 48px 100px; }
+.contact-faq-title { font-weight: 700; font-size: 28px; color: var(--ink); letter-spacing: -0.5px; margin-bottom: 32px; text-align: center; }
+.faq-list { display: flex; flex-direction: column; gap: 10px; }
+.faq-item { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.faq-item.open { border-color: #b8ccf7; }
+.faq-q { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; cursor: pointer; font-size: 15px; font-weight: 600; color: var(--ink); gap: 16px; background: #fff; transition: background 0.2s; user-select: none; }
+.faq-item.open .faq-q { background: var(--stone); }
+.faq-toggle { width: 26px; height: 26px; border-radius: 50%; background: var(--stone); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--muted); transition: background 0.2s, transform 0.2s, color 0.2s; flex-shrink: 0; }
+.faq-item.open .faq-toggle { background: var(--cta); color: #fff; transform: rotate(45deg); }
+.faq-a { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.3s ease; font-size: 14px; color: var(--muted); line-height: 1.75; background: #fff; padding: 0 22px; }
+.faq-item.open .faq-a { max-height: 300px; padding: 18px 22px 22px; }
+
+/* FOOTER */
+footer { border-top: 1px solid var(--border); padding: 32px 48px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.footer-copy { font-size: 13px; color: var(--muted); }
+.footer-links { display: flex; gap: 24px; }
+.footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; }
+.footer-links a:hover { color: var(--cta); }
+
+@media (max-width: 899px) {
+  nav { padding: 0 20px; }
+  .contact-hero { padding: 56px 20px 40px; }
+  .hero-title { font-size: 36px; }
+  .contact-grid { grid-template-columns: 1fr; padding: 0 20px 64px; gap: 36px; }
+  .contact-faq { padding: 0 20px 64px; }
+  .form-row { grid-template-columns: 1fr; }
+  footer { padding: 24px 20px; flex-direction: column; text-align: center; }
+  .footer-links { justify-content: center; }
+}
+</style>
+
+<script>
+/* Logo — identique à optin.html (buildLogoSVG + buildLogoText) */
+/* ═══════════════════════════════════════
+   LOGO CONFIG — modifie ici uniquement
+   ═══════════════════════════════════════ */
+const LOGO = {
+  text:       "Spotrank",        // Nom complet
+  textBold:   "Spot",            // Partie en couleur foncée
+  textAccent: "rank",            // Partie en couleur accent
+  colorAccent:"#1a56e8",         // Couleur accent
+  colorDark:  "var(--ink, #0f1f3d)", // Couleur texte principal
+  fontFamily: "'Manrope', sans-serif",
+  fontSize:   { nav: "19px", footer: "17px" },
+  svgSize:    { nav: "28", footer: "22" },
+};
+/* ═══════════════════════════════════════ */
+
+/**
+ * Génère le SVG de l'icône logo Spotrank (carré arrondi bleu + pin blanc).
+ * @param {number} size - Taille en px du SVG carré (ex: 28 nav, 36 footer)
+ * @returns {string} - HTML string du SVG inline
+ */
+function buildLogoSVG(size) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 28 28" fill="none" style="flex-shrink:0;display:block;"><rect width="28" height="28" rx="7" fill="${LOGO.colorAccent}"/><path d="M14 6C10.69 6 8 8.69 8 12c0 5 6 10 6 10s6-5 6-10C20 8.69 17.31 6 14 6z" fill="white"/><circle cx="14" cy="12" r="3" fill="${LOGO.colorAccent}"/></svg>`;
+}
+
+/**
+ * Génère le span texte du logo "Spot<rank>" avec la couleur d'accent sur "rank".
+ * @param {string} fontSize - Taille CSS du texte (ex: '19px', '16px')
+ * @returns {string} - HTML string du span texte
+ */
+function buildLogoText(fontSize) {
+  return `<span style="font-family:${LOGO.fontFamily};font-size:${fontSize};font-weight:700;letter-spacing:-0.4px;color:${LOGO.colorDark};white-space:nowrap;">${LOGO.textBold}<span style="color:${LOGO.colorAccent};">${LOGO.textAccent}</span></span>`;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Nav logos
+  document.querySelectorAll('[data-logo="nav"]').forEach(el => {
+    el.innerHTML = buildLogoSVG(LOGO.svgSize.nav) + buildLogoText(LOGO.fontSize.nav);
+  });
+  // Footer logos
+  document.querySelectorAll('[data-logo="footer"]').forEach(el => {
+    el.innerHTML = buildLogoSVG(LOGO.svgSize.footer) + buildLogoText(LOGO.fontSize.footer);
+  });
+  // Optin dark logos
+  document.querySelectorAll('[data-logo="dark"]').forEach(el => {
+    el.innerHTML = buildLogoSVG(LOGO.svgSize.nav) + `<span style="font-family:${LOGO.fontFamily};font-size:${LOGO.fontSize.nav};font-weight:700;letter-spacing:-0.4px;color:#ffffff;white-space:nowrap;">${LOGO.textBold}<span style="color:${LOGO.colorAccent};">${LOGO.textAccent}</span></span>`;
+  });
+});
+</script>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><span data-logo="nav" style="display:flex;align-items:center;gap:10px;"></span></a>
+  <a href="index.html" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 11L5 7L9 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Back to home
+  </a>
+</nav>
+
+<!-- HERO -->
+<div class="contact-hero">
+  <p class="hero-eyebrow">Contact</p>
+  <h1 class="hero-title">Let's talk about<br>your business</h1>
+  <p class="hero-sub">Whether you're ready to get started or just have questions — we're here. No pushy sales calls, no BS.</p>
+</div>
+
+<!-- MAIN GRID -->
+<div class="contact-grid">
+
+  <!-- LEFT -->
+  <div class="contact-info">
+
+    <!-- Free call CTA -->
+    <div class="cta-card">
+      <p class="cta-card-eyebrow">Best option · Free</p>
+      <h2 class="cta-card-title">Book a free 30-min strategy call</h2>
+      <p class="cta-card-sub">We'll audit your online presence live and give you a personalized action plan — no strings attached.</p>
+      <a id="cta-book" href="#" class="btn-white">Book my free call →</a>
+    </div>
+
+    <!-- Response time -->
+    <div class="response-badge">
+      <span class="response-dot"></span>
+      We reply <span id="response-time"></span>
+    </div>
+
+    <!-- Info cards -->
+    <div class="info-cards">
+      <div class="info-card">
+        <div class="info-icon">✉️</div>
+        <div>
+          <div class="info-label">Email</div>
+          <div class="info-value"><a id="support-email" href="#"></a></div>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">📞</div>
+        <div>
+          <div class="info-label">Phone</div>
+          <div class="info-value" id="co-phone"></div>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">📍</div>
+        <div>
+          <div class="info-label">Headquarters</div>
+          <div class="info-value" id="co-address"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT — Form -->
+  <div class="contact-form-wrap">
+    <div id="contact-form-container">
+      <h2 class="form-title">Send us a message</h2>
+      <p class="form-sub">Prefer to write? Fill in the form and we'll get back to you fast.</p>
+
+      <form id="contactForm" onsubmit="handleSubmit(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="c-fname">First name *</label>
+            <input type="text" id="c-fname" placeholder="John" required>
+          </div>
+          <div class="form-group">
+            <label for="c-lname">Last name *</label>
+            <input type="text" id="c-lname" placeholder="Smith" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="c-email">Email address *</label>
+          <input type="email" id="c-email" placeholder="john@yourcompany.com" required>
+        </div>
+        <div class="form-group">
+          <label for="c-phone">Phone number</label>
+          <input type="tel" id="c-phone" placeholder="+1 (555) 000-0000">
+        </div>
+        <div class="form-group">
+          <label for="c-subject">Subject *</label>
+          <select id="c-subject" required>
+            <option value="">Select a topic...</option>
+            <option>I want to book a free strategy call</option>
+            <option>I have a question about your services</option>
+            <option>I'm an existing client — support request</option>
+            <option>Billing or account question</option>
+            <option>Partnership or press inquiry</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="c-message">Message *</label>
+          <textarea id="c-message" placeholder="Tell us about your business and how we can help..." required></textarea>
+        </div>
+        <button type="submit" class="btn-submit" id="submitBtn">Send message →</button>
+        <p class="form-disclaimer">By submitting this form, you agree to our <a href="privacy.html" style="color:var(--cta);">Privacy Policy</a>. We never spam.</p>
+      </form>
+    </div>
+
+    <div class="form-success" id="form-success">
+      <div class="success-icon">✅</div>
+      <h3 class="success-title">Message received!</h3>
+      <p class="success-sub">We'll get back to you <span id="success-response-time"></span>. In the meantime, feel free to <a id="success-book-link" href="#" style="color:var(--cta);">book a free strategy call</a>.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- FAQ -->
+<div class="contact-faq">
+  <h2 class="contact-faq-title">Common questions</h2>
+  <div class="faq-list">
+    <div class="faq-item">
+      <div class="faq-q">How quickly do you respond to messages? <span class="faq-toggle">+</span></div>
+      <div class="faq-a">We respond to all inquiries within 24 hours on business days. For urgent matters, please call us directly or book a strategy call.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Is the free strategy call really free? <span class="faq-toggle">+</span></div>
+      <div class="faq-a">Yes — 100% free, no credit card, no commitment. We'll audit your online presence and give you a personalized action plan whether you sign up with us or not. We believe in earning your trust, not pressuring you.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">I'm an existing client — how do I get support? <span class="faq-toggle">+</span></div>
+      <div class="faq-a">Existing clients can reach our support team directly by email or through the client portal. Select "I'm an existing client" in the form above and we'll prioritize your request.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Do you work with businesses outside the US? <span class="faq-toggle">+</span></div>
+      <div class="faq-a">We primarily serve contractors and home service businesses in the US, Canada, France, Belgium, and Switzerland. Our local SEO expertise works across all these markets. Book a call to discuss your specific location.</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p class="footer-copy" id="footer-copy"></p>
+  <div class="footer-links">
+    <a href="index.html">Accueil</a>
+    <a href="contact.html">Contact</a>
+    <a href="legal.html">Mentions légales</a>
+    <a href="privacy.html">Confidentialité</a>
+  </div>
+</footer>
+
+<script>
+/*
+ * Injection des informations d'entreprise dans la page.
+ * Toutes les valeurs viennent de l'objet COMPANY (défini en tête de fichier).
+ * Pattern : querySelector(s) → textContent ou href.
+ * ⚙️ Modifier COMPANY pour mettre à jour toute la page d'un coup.
+ */
+/* Inject company info */
+document.getElementById('support-email').textContent = COMPANY.supportEmail;
+document.getElementById('support-email').href        = `mailto:${COMPANY.supportEmail}`;
+document.getElementById('co-phone').textContent      = COMPANY.phone;
+document.getElementById('co-address').textContent    = `${COMPANY.address}, ${COMPANY.city}, ${COMPANY.stateShort} ${COMPANY.zip}`;
+document.getElementById('response-time').textContent = COMPANY.responseTime;
+document.getElementById('footer-copy').textContent   = `© ${new Date().getFullYear()} ${COMPANY.name}. All rights reserved.`;
+document.getElementById('cta-book').href             = COMPANY.calendlyUrl;
+document.getElementById('success-book-link').href    = COMPANY.calendlyUrl;
+document.getElementById('success-response-time').textContent = COMPANY.responseTime;
+
+/**
+ * Soumet le formulaire de contact.
+ * Simule un envoi (1s) puis affiche l'écran de succès #form-success.
+ * En prod : remplacer le setTimeout par un POST à l'API backend.
+ */
+/* Form submit */
+function handleSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+  setTimeout(() => {
+    document.getElementById('contact-form-container').style.display = 'none';
+    document.getElementById('form-success').style.display = 'block';
+  }, 1000);
+}
+
+/* FAQ accordion — un item ouvert à la fois */
+/* FAQ toggle */
+document.querySelectorAll('.faq-q').forEach(q => {
+  q.addEventListener('click', () => {
+    const item = q.parentElement;
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  });
+});
+</script>
+
+</body>
+</html>
