@@ -10430,7 +10430,7 @@ async function pushClientTemplate(clientId) {
       'years_experience':       '15+',
       'year_founded':           '2010',
       'year':                   new Date().getFullYear().toString(),
-      'color_theme':            clientTheme(c.trade) === 'blue' ? '#1a56e8' : clientTheme(c.trade) === 'green' ? '#16a34a' : '#ea580c',
+      'color_theme':            clientTheme(c.trade),  // 'blue' | 'green' | 'orange' → data-theme="X" dans le template
       'faq_items':              faqItems,
       'ghl_form_action':        '#',
     };
@@ -12512,9 +12512,19 @@ let currentClientTab = 'overview';
 let recentClientIds = [];
 
 const THEME_COLORS = { blue:'#1a56e8', green:'#16a34a', orange:'#ea580c' };
+/**
+ * clientTheme(trade) — Retourne le thème couleur d'un client selon son métier.
+ * Blue  : trades techniques / mécaniques
+ * Green : trades extérieurs / nature / environnement
+ * Orange: trades construction / bâtiment
+ * @param {string} trade - Métier du client
+ * @returns {string} - 'blue' | 'green' | 'orange'
+ */
 function clientTheme(trade) {
-  if (['Plumbing','HVAC','Electrician','Swimming Pools'].includes(trade)) return 'blue';
-  if (['Landscaping','Tree Service','Painting','Pest Control'].includes(trade)) return 'green';
+  const blue  = ['Plumbing','HVAC','Electrician','Swimming Pools','Water Treatment System','Locksmith','Solar','Home Services','Home Maintenance','Household Help','Insulation','Waterproofing'];
+  const green = ['Landscaping','Lawn & Garden Care','Tree Service','Yard & Garden Work','Painting','Pest Control','Outdoor Playgrounds','Stained Glass'];
+  if (blue.includes(trade)) return 'blue';
+  if (green.includes(trade)) return 'green';
   return 'orange';
 }
 
