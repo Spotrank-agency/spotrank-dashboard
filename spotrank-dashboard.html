@@ -10533,18 +10533,27 @@ async function enableGithubPages(clientId) {
       }
     );
 
-    // 422 = Pages déjà activé — pas une erreur bloquante
-    if (res.status === 422) {
+    // 422 ou 409 = Pages déjà activé — pas une erreur bloquante
+    if (res.status === 422 || res.status === 409) {
       const pagesUrl = `https://${GITHUB_CONFIG.org.toLowerCase()}.github.io/${slug}/`;
       c.siteUrl = pagesUrl;
       c.siteUp  = true;
-      showToast('GitHub Pages déjà actif ✓', 'info');
+      showToast('GitHub Pages déjà actif ✓', 'success');
       return { success: true, pagesUrl };
     }
 
     if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || `HTTP ${res.status}`);
+      const errBody = await res.json();
+      // Vérifier si le message indique que Pages est déjà activé
+      const errMsg = errBody.message || '';
+      if (errMsg.toLowerCase().includes('already enabled') || errMsg.toLowerCase().includes('already exists')) {
+        const pagesUrl = `https://${GITHUB_CONFIG.org.toLowerCase()}.github.io/${slug}/`;
+        c.siteUrl = pagesUrl;
+        c.siteUp  = true;
+        showToast('GitHub Pages déjà actif ✓', 'success');
+        return { success: true, pagesUrl };
+      }
+      throw new Error(errMsg || `HTTP ${res.status}`);
     }
 
     const data = await res.json();
@@ -10558,6 +10567,14 @@ async function enableGithubPages(clientId) {
     return { success: true, pagesUrl };
 
   } catch (err) {
+    // Si le message indique que Pages est déjà activé → c'est un succès
+    if (err.message && (err.message.toLowerCase().includes('already enabled') || err.message.toLowerCase().includes('already exists'))) {
+      const pagesUrl = `https://${GITHUB_CONFIG.org.toLowerCase()}.github.io/${slug}/`;
+      c.siteUrl = pagesUrl;
+      c.siteUp  = true;
+      showToast('GitHub Pages déjà actif ✓', 'success');
+      return { success: true, pagesUrl };
+    }
     console.error('enableGithubPages error:', err);
     showToast(`Erreur activation Pages : ${err.message}`, 'warning');
     return { success: false, error: err.message };
