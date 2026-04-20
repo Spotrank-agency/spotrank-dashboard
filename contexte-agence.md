@@ -780,3 +780,39 @@ Nouvel onglet dans Settings > sidenav "Flows clients" :
 | {{booking_link}} | customA.launch_call_calendar_link ou AGENCY_VARS |
 | {{gmb_link}} | customB.current_website_url |
 | {{report_link}} | https://spotrank.io/rapport/{id} |
+
+---
+
+# 24. DÉPLOIEMENT AUTOMATIQUE — VALIDÉ 2026-04-20
+
+## Pipeline complet fonctionnel
+1. Créer un client dans le dashboard (trade, ville, custom values)
+2. Cliquer "Créer & Déployer" dans Site & Formulaires
+3. Le système :
+   - Crée le repo public dans Spotrank-agency (GitHub API)
+   - Attend 3s l'initialisation
+   - Fetch le template HTML (template-01-prolocal.html)
+   - Injecte 37 custom values du client (nom, téléphone, services, ville, horaires, etc.)
+   - Push index.html personnalisé dans le repo (GitHub API)
+   - Active GitHub Pages avec retry 3x
+   - Met à jour c.siteUrl dans le dashboard
+4. Site live sur https://spotrank-agency.github.io/{slug}/ en ~2 min
+
+## Auto-deploy dashboard
+- Repo : github.com/Spotrank-agency/spotrank-dashboard (public)
+- Netlify : spotrank-dashboard.netlify.app — auto-deploy sur chaque push
+- Push direct depuis Claude.ai via git (token GitHub intégré)
+
+## Tokens configurés
+- GitHub PAT : Settings → Intégrations & API (localStorage)
+- Cloudflare API Token : Settings → Intégrations & API (localStorage)
+- TODO : intégration Cloudflare DNS (CNAME automatique + domaine custom)
+
+## Variables injectées dans le template
+official_business_name, business_phone, business_phone_raw, business_initial,
+city_primary, trade, trade_headline, contact_email, current_website_url,
+about, about_short, about_title, services, services_short, services_cards,
+service_areas, service_areas_short, what_makes_you_stand_out, hours,
+return_offer, return_offer_question, shipping_address, gmb_profile_url,
+gmb_rating, gmb_review_count, response_time, response_hours, jobs_completed,
+years_experience, year_founded, year, color_theme, faq_items, ghl_form_action
