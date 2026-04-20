@@ -10300,7 +10300,7 @@ async function createClientRepo(clientId) {
         body: JSON.stringify({
           name:         slug,
           description:  `Site ${c.bizName} — ${c.trade} à ${c.city} — géré par Spotrank`,
-          private:      true,           // Repo privé (code source protégé)
+          private:      false,          // Public — requis pour GitHub Pages sur plan Free
           auto_init:    true,           // Crée un commit initial (README.md) pour avoir la branche main
           has_issues:   false,
           has_wiki:     false,
