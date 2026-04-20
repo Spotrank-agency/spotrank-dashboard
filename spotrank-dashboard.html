@@ -10373,7 +10373,74 @@ async function pushClientTemplate(clientId) {
 </html>`;
     }
 
-    // 2. Injecter le contexte client en commentaire d'en-tête
+    // 2. Injecter les custom values du client dans le template
+    //    Mappe les champs customB + données client vers les {{variables}} du template.
+    //    Les variables non résolues restent telles quelles.
+    const cb = c.customB || {};
+    const phone     = c.phone || cb.business_phone || '';
+    const phoneRaw  = phone.replace(/[\s\-\(\)\.]/g, '');
+    const services  = cb.services || '';
+    const areas     = cb.service_areas || '';
+    const about     = cb.about || '';
+
+    // Générer les services_cards HTML pour le template
+    const servList  = services.split(',').map(s => s.trim()).filter(Boolean);
+    const servCards = servList.map(s =>
+      '<div class="service-card"><h3>' + s + '</h3></div>'
+    ).join('');
+    const servShort = servList.slice(0, 3).join(', ') + (servList.length > 3 ? '…' : '');
+
+    // Générer les FAQ items (basiques — basé sur le trade)
+    const faqItems = [
+      { q: 'How much does ' + c.trade.toLowerCase() + ' service cost?', a: 'Every project is unique. Contact us for a free estimate tailored to your needs.' },
+      { q: 'Do you offer emergency services?', a: 'Yes! We offer 24/7 emergency service. Call us anytime at ' + phone + '.' },
+      { q: 'Are you licensed and insured?', a: 'Absolutely. We are fully licensed, bonded, and insured for your protection.' },
+    ].map(f => '<div class="faq-item"><h3 class="faq-q">' + f.q + '</h3><p class="faq-a">' + f.a + '</p></div>').join('');
+
+    // Mapping complet template variables → valeurs client
+    const vars = {
+      'official_business_name': cb.official_business_name || c.bizName || '',
+      'business_phone':         phone,
+      'business_phone_raw':     phoneRaw,
+      'business_initial':       (c.bizName || 'S')[0],
+      'city_primary':           c.city || '',
+      'trade':                  c.trade || '',
+      'trade_headline':         c.trade + ' Services in ' + (c.city || ''),
+      'contact_email':          c.email || cb.photos_email || '',
+      'current_website_url':    cb.current_website_url || '',
+      'about':                  about,
+      'about_short':            about.length > 120 ? about.substring(0, 120) + '…' : about,
+      'about_title':            'About ' + (c.bizName || ''),
+      'services':               services,
+      'services_short':         servShort,
+      'services_cards':         servCards,
+      'service_areas':          areas,
+      'service_areas_short':    areas.split(',').slice(0, 3).map(s => s.trim()).join(', '),
+      'what_makes_you_stand_out': cb.what_makes_you_stand_out || '',
+      'hours':                  cb.hours || 'Mon-Fri 8am-6pm',
+      'return_offer':           cb.return_offer || '',
+      'return_offer_question':  cb.return_offer ? 'Yes! ' + cb.return_offer : 'Contact us for special offers.',
+      'shipping_address':       cb.shipping_address || '',
+      'gmb_profile_url':        cb.current_website_url || '#',
+      'gmb_rating':             '4.8',
+      'gmb_review_count':       '47',
+      'response_time':          '30 minutes',
+      'response_hours':         '24',
+      'jobs_completed':         '500+',
+      'years_experience':       '15+',
+      'year_founded':           '2010',
+      'year':                   new Date().getFullYear().toString(),
+      'color_theme':            clientTheme(c.trade) === 'blue' ? '#1a56e8' : clientTheme(c.trade) === 'green' ? '#16a34a' : '#ea580c',
+      'faq_items':              faqItems,
+      'ghl_form_action':        '#',
+    };
+
+    // Remplacer toutes les {{variables}} dans le HTML
+    html = html.replace(/\{\{(\w+)\}\}/g, function(match, key) {
+      return vars[key] !== undefined ? vars[key] : match;
+    });
+
+    // 3. Injecter le contexte client en commentaire d'en-tête
     const clientHeader = `<!--
   CLIENT  : ${c.bizName}
   TRADE   : ${c.trade}
@@ -10387,10 +10454,10 @@ async function pushClientTemplate(clientId) {
 `;
     html = html.replace('<!DOCTYPE html>', clientHeader + '<!DOCTYPE html>');
 
-    // 3. Encoder en base64 (API GitHub exige base64 pour le contenu)
+    // 4. Encoder en base64 (API GitHub exige base64 pour le contenu)
     const base64Content = btoa(unescape(encodeURIComponent(html)));
 
-    // 4. Vérifier si index.html existe déjà (pour récupérer le SHA du fichier)
+    // 5. Vérifier si index.html existe déjà (pour récupérer le SHA du fichier)
     let existingSha = null;
     try {
       const checkFile = await fetch(
@@ -10403,7 +10470,7 @@ async function pushClientTemplate(clientId) {
       }
     } catch { /* fichier n'existe pas encore — normal au premier push */ }
 
-    // 5. Créer ou mettre à jour index.html
+    // 6. Créer ou mettre à jour index.html
     const pushRes = await fetch(
       `${GITHUB_CONFIG.apiBase}/repos/${fullRepo}/contents/index.html`,
       {
