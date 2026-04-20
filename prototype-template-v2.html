@@ -294,32 +294,31 @@ nav.scrolled { background: rgba(255,255,255,.96); box-shadow: 0 4px 30px rgba(0,
 ════════════════════════════ */
 .hero {
   padding-top: 66px;
-  background: var(--ink);
   position: relative;
   overflow: hidden;
-  min-height: 600px;
+  min-height: 92vh;
   display: flex;
   align-items: center;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
-/* Subtle texture overlay */
+/* Dark overlay — gradient from left (text) to right (lighter for image) */
 .hero::before {
   content: '';
   position: absolute; inset: 0;
-  background: 
-    radial-gradient(ellipse 60% 50% at 70% 40%, var(--brand-glow) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 40% at 20% 80%, rgba(255,255,255,.02) 0%, transparent 60%),
-    repeating-linear-gradient(0deg, transparent, transparent 80px, rgba(255,255,255,.015) 80px, rgba(255,255,255,.015) 81px),
-    repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(255,255,255,.015) 80px, rgba(255,255,255,.015) 81px);
+  background: linear-gradient(90deg, rgba(15,22,35,.82) 0%, rgba(15,22,35,.55) 50%, rgba(15,22,35,.35) 100%);
   pointer-events: none;
 }
 
-/* Brand color top bar */
+/* Brand gradient top bar */
 .hero::after {
   content: '';
   position: absolute; top: 0; left: 0; right: 0;
   height: 4px;
   background: linear-gradient(90deg, var(--brand), var(--brand-mid), var(--accent));
+  z-index: 3;
 }
 
 .hero-inner {
@@ -373,11 +372,9 @@ nav.scrolled { background: rgba(255,255,255,.96); box-shadow: 0 4px 30px rgba(0,
 
 /* ── LEAD FORM CARD ── */
 .lead-form-card {
-  background: rgba(255,255,255,.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: #fff;
   border-radius: var(--radius-lg);
-  padding: 28px;
+  padding: 32px 28px;
   box-shadow: 0 20px 60px rgba(0,0,0,.3);
   position: relative;
 }
@@ -394,6 +391,13 @@ nav.scrolled { background: rgba(255,255,255,.96); box-shadow: 0 4px 30px rgba(0,
   margin-bottom: 4px;
 }
 .form-sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+.form-input {
+  width: 100%; padding: 13px 16px; margin-bottom: 10px;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  background: #fff; font-family: 'Barlow', sans-serif;
+  font-size: 14px; color: var(--ink); transition: border-color .18s; outline: none;
+}
+.form-input:focus { border-color: var(--brand); }
 
 .form-group { margin-bottom: 12px; }
 .form-input {
@@ -902,6 +906,8 @@ footer {
 
 @media (max-width: 900px) {
   .hero-inner { grid-template-columns: 1fr; gap: 32px; padding: 48px 24px; }
+  .hero { min-height: auto; }
+  .hero::before { background: linear-gradient(180deg, rgba(15,22,35,.75) 0%, rgba(15,22,35,.6) 50%, rgba(15,22,35,.8) 100%); }
   .lead-form-card { max-width: 480px; }
   .about-grid { grid-template-columns: 1fr; }
   .services-grid { grid-template-columns: 1fr 1fr; }
@@ -1472,39 +1478,44 @@ function setTheme(t, btn) {
 /* ══ Trade Images — banque curatée Unsplash ══ */
 var TRADE_IMAGES = {
   blue: {
-    about: 'https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=800&h=600&fit=crop',
+    hero: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=1600&h=900&fit=crop&q=80',
+    about: 'https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=800&h=600&fit=crop&q=80',
     gallery: [
-      'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1560440021-33f9b867899d?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1558618047-3c8c76c7d1b8?w=400&h=400&fit=crop'
+      'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=500&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=500&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=500&h=500&fit=crop'
     ]
   },
   green: {
-    about: 'https://images.unsplash.com/photo-1558904541-efa843a96f01?w=800&h=600&fit=crop',
+    hero: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&h=900&fit=crop&q=80',
+    about: 'https://images.unsplash.com/photo-1558904541-efa843a96f01?w=800&h=600&fit=crop&q=80',
     gallery: [
-      'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1598902108854-d1446c06cf25?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400&h=400&fit=crop'
+      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1598902108854-d1446c06cf25?w=500&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=500&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500&h=500&fit=crop'
     ]
   },
   orange: {
-    about: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&h=600&fit=crop',
+    hero: 'https://images.unsplash.com/photo-1632823471565-1ecdf5c6da24?w=1600&h=900&fit=crop&q=80',
+    about: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&h=600&fit=crop&q=80',
     gallery: [
       'https://images.unsplash.com/photo-1621460248083-6271cc4437a8?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1635048424329-a9bfb146d7aa?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1585079542156-2755d9c8a094?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1632778149955-e80f8ceca2e8?w=400&h=400&fit=crop'
+      'https://images.unsplash.com/photo-1635048424329-a9bfb146d7aa?w=500&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=500&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1585079542156-2755d9c8a094?w=500&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=500&h=500&fit=crop'
     ]
   }
 };
 
 function updateTradeImages(theme) {
   var imgs = TRADE_IMAGES[theme] || TRADE_IMAGES.blue;
+  var hero = document.querySelector('.hero');
+  if (hero && imgs.hero) hero.style.backgroundImage = 'url(' + imgs.hero + ')';
   var aboutImg = document.querySelector('.about-img-wrap img');
   if (aboutImg) aboutImg.src = imgs.about;
   var galleryItems = document.querySelectorAll('.gallery-item img');
