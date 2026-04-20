@@ -10465,6 +10465,8 @@ async function enableGithubPages(clientId) {
     // 422 = Pages déjà activé — pas une erreur bloquante
     if (res.status === 422) {
       const pagesUrl = `https://${GITHUB_CONFIG.org.toLowerCase()}.github.io/${slug}/`;
+      c.siteUrl = pagesUrl;
+      c.siteUp  = true;
       showToast('GitHub Pages déjà actif ✓', 'info');
       return { success: true, pagesUrl };
     }
@@ -10655,11 +10657,15 @@ async function deployClientSite(clientId) {
       return;
     }
 
-    // Succès complet — rafraîchir l'onglet si ouvert
+    // Succès complet — mettre à jour l'URL du site + rafraîchir
+    const slug = githubRepoSlug(c);
+    const finalUrl = pagesResult.pagesUrl || 'https://spotrank-agency.github.io/' + slug + '/';
+    c.siteUrl = finalUrl;
+    c.siteUp  = true;
+
     if (currentSheetTab === 'site-forms') renderSheetTab('site-forms');
     if (document.getElementById('page-clients')?.classList.contains('active')) renderClientsTable();
 
-    const finalUrl = pagesResult.pagesUrl || c.siteUrl;
     showToast(`✅ ${c.bizName} déployé ! → ${finalUrl}`, 'success');
 
   } catch (err) {
