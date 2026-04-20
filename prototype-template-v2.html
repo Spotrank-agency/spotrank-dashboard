@@ -1066,14 +1066,6 @@ footer {
 .quote-modal .form-submit { box-shadow: 0 4px 20px var(--brand-glow); }
 .quote-modal .form-guarantee { color: var(--muted); }
 
-/* ── THEME SWITCHER (prototype) ── */
-.theme-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; background: #0f1623; padding: 8px 24px; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 12px; color: rgba(255,255,255,.7); }
-.theme-bar span { font-weight: 700; color: #fff; }
-.theme-btn { padding: 5px 14px; border-radius: 6px; border: 1.5px solid rgba(255,255,255,.2); background: none; color: #fff; font-family: 'Barlow', sans-serif; font-size: 11px; font-weight: 600; cursor: pointer; transition: all .15s; }
-.theme-btn:hover { border-color: rgba(255,255,255,.5); }
-.theme-btn.active { background: var(--brand); border-color: var(--brand); }
-body.has-theme-bar nav { top: 52px; }
-body.has-theme-bar .hero { padding-top: 66px; }
 </style>
 </head>
 
@@ -1085,15 +1077,8 @@ body.has-theme-bar .hero { padding-top: 66px; }
   data-theme="green"  → Landscaper, Tree Service, Pest Control, Painter (extérieur)
   data-theme="orange" → Roofer, General Contractor, Concrete, Flooring
 -->
-<body data-theme="{{color_theme}}" class="has-theme-bar">
+<body data-theme="{{color_theme}}">
 
-<!-- ══ PROTOTYPE THEME SWITCHER — à retirer en production ══ -->
-<div class="theme-bar">
-  <span>Theme:</span>
-  <button class="theme-btn active" onclick="setTheme('blue',this)">Blue — Plumbing, Electrician</button>
-  <button class="theme-btn" onclick="setTheme('green',this)">Green — Landscaping</button>
-  <button class="theme-btn" onclick="setTheme('orange',this)">Orange — Roofing</button>
-</div>
 
 <!-- ════════ NAV ════════ -->
 <nav id="main-nav">
@@ -1117,7 +1102,7 @@ body.has-theme-bar .hero { padding-top: 66px; }
         {{business_phone}}
       </a>
       <a href="javascript:void(0)" class="nav-cta" onclick="openQuoteModal()">Free Quote</a>
-      <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.add('open')">
+      <button class="nav-hamburger" onclick="toggleMobileMenu()">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
       </button>
     </div>
@@ -1617,24 +1602,11 @@ body.has-theme-bar .hero { padding-top: 66px; }
 </div>
 
 <script>
-/* ══ Quote Modal Popup ══ */
-function openQuoteModal() {
-  document.getElementById('quote-modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeQuoteModal() {
-  document.getElementById('quote-modal').classList.remove('open');
-  document.body.style.overflow = '';
-}
-document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeQuoteModal(); });
-
-/* ══ Theme Switcher (prototype — remove in production) ══ */
-function setTheme(t, btn) {
-  document.body.setAttribute('data-theme', t);
-  document.querySelectorAll('.theme-btn').forEach(function(b) { b.classList.remove('active'); b.style.background = 'none'; });
-  btn.classList.add('active');
-  setTimeout(function() { btn.style.background = getComputedStyle(document.documentElement).getPropertyValue('--brand'); }, 10);
-  updateTradeImages(t);
+/* ══ Toggle Mobile Menu ══ */
+function toggleMobileMenu() {
+  var menu = document.getElementById('mobile-menu');
+  if (menu.classList.contains('open')) menu.classList.remove('open');
+  else menu.classList.add('open');
 }
 
 /* ══ Trade Images — banque curatée Unsplash ══ */
@@ -1673,7 +1645,6 @@ var TRADE_IMAGES = {
     ]
   }
 };
-
 function updateTradeImages(theme) {
   var imgs = TRADE_IMAGES[theme] || TRADE_IMAGES.blue;
   var hero = document.querySelector('.hero');
@@ -1687,75 +1658,14 @@ var initTheme = document.body.getAttribute('data-theme') || 'blue';
 if (initTheme.includes('{{')) initTheme = 'blue';
 updateTradeImages(initTheme);
 
-/* ══ FAQ Toggle ══ */
-function toggleFaq(el) {
-  var item = el.closest('.faq-item');
-  var isOpen = item.classList.contains('open');
-  document.querySelectorAll('.faq-item.open').forEach(function(i) { i.classList.remove('open'); });
-  if (!isOpen) item.classList.add('open');
+/* ══ Quote Modal Popup ══ */
+function openQuoteModal() {
+  document.getElementById('quote-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
-
-/* ══ Service Areas ══ */
-var serviceAreasRaw = "{{service_areas}}";
-var areasList = serviceAreasRaw.split(',').map(function(a) { return a.trim(); }).filter(Boolean);
-var areasGrid = document.getElementById('areas-grid');
-if (areasGrid && areasList.length && !serviceAreasRaw.includes('{{')) {
-  areasGrid.innerHTML = areasList.map(function(area) {
-    return '<div class="area-chip reveal"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="7" r="4"/><path d="M8 3v0M4.5 11.5C3.2 13 2 14 2 14s2-1 6-1 6 1 6 1-1.2-1-2.5-2.5"/></svg>' + area + '</div>';
-  }).join('');
+function closeQuoteModal() {
+  document.getElementById('quote-modal').classList.remove('open');
+  document.body.style.overflow = '';
 }
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeQuoteModal(); });
 
-/* ══ Services Grid ══ */
-var servicesRaw = "{{services}}";
-var SERVICE_ICONS = ['🔧','⚡','🏠','🌿','🔨','🪣','🏗️','🛡️','🚿','🌡️'];
-var servicesGrid = document.getElementById('services-grid');
-if (servicesGrid && servicesRaw && !servicesRaw.includes('{{')) {
-  var servicesList = servicesRaw.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
-  servicesGrid.innerHTML = servicesList.map(function(svc, i) {
-    return '<div class="service-card reveal"><div class="service-icon">' + SERVICE_ICONS[i % SERVICE_ICONS.length] + '</div><div class="service-name">' + svc + '</div><p class="service-desc">Professional ' + svc.toLowerCase() + ' services in {{city_primary}} and surrounding areas.</p><a href="#quote" class="service-link">Get a Quote →</a></div>';
-  }).join('');
-}
-
-/* ══ Form Submit ══ */
-function handleFormSubmit(e) {
-  e.preventDefault();
-  var btn = e.target.querySelector('.form-submit');
-  btn.textContent = '✓ Sent! We\'ll be in touch shortly.';
-  btn.style.background = '#16a34a';
-  btn.disabled = true;
-}
-
-/* ══ Smooth Scroll ══ */
-document.querySelectorAll('a[href^="#"]').forEach(function(a) {
-  a.addEventListener('click', function(e) {
-    var target = document.querySelector(a.getAttribute('href'));
-    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-  });
-});
-
-/* ══ Scroll Reveal (IntersectionObserver) ══ */
-function initReveal() {
-  var reveals = document.querySelectorAll('.reveal:not(.visible)');
-  var obs = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) { entry.target.classList.add('visible'); obs.unobserve(entry.target); }
-    });
-  }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
-  reveals.forEach(function(el) { obs.observe(el); });
-}
-
-/* Also animate cards that are dynamically generated */
-document.querySelectorAll('.service-card, .why-card, .review-card, .faq-item, .area-chip').forEach(function(el) {
-  if (!el.classList.contains('reveal')) el.classList.add('reveal');
-});
-initReveal();
-
-/* ══ Nav Scroll Effect ══ */
-var mainNav = document.getElementById('main-nav') || document.querySelector('nav');
-window.addEventListener('scroll', function() {
-  if (window.scrollY > 60) mainNav.classList.add('scrolled');
-  else mainNav.classList.remove('scrolled');
-});
-</script>
-</body>
-</html>
