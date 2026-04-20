@@ -9031,6 +9031,9 @@ let API_KEYS = {
   // GitHub Personal Access Token — scopes requis : repo, workflow, write:org, pages
   // Générer sur : github.com/settings/tokens → "Spotrank Dashboard"
   github_token:'',
+  // Cloudflare API Token — permissions : Zone:Read + DNS:Edit
+  // Générer sur : dash.cloudflare.com → API Tokens → "Edit zone DNS" template
+  cloudflare_token:'',
 };
 
 /*
@@ -9626,6 +9629,7 @@ const INTEGRATIONS = [
   { id:'ghl',         name:'GoHighLevel',       icon:'🎯', category:'CRM',     desc:'Sync bidirectionnelle leads, contacts, automations', usage:'Recommandé pour sync CRM', fields:[{key:'ghl_api_key',label:'API Key',placeholder:'eyJhbGci...',type:'password'}] },
   { id:'anthropic',   name:'Anthropic (Claude)',icon:'🤖', category:'IA',      desc:'AI Assistant intégré dans toutes les pages', usage:'Requis pour activer l\'AI Assistant', fields:[{key:'anthropic_api_key',label:'API Key',placeholder:'sk-ant-xxxx',type:'password'}] },
   { id:'github', name:'GitHub Pages', icon:'🐙', category:'Deploy', desc:'Hébergement automatique des sites clients via GitHub Pages (org: Spotrank-agency)', usage:'Requis pour créer et déployer les sites clients', fields:[{key:'github_token',label:'Personal Access Token',placeholder:'ghp_xxxx',type:'password'}] },
+  { id:'cloudflare', name:'Cloudflare', icon:'☁️', category:'DNS', desc:'Gestion DNS automatique pour les domaines clients — CNAME, SSL, cache', usage:'Requis pour configurer les domaines custom', fields:[{key:'cloudflare_token',label:'API Token (Edit zone DNS)',placeholder:'xxxxxxxxxxxxxxxxxxxx',type:'password'}] },
 ];
 
 /* ═══════════════════════════════════════════
