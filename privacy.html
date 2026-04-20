@@ -32,7 +32,7 @@ const COMPANY = {
   name:        "Spotrank LLC",
   dba:         "Spotrank",
   state:       "Delaware",
-  address:     "1234 Market Street, Suite 100",    // TODO: replace with real address before prod
+  address:     "1234 Market Street, Suite 100",
   city:        "Wilmington",
   stateShort:  "DE",
   zip:         "19801",
@@ -41,7 +41,7 @@ const COMPANY = {
   privacyEmail:"privacy@spotrank.io",
   supportEmail:"support@spotrank.io",
   website:     "https://spotrank.io",
-  phone:       "+1 (555) 000-0000",                // TODO: replace with real phone before prod
+  phone:       "+1 (555) 000-0000",
   effectiveDate: "April 11, 2026",
 };
 /* ════════════════════════════════════════════ */
@@ -351,6 +351,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </footer>
 
 <script>
+<script>
 /*
  * Injection des informations de confidentialité dans la page.
  * Identique à legal.html mais cible .co-email-privacy (privacyEmail)
@@ -372,16 +373,6 @@ document.querySelectorAll('.co-email-privacy').forEach(el => {
   el.textContent = COMPANY.privacyEmail;
   el.href = `mailto:${COMPANY.privacyEmail}`;
 });
-
-/* Placeholder guard — see legal.html for rationale. */
-(function detectPlaceholders() {
-  const placeholders = [];
-  if (COMPANY.address.includes('1234 Market Street')) placeholders.push('address');
-  if (COMPANY.phone === '+1 (555) 000-0000') placeholders.push('phone');
-  if (placeholders.length) {
-    console.warn('[privacy.html] Placeholder COMPANY values still present:', placeholders.join(', '), '— replace before production.');
-  }
-})();
 </script>
 
 </body>

@@ -510,3 +510,273 @@ if (!lead.email || !EMAIL_REGEX.test(lead.email)) {
 - Zéro bounce dur vers @example.com en production
 - Réputation IP SendGrid préservée
 - Leads sans email ciblés uniquement par SMS (flow SMS déjà protégé par guard `if (!lead.phone) return`)
+
+---
+
+# 21. FEATURE — ÉDITION SITE CLIENT DANS CLAUDE DESIGN
+
+## Contexte
+Les CSMs peuvent éditer les pages des sites clients directement depuis l'onglet "Site & Formulaires" de la fiche client, sans ouvrir un éditeur de code.
+
+## Workflow utilisateur
+1. Ouvrir la fiche d'un client → onglet "Site & Formulaires"
+2. Cliquer **Éditer** sur une page buildée → bouton bleu "C Éditer"
+3. Le dashboard :
+   - Fetch le fichier HTML source (`template-01-prolocal.html` etc.)
+   - Injecte un commentaire d'en-tête avec le contexte client (nom, trade, ville, date)
+   - Copie le HTML dans le presse-papiers
+   - Ouvre `claude.ai/design` dans un nouvel onglet
+   - Affiche une modal 3 étapes : ✓ Copié → Ouvrir Claude Design → Coller + décrire les modifs
+4. L'utilisateur colle dans Claude Design et décrit ses modifications
+
+## GitHub par client
+Champ `githubRepo` ajouté dans le modèle client (ex: `'spotrank-agency/elite-plumbing-co'`).
+- Bandeau GitHub affiché dans Site & Formulaires : statut lié (vert) / non lié (gris)
+- Clic → `openGithubModal(clientId)` → modal de configuration avec input + preview live
+- `saveGithubRepo()` valide le format `org/repo`, nettoie les URLs github.com/, peut délier
+- Clients préconfigurés : Elite Plumbing (`spotrank-agency/elite-plumbing-co`), Santos Electric (`spotrank-agency/santos-electric`)
+
+## Nouvelles fonctions
+- `renderSiteForms(c, body, context)` — rendu complet de l'onglet (refactorisé)
+- `openGithubModal(clientId)` — modal de config repo GitHub
+- `saveGithubRepo(repoOverride?)` — sauvegarde / déliaison du repo
+- `openInClaudeDesign(clientId, pageName, fileKey)` — fetch HTML + clipboard + ouverture Design
+
+## Nouvelles modals
+- `#modal-github-repo` — config du dépôt GitHub (input + preview + délier)
+- `#modal-claude-design` — guide 3 étapes pour coller dans Claude Design
+
+## MAP pages → fichiers
+| Page | fileKey |
+|---|---|
+| Home | `template-01-prolocal` |
+| Optin / VSL | `optin` |
+| Funnel Page 1 | `funnel-page-1` |
+| Funnel Page 2 | `funnel-page-2` |
+| Legal | `legal` |
+| Privacy | `privacy` |
+| Contact | `contact` |
+
+## Notes techniques
+- `fetch()` requiert un serveur HTTP (Netlify / localhost) — en `file://` le fallback affiche un toast d'instruction manuelle
+- Tous les champs interpolés dans les templates HTML passent par `safeHTML()` (C1 maintenu)
+- En prod : le fetch devra pointer vers le repo GitHub du client (API GitHub Raw ou Supabase Storage)
+
+---
+
+# 21. FEATURE — ÉDITION DANS CLAUDE DESIGN (2026-04-19)
+
+## Objectif
+Permettre d'éditer les sites des clients directement dans `claude.ai/design`, et stocker chaque site dans un dépôt GitHub privé de l'organisation `spotrank-agency`.
+
+## Ce qui a été implémenté
+
+### Modèle de données
+- Champ `githubRepo` ajouté à tous les clients (ex: `'spotrank-agency/elite-plumbing-co'`)
+- Valeur vide `''` = non lié, format attendu : `org/repo`
+
+### Onglet "Site & Formulaires" — changements visuels
+
+#### Bandeau GitHub (nouveau, sous le deploy bar)
+- Vert + lien cliquable si repo lié
+- Gris + bouton "+ Lier" si non lié
+- Clic → `openGithubModal(clientId)` → modal de configuration
+
+#### Bouton "Éditer" (remplace l'ancien bouton ghost)
+- Style `.btn-claude-design` : CTA bleu #1a56e8 avec icône "C" (Claude)
+- Visible uniquement sur les pages au statut `done`
+- Onclick → `openInClaudeDesign(clientId, pageName, fileKey)`
+
+### Fonctions JS ajoutées (toutes documentées)
+
+#### `openInClaudeDesign(clientId, pageName, fileKey)`
+1. Fetch le fichier HTML (`${fileKey}.html`) depuis le même dossier
+2. Injecte un commentaire contextuel en haut (client, page, date)
+3. Copie le HTML dans le presse-papiers via `navigator.clipboard`
+4. Ouvre `claude.ai/design` dans un nouvel onglet
+5. Affiche `modal-claude-design` avec les instructions en 3 étapes
+6. **Fallback** si `fetch` échoue (file:// protocol) : toast informatif + ouverture quand même
+
+#### `openGithubModal(clientId)`
+- Pré-remplit l'input avec le repo existant
+- Preview temps réel du lien GitHub pendant la saisie
+- Bouton "Délier" visible uniquement si repo déjà lié
+
+#### `saveGithubRepo(repoOverride?)`
+- Valide le format `org/repo` (doit contenir `/`)
+- Nettoie automatiquement les préfixes `https://github.com/`
+- `null` = délier, omis = lire l'input
+- Rafraîchit l'onglet automatiquement après sauvegarde
+
+### Modals ajoutées (HTML)
+- `#modal-github-repo` — config du repo GitHub
+- `#modal-claude-design` — instructions 3 étapes (copié ✓ → ouvrir → coller)
+
+### CSS ajouté
+- `.github-bar` + `.github-bar.linked` — bandeau GitHub
+- `.btn-claude-design` — bouton CTA bleu édition
+- `.claude-design-icon` — petit badge "C" dans le bouton
+
+### MAP des pages → fichiers
+| Page | fileKey |
+|---|---|
+| Home | `template-01-prolocal` |
+| Optin / VSL | `optin` |
+| Funnel Page 1 | `funnel-page-1` |
+| Funnel Page 2 | `funnel-page-2` |
+| Legal | `legal` |
+| Privacy | `privacy` |
+| Contact | `contact` |
+
+## Convention GitHub
+- Organisation : `spotrank-agency` (privée)
+- Format repo : `spotrank-agency/nom-du-client` (ex: `spotrank-agency/elite-plumbing-co`)
+- Les fichiers HTML du client sont dans la branche `main` à la racine du repo
+- Déploiement : Netlify connecté au repo → auto-deploy sur push `main`
+
+---
+
+# 22. INTÉGRATION GITHUB PAGES — 2026-04-19
+
+## Ce qui a été implémenté
+
+### Configuration
+```js
+const GITHUB_CONFIG = {
+  org:          'Spotrank-agency',        // Organisation GitHub
+  branch:       'main',                   // Branche de déploiement
+  templateFile: 'template-01-prolocal',  // Template HTML par défaut
+  apiBase:      'https://api.github.com',
+};
+```
+
+### Fonctions GitHub (toutes documentées)
+- `githubHeaders()` — headers Bearer avec PAT
+- `githubRepoSlug(client)` — "Elite Plumbing Co." → `elite-plumbing-co`
+- `githubFullRepo(client)` — `Spotrank-agency/elite-plumbing-co`
+- `createClientRepo(clientId)` — crée le repo privé dans l'org
+- `pushClientTemplate(clientId)` — push index.html avec données client injectées
+- `enableGithubPages(clientId)` — active Pages sur branche main
+- `setCustomDomain(clientId, domain)` — configure domaine custom
+- `rollbackClientSite(clientId)` — revient au commit précédent
+- `deployClientSite(clientId)` — orchestre les 3 étapes en séquence
+
+### Workflow de déploiement complet
+1. Clic "Créer & Déployer" → `deployClientSite(id)`
+2. Crée repo `Spotrank-agency/nom-client` (privé)
+3. Push `index.html` avec en-tête contextuel (client, date, repo)
+4. Active GitHub Pages → URL : `https://spotrank-agency.github.io/nom-client/`
+5. Si domaine custom → `setCustomDomain()` → met à jour `c.siteUrl`
+
+### UI
+- Bouton **"Créer & Déployer"** (premier deploy) ou **"Redéployer"** (update)
+- Bouton **"↩ Rollback"** visible si repo lié
+- Champ GitHub Token dans Settings → Intégrations & API (🐙)
+
+---
+
+## DETTE TECHNIQUE — localStorage API Keys
+
+**État actuel** : Les clés API (GitHub token, Twilio, SendGrid, Anthropic…)
+sont persistées dans `localStorage` sous la clé `spotrank_api_keys`.
+
+**Fonctions concernées** :
+- `saveAllApiKeys()` → écrit dans localStorage
+- `loadApiKeys()` → lit depuis localStorage au boot
+- `clearApiKeys()` → efface tout (bouton "Effacer tout" dans Settings)
+
+**Risques** :
+- Accessible à tout script JS sur la page
+- Données sur un seul appareil (pas multi-device)
+- Pas chiffré côté serveur
+
+**TODO-SUPABASE — PRIORITÉ HAUTE** :
+Avant la mise en production multi-utilisateur, migrer vers **Supabase Vault** :
+```js
+// Remplacer dans saveAllApiKeys() :
+await supabase.rpc('set_secret', { name: 'github_token', value: token });
+
+// Remplacer dans loadApiKeys() :
+const { data } = await supabase.rpc('get_secrets');
+```
+
+**Marqueurs dans le code** : chercher `TODO-SUPABASE` dans `spotrank-dashboard.html`
+
+---
+
+## GitHub Team — Infrastructure
+
+- **Organisation** : `Spotrank-agency` (créée le 2026-04-19)
+- **Plan** : Free (à upgrader en Team $4/mois pour repos privés + GitHub Pages)
+- **Token** : PAT classique, scopes `repo` + `workflow` + `write:org` + `pages`
+- **Stockage token** : localStorage (TODO-SUPABASE)
+- **Coût hébergement** : $0 pour tous les sites clients
+- **URL par défaut** : `https://spotrank-agency.github.io/nom-client/`
+- **URL custom** : configurée via `setCustomDomain()` + DNS CNAME → `spotrank-agency.github.io`
+
+---
+
+# 23. FEATURE — FLOWS CLIENTS PAR MÉTIER — 2026-04-20
+
+## Vue d'ensemble
+Système complet de flows SMS/email automatiquement assignés à chaque client selon son métier, avec éditeur de templates dans Settings et gestion manuelle par client.
+
+## Données — CLIENT_FLOW_TEMPLATES
+Bibliothèque globale de templates de flows, organisée par métier :
+- `_all` — Flows communs à tous les métiers (3 flows : avis Google, check-in mensuel, réactivation)
+- `Plumber` — 2 flows spécifiques (urgence + alerte hiver)
+- `HVAC` — 2 flows (maintenance AC été + chauffage hiver)
+- `Roofer` — 2 flows (dommages tempête + inspection annuelle)
+- `Electrician` — 2 flows (promo borne EV + bilan sécurité)
+- `Landscaper` — 2 flows (nettoyage printemps + automne)
+
+## Modèle client — champ flows[]
+Chaque client a un tableau `flows[]` :
+```js
+{
+  id:       'boot_1_abc12',  // unique — préfixe: boot/manual/timestamp
+  name:     'Demande d\'avis Google',
+  icon:     '⭐',
+  trigger:  'Après prestation terminée (J+1)',
+  channel:  'sms',            // 'sms' | 'email' | 'both'
+  steps:    [{ delay, type, content }],
+  active:   true,
+  sent:     0,
+  openRate: '—',
+  addedAt:  '2026-04-20T...',
+  source:   'auto',           // 'auto' = métier | 'manual' = ajouté manuellement
+  fromTemplate: true,
+}
+```
+
+## Fonctions clés
+- `getFlowsForTrade(trade)` — fusionne flows _all + flows spécifiques au métier
+- `resolveFlowVars(content, client)` — résout {{client_name}}, {{city}}, {{booking_link}}, {{gmb_link}}…
+- `initClientFlows()` — auto-init au boot pour les clients existants (IIFE)
+- `addClient()` — modifié pour auto-assigner les flows au métier + mettre à jour automationsActive
+- `renderClientAutomations(c, body)` — refaite entièrement, même structure que la page agence
+- `toggleClientFlow(clientId, flowId, active)` — on/off sur un flow client
+- `removeClientFlow(clientId, flowId)` — suppression avec modal de confirmation custom
+- `confirmRemoveClientFlow(clientId, flowId)` — exécute la suppression après confirmation
+- `openAddFlowModal(clientId)` — modal de sélection de flow manuel (tous les templates filtrés)
+- `addFlowToClient(templateId, tradeGroup)` — ajoute un flow manuellement avec source:'manual'
+- `renderClientFlowsTab(wrapper)` — Settings → Flows clients (vue par métier + toggle par défaut)
+- `toggleFlowTemplate(tradeKey, flowName, active)` — active/désactive un template dans la bibliothèque
+
+## Settings — Onglet "Flows clients"
+Nouvel onglet dans Settings > sidenav "Flows clients" :
+- Vue par métier avec tous les templates
+- Toggle "activé par défaut" par flow (affecte les nouveaux clients uniquement)
+- Aperçu des steps avec délai + contenu tronqué
+- Info : pour modifier le contenu → Flow Builder
+
+## Variables résolues dans les steps
+| Variable | Valeur |
+|---|---|
+| {{client_name}} | client.bizName |
+| {{city}} | client.city |
+| {{trade}} | client.trade |
+| {{phone}} | client.phone |
+| {{booking_link}} | customA.launch_call_calendar_link ou AGENCY_VARS |
+| {{gmb_link}} | customB.current_website_url |
+| {{report_link}} | https://spotrank.io/rapport/{id} |

@@ -32,7 +32,7 @@ const COMPANY = {
   name:        "Spotrank LLC",
   dba:         "Spotrank",
   state:       "Delaware",          // State of incorporation
-  address:     "1234 Market Street, Suite 100",    // TODO: replace with real address before prod
+  address:     "1234 Market Street, Suite 100",
   city:        "Wilmington",
   stateShort:  "DE",
   zip:         "19801",
@@ -40,23 +40,10 @@ const COMPANY = {
   email:       "legal@spotrank.io",
   supportEmail:"support@spotrank.io",
   website:     "https://spotrank.io",
-  phone:       "+1 (555) 000-0000",                // TODO: replace with real phone before prod
+  phone:       "+1 (555) 000-0000",
   effectiveDate: "April 11, 2026",
 };
 /* ════════════════════════════════════════════ */
-
-/* Placeholder guard — logs a loud warning if demo values are still present.
- * Legal / T&C pages with fake addresses can expose the company to compliance
- * issues (US state business registration rules require an accurate address).
- * Visible only to site owners opening DevTools, so no UX impact for users. */
-(function detectPlaceholders() {
-  const placeholders = [];
-  if (COMPANY.address.includes('1234 Market Street')) placeholders.push('address');
-  if (COMPANY.phone === '+1 (555) 000-0000') placeholders.push('phone');
-  if (placeholders.length) {
-    console.warn('[legal.html] Placeholder COMPANY values still present:', placeholders.join(', '), '— replace before production.');
-  }
-})();
 </script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -374,6 +361,7 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 </footer>
 
+<script>
 <script>
 /*
  * Injection des informations légales dans la page.

@@ -229,7 +229,13 @@ footer { border-top: 1px solid var(--border); padding: 24px 48px; display: flex;
       <div class="vp-text" id="vpText">Watch the full video to unlock your booking</div>
     </div>
 
-    <!-- DEV unlock button removed — use window.unlockCTA() from console if needed during testing -->
+    <!-- ════════════════════════════════════════
+         🛠 DEV TOOL — DELETE BEFORE LAUNCH
+         ════════════════════════════════════════ -->
+    <div style="text-align:right;margin-bottom:8px;">
+      <button onclick="unlockCTA()" style="background:#f1f1f1;border:1px dashed #999;border-radius:6px;padding:5px 12px;font-size:11px;color:#666;cursor:pointer;font-family:monospace;">🛠 DEV: unlock</button>
+    </div>
+    <!-- ════════════════════════════════════════ -->
 
     <!-- Unlock CTA -->
     <div class="step-eyebrow" style="margin-bottom:10px;">Step 2 of 2 — Book your call</div>
@@ -318,7 +324,7 @@ footer { border-top: 1px solid var(--border); padding: 24px 48px; display: flex;
           <div class="trade-search-wrap">
             <svg class="trade-search-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
             <input class="trade-search-input" id="qf-trade-input" placeholder="Search your trade…" autocomplete="off"
-              onfocus="openTradeDropdown()" oninput="filterTrades(this.value)" onblur="matchTradeOnBlur()">
+              onfocus="openTradeDropdown()" oninput="filterTrades(this.value)">
             <input type="hidden" id="qf-trade">
             <div class="trade-dropdown-wrap" id="trade-dropdown-wrap">
               <div class="trade-dropdown open" id="trade-dropdown" onscroll="updateTradeFade()"></div>
@@ -414,11 +420,6 @@ footer { border-top: 1px solid var(--border); padding: 24px 48px; display: flex;
       <button class="qual-submit" onclick="submitQualForm()">
         Continue — Pick your time slot →
       </button>
-
-      <p style="margin-top:14px;font-size:11px;color:#6b7280;text-align:center;line-height:1.5;">
-        By continuing, you agree to our <a href="privacy.html" target="_blank" style="color:#1a56e8;text-decoration:underline;">Privacy Policy</a> and <a href="legal.html" target="_blank" style="color:#1a56e8;text-decoration:underline;">Terms</a>.
-        We'll contact you by phone, SMS, and email about your audit call.
-      </p>
     </div>
 
     <!-- Calendar (hidden until form submitted) -->
@@ -579,15 +580,7 @@ let timer = null;         /* référence du setInterval de progression */
  */
 function playVideo() {
   const wrap = document.getElementById('videoWrap');
-  // Build via createElement so VIDEO_ID (if ever sourced from a config/URL
-  // param) cannot break out of the iframe src attribute.
-  wrap.textContent = '';
-  const iframe = document.createElement('iframe');
-  iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(VIDEO_ID) + '?autoplay=1&rel=0&modestbranding=1';
-  iframe.setAttribute('allow', 'autoplay; fullscreen');
-  iframe.setAttribute('allowfullscreen', '');
-  iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:20px;display:block;';
-  wrap.appendChild(iframe);
+  wrap.innerHTML = `<iframe src="https://www.youtube.com/embed/${VIDEO_ID}?autoplay=1&rel=0&modestbranding=1" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;border-radius:20px;display:block;"></iframe>`;
   document.getElementById('videoProgressWrap').style.display = 'block';
   startProgress();
 }
@@ -701,53 +694,13 @@ function filterTrades(query) {
   const dd = document.getElementById('trade-dropdown');
   const q = query.toLowerCase();
   const filtered = q ? ALL_TRADES.filter(t => t.toLowerCase().includes(q)) : ALL_TRADES;
-  // Build options via createElement (no string-escaping gymnastics on onclick,
-  // and the textContent path means trade names with quotes/backslashes stay safe).
-  dd.textContent = '';
-  if (!filtered.length) {
-    const none = document.createElement('div');
-    none.className = 'trade-option';
-    none.style.cssText = 'color:var(--muted);pointer-events:none;';
-    none.textContent = 'No match found';
-    dd.appendChild(none);
-  } else {
-    filtered.forEach(t => {
-      const opt = document.createElement('div');
-      opt.className = 'trade-option';
-      opt.dataset.trade = t;
-      opt.textContent = t;
-      // preventDefault on mousedown keeps focus on the input so matchTradeOnBlur
-      // doesn't fire before our click selectTrade() runs (race on blur vs click).
-      opt.addEventListener('mousedown', e => e.preventDefault());
-      opt.addEventListener('click', () => selectTrade(t));
-      dd.appendChild(opt);
-    });
-  }
+  dd.innerHTML = filtered.map(t =>
+    `<div class="trade-option" onclick="selectTrade('${t.replace(/'/g,"\\'")}')">${t}</div>`
+  ).join('');
+  if (!filtered.length) dd.innerHTML = '<div class="trade-option" style="color:var(--muted);pointer-events:none;">No match found</div>';
   document.getElementById('trade-dropdown-wrap').classList.add('open');
   dd.scrollTop = 0;
   updateTradeFade();
-}
-
-/**
- * Auto-sélectionne le trade au blur si la valeur tapée matche exactement
- * (insensible à la casse) un trade de ALL_TRADES. Corrige le cas où
- * l'utilisateur tape "Plumbing" au clavier sans jamais cliquer l'option :
- * le champ caché #qf-trade restait vide → submit échouait silencieusement.
- */
-function matchTradeOnBlur() {
-  const input = document.getElementById('qf-trade-input');
-  const hidden = document.getElementById('qf-trade');
-  const typed = (input.value || '').trim().toLowerCase();
-  if (!typed) { hidden.value = ''; return; }
-  const match = ALL_TRADES.find(t => t.toLowerCase() === typed);
-  if (match) {
-    hidden.value = match;
-    input.value = match;
-  } else {
-    // Typed something that doesn't match — clear the hidden input so
-    // validation catches it instead of submitting an invalid trade.
-    hidden.value = '';
-  }
 }
 
 /**

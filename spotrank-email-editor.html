@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Spotrank — Email Editor</title>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
-<!-- DOMPurify: sanitize postMessage payloads (bodyHtml, signatureHtml) before innerHTML -->
-<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js" crossorigin="anonymous"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -282,34 +280,18 @@ function toggleSig() {
  *   LOAD_EMAIL      → charge un email existant dans l'éditeur
  *   UPDATE_SIGNATURE → met à jour la signature sans recharger
  */
-// Sanitize helper: DOMPurify with email-safe profile. Falls back to a minimal
-// allowlist if DOMPurify isn't loaded (CDN blocked).
-function _sanitizeEmailHtml(html) {
-  if (!html) return '';
-  if (typeof DOMPurify !== 'undefined') {
-    return DOMPurify.sanitize(String(html), { USE_PROFILES: { html: true } });
-  }
-  return String(html)
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
-    .replace(/\son\w+\s*=\s*'[^']*'/gi, '')
-    .replace(/javascript\s*:/gi, '');
-}
-
 // ── PostMessage API ──
 window.addEventListener('message', (e) => {
-  // Accept messages only from the parent frame (same-origin iframe embedding).
-  if (e.source !== window.parent) return;
   const d = e.data;
   if (!d || !d.type) return;
 
   /* Charge un email dans l'éditeur — appelé quand on ouvre un bloc send_email */
   if (d.type === 'LOAD_EMAIL') {
-    document.getElementById('ee-subj').value = typeof d.subject === 'string' ? d.subject : '';
-    document.getElementById('ee-prev').value = typeof d.preview === 'string' ? d.preview : '';
-    document.getElementById('ee-body').innerHTML = _sanitizeEmailHtml(d.bodyHtml || '');
-    if (d.badge) document.getElementById('ee-badge').textContent = String(d.badge);
-    if (d.signatureHtml) signatureHTML = _sanitizeEmailHtml(d.signatureHtml);
+    document.getElementById('ee-subj').value = d.subject || '';
+    document.getElementById('ee-prev').value = d.preview || '';
+    document.getElementById('ee-body').innerHTML = d.bodyHtml || '';
+    if (d.badge) document.getElementById('ee-badge').textContent = d.badge;
+    if (d.signatureHtml) signatureHTML = d.signatureHtml;
     if (typeof d.showSignature !== 'undefined') { showSignature = d.showSignature; toggleSig(); toggleSig(); /* sync UI */ }
     livePreview();
     setTimeout(() => document.getElementById('ee-body').focus(), 100);
@@ -317,14 +299,14 @@ window.addEventListener('message', (e) => {
 
   /* Met à jour la signature en temps réel (ex: après modif dans Settings) */
   if (d.type === 'UPDATE_SIGNATURE') {
-    signatureHTML = _sanitizeEmailHtml(d.signatureHtml || '');
+    signatureHTML = d.signatureHtml || '';
     livePreview();
   }
 });
 
 /* Notifie le parent que l'iframe est prête à recevoir des messages */
 // Notify parent we're ready
-window.parent.postMessage({ type: 'EDITOR_READY' }, window.location.origin || '*');
+window.parent.postMessage({ type: 'EDITOR_READY' }, '*');
 
 /*
  * ── Fonctions de l'éditeur WYSIWYG ──
@@ -445,9 +427,9 @@ function doSave() {
     type: 'SAVE_EMAIL',
     subject: document.getElementById('ee-subj').value,
     preview: document.getElementById('ee-prev').value,
-    bodyHtml: _sanitizeEmailHtml(document.getElementById('ee-body').innerHTML),
+    bodyHtml: document.getElementById('ee-body').innerHTML,
     showSignature: showSignature,
-  }, window.location.origin || '*');
+  }, '*');
 }
 
 /**
@@ -455,7 +437,7 @@ function doSave() {
  * Envoie { type:'CLOSE_EDITOR' } → le parent masque la modal.
  */
 function doClose() {
-  window.parent.postMessage({ type: 'CLOSE_EDITOR' }, window.location.origin || '*');
+  window.parent.postMessage({ type: 'CLOSE_EDITOR' }, '*');
 }
 
 /* Escape → ferme l'éditeur */

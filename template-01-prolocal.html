@@ -1427,34 +1427,17 @@ function toggleFaq(el) {
  * les placeholders non remplacés en cas d'export incomplet.
  */
 // ── Service Areas ──
-// {{service_areas}} is injected as comma-separated string at deploy time.
-// Client-supplied names go through textContent so any HTML in the config
-// cannot execute. The pin SVG is built via createElementNS (static markup).
+// {{service_areas}} is injected as comma-separated string
 const serviceAreasRaw = "{{service_areas}}";
 const areasList = serviceAreasRaw.split(',').map(a => a.trim()).filter(Boolean);
 const areasGrid = document.getElementById('areas-grid');
-if (areasGrid && areasList.length && !serviceAreasRaw.includes('{{')) {
-  const SVG_NS = 'http://www.w3.org/2000/svg';
-  const makePin = () => {
-    const svg = document.createElementNS(SVG_NS, 'svg');
-    svg.setAttribute('width', '12'); svg.setAttribute('height', '12');
-    svg.setAttribute('viewBox', '0 0 16 16'); svg.setAttribute('fill', 'none');
-    svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', '2');
-    const circle = document.createElementNS(SVG_NS, 'circle');
-    circle.setAttribute('cx', '8'); circle.setAttribute('cy', '7'); circle.setAttribute('r', '4');
-    const path = document.createElementNS(SVG_NS, 'path');
-    path.setAttribute('d', 'M8 3v0M4.5 11.5C3.2 13 2 14 2 14s2-1 6-1 6 1 6 1-1.2-1-2.5-2.5');
-    svg.appendChild(circle); svg.appendChild(path);
-    return svg;
-  };
-  areasGrid.textContent = '';
-  areasList.forEach(area => {
-    const chip = document.createElement('div');
-    chip.className = 'area-chip';
-    chip.appendChild(makePin());
-    chip.append(' ' + area);
-    areasGrid.appendChild(chip);
-  });
+if (areasGrid && areasList.length) {
+  areasGrid.innerHTML = areasList.map(area => `
+    <div class="area-chip">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="7" r="4"/><path d="M8 3v0M4.5 11.5C3.2 13 2 14 2 14s2-1 6-1 6 1 6 1-1.2-1-2.5-2.5"/></svg>
+      ${area}
+    </div>
+  `).join('');
 }
 
 /* ══ Services Grid ══
@@ -1464,43 +1447,20 @@ if (areasGrid && areasList.length && !serviceAreasRaw.includes('{{')) {
  * Guard !servicesRaw.includes('{{') : évite le rendu des placeholders bruts.
  */
 // ── Services Grid ──
-// {{services}} comma-separated list. Client-supplied service names go
-// through textContent to neutralize any HTML injected via the deploy config.
+// {{services}} comma-separated list
 const servicesRaw = "{{services}}";
-const cityPrimary = "{{city_primary}}";
 const SERVICE_ICONS = ['🔧','⚡','🏠','🌿','🔨','🪣','🏗️','🛡️','🚿','🌡️'];
 const servicesGrid = document.getElementById('services-grid');
 if (servicesGrid && servicesRaw && !servicesRaw.includes('{{')) {
   const servicesList = servicesRaw.split(',').map(s => s.trim()).filter(Boolean);
-  const safeCity = cityPrimary && !cityPrimary.includes('{{') ? cityPrimary : 'your area';
-  servicesGrid.textContent = '';
-  servicesList.forEach((svc, i) => {
-    const card = document.createElement('div');
-    card.className = 'service-card';
-
-    const icon = document.createElement('div');
-    icon.className = 'service-icon';
-    icon.textContent = SERVICE_ICONS[i % SERVICE_ICONS.length];
-
-    const name = document.createElement('div');
-    name.className = 'service-name';
-    name.textContent = svc;
-
-    const desc = document.createElement('p');
-    desc.className = 'service-desc';
-    desc.textContent = `Professional ${svc.toLowerCase()} services in ${safeCity} and surrounding areas. Licensed and insured.`;
-
-    const link = document.createElement('a');
-    link.href = '#quote';
-    link.className = 'service-link';
-    link.textContent = 'Get a Quote →';
-
-    card.appendChild(icon);
-    card.appendChild(name);
-    card.appendChild(desc);
-    card.appendChild(link);
-    servicesGrid.appendChild(card);
-  });
+  servicesGrid.innerHTML = servicesList.map((svc, i) => `
+    <div class="service-card">
+      <div class="service-icon">${SERVICE_ICONS[i % SERVICE_ICONS.length]}</div>
+      <div class="service-name">${svc}</div>
+      <p class="service-desc">Professional ${svc.toLowerCase()} services in {{city_primary}} and surrounding areas. Licensed and insured.</p>
+      <a href="#quote" class="service-link">Get a Quote →</a>
+    </div>
+  `).join('');
 }
 
 /* ══ Form Submit ══

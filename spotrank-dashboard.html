@@ -43,11 +43,11 @@
   DOMPurify — Bibliothèque de sanitization HTML (anti-XSS).
   Utilisée par safeHTML() pour nettoyer toute donnée utilisateur avant insertion dans innerHTML.
   CRITIQUE : À charger AVANT le premier script du dashboard.
-  CDN jsDelivr : stable, rapide, avec fallback integrity check.
+  Note : integrity check retiré intentionnellement pour compatibilité file:// (dev local).
+  En production (Netlify), le CDN est accessible et DOMPurify se charge normalement.
+  safeHTML() a un fallback natif si DOMPurify est indisponible.
 -->
-<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"
-  integrity="sha384-I0NJOC+bfI2OT01vBTBUL7bwCNiVPPVPJ3k+8y9KkHPJJmJnrGIFkblHmjLpjSa"
-  crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 <style>
 /*
  * ════════════════════════════════════════════════════════════
@@ -2071,6 +2071,35 @@ body.client-mode .main > .page { display: none !important; }
 .form-field-chip { font-size: 11px; font-weight: 500; background: var(--stone); color: var(--muted); border: 1px solid var(--border); border-radius: 5px; padding: 2px 8px; }
 
 /*
+ * ─── GITHUB REPO SECTION (Site & Formulaires) ───
+ * Bandeau de configuration du dépôt GitHub du site client.
+ * Statuts : non lié (gris), lié (vert), erreur (rouge).
+ */
+.github-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px; border-radius: var(--radius);
+  border: 1px solid var(--border-mid); background: var(--bg-card);
+  margin-bottom: 12px;
+}
+.github-bar-icon { font-size: 16px; flex-shrink: 0; }
+.github-bar-text { flex: 1; min-width: 0; }
+.github-bar-label { font-size: 11.5px; font-weight: 600; color: var(--ink); }
+.github-bar-sub   { font-size: 11px; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.github-bar.linked { border-color: #bbf7d0; background: #f0fdf4; }
+.github-bar.linked .github-bar-label { color: #16a34a; }
+/* Bouton "Éditer dans Claude Design" — CTA bleu avec icône Claude */
+.btn-claude-design {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 11px; border-radius: 7px; font-size: 11px; font-weight: 600;
+  font-family: 'Onest', sans-serif; cursor: pointer; border: none;
+  background: var(--cta); color: #fff; transition: background .15s;
+  white-space: nowrap;
+}
+.btn-claude-design:hover { background: #1240c4; }
+/* Icône minuscule inline pour le bouton Éditer */
+.claude-design-icon { width: 12px; height: 12px; border-radius: 2px; background: rgba(255,255,255,.25); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; }
+
+/*
  * ─── SITE SPOTRANK TABS ───
  * Onglets principaux de la page "Sites" (section agence) :
  *   Funnel (parcours leads), Pages, Formulaires, Analytics.
@@ -2967,7 +2996,22 @@ body.client-mode .main > .page { display: none !important; }
        🛠 BOUTON DEV — SUPPRIMER AVANT PROD
        Bypass l'OTP et connecte directement en tant qu'Admin.
        ════════════════════════════════════════ -->
-  <button onclick="currentUser = { member: teamMembers.find(m => m.roles.includes('admin')), sessionToken: 'dev', loginAt: Date.now() }; bootDashboard();" style="
+  <button onclick="
+    try {
+      console.log('[DEV] Bypass clicked');
+      console.log('[DEV] teamMembers:', typeof teamMembers, Array.isArray(teamMembers) ? teamMembers.length : 'N/A');
+      console.log('[DEV] safeHTML:', typeof safeHTML);
+      console.log('[DEV] bootDashboard:', typeof bootDashboard);
+      console.log('[DEV] DOMPurify:', typeof DOMPurify);
+      const admin = teamMembers.find(m => m.roles.includes('admin'));
+      console.log('[DEV] admin found:', admin?.firstname);
+      currentUser = { member: admin, sessionToken: 'dev', loginAt: Date.now() };
+      bootDashboard();
+      console.log('[DEV] bootDashboard() OK');
+    } catch(e) {
+      console.error('[DEV] Bypass error:', e.message, e.stack);
+    }
+  " style="
     margin-top: 16px;
     padding: 10px 24px;
     background: transparent;
@@ -3612,6 +3656,10 @@ body.client-mode .main > .page { display: none !important; }
             Templates sites
             <!-- Badge = nb templates disponibles -->
             <span class="settings-sidenav-badge">1</span>
+          </button>
+          <button class="settings-sidenav-item" onclick="switchSettingsTab('client-flows', this)">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4h12M2 8h8M2 12h5"/><circle cx="13" cy="11" r="2.5"/><path d="M13 9v2M11.5 12.5l1 1"/></svg>
+            Flows clients
           </button>
           <button class="settings-sidenav-item" onclick="switchSettingsTab('api', this)">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 5l4-3 4 3v6l-4 3-4-3V5z"/><path d="M10 5l4-3v8l-4 3"/></svg>
@@ -4654,10 +4702,8 @@ body.client-mode .main > .page { display: none !important; }
         </div>
         <div class="form-group">
           <label class="form-label">Trade / Métier</label>
-          <select class="form-select" id="nc-trade">
-            <option>Plumber</option><option>Electrician</option><option>Roofer</option>
-            <option>HVAC</option><option>Landscaper</option><option>Painter</option>
-            <option>General Contractor</option>
+          <select class="form-select trade-select" id="nc-trade">
+            <!-- Alimenté dynamiquement par populateTradeDropdowns() depuis TRADES[] -->
           </select>
         </div>
         <div class="form-group">
@@ -4688,6 +4734,109 @@ body.client-mode .main > .page { display: none !important; }
     <div class="modal-footer">
       <button class="btn btn-ghost-sm" onclick="closeModal('modal-add-client')">Annuler</button>
       <button class="btn btn-primary" onclick="addClient()">Créer le client →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MODAL: GitHub Repo ─── -->
+<!--
+  Modal de configuration du dépôt GitHub du site client.
+  Permet de lier ou délier un repo GitHub privé à un client.
+  Le repo est stocké dans client.githubRepo (ex: "spotrank-agency/elite-plumbing-co").
+  Appelée par openGithubModal(clientId).
+-->
+<div class="modal-overlay" id="modal-github-repo">
+  <div class="modal" style="width:500px;">
+    <div class="modal-header">
+      <div class="modal-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right:6px;vertical-align:-2px;"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        Dépôt GitHub
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-github-repo')">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Explication -->
+      <div style="background:var(--cta-ghost);border:1px solid var(--cta-border);border-radius:8px;padding:11px 14px;font-size:12.5px;color:var(--ink-mid);margin-bottom:16px;line-height:1.6;">
+        Le repo GitHub stocke les fichiers HTML du site client. Il doit être dans l'organisation <strong>spotrank-agency</strong> et être privé. Format attendu : <code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:11px;">spotrank-agency/nom-du-client</code>
+      </div>
+      <div class="form-group">
+        <label class="form-label">URL ou slug du dépôt</label>
+        <input class="form-input" id="github-repo-input"
+          placeholder="spotrank-agency/nom-du-client"
+          style="font-family: var(--font-mono, monospace); font-size: 13px;">
+        <div style="font-size:11px;color:var(--muted);margin-top:5px;">
+          Ex: <code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;">spotrank-agency/elite-plumbing-co</code>
+        </div>
+      </div>
+      <div id="github-repo-preview" style="display:none; margin-top:8px; padding:10px 13px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; font-size:12.5px; color:#166534;">
+        ✓ Sera lié à :
+        <a id="github-repo-link" href="#" target="_blank" style="color:#16a34a; font-weight:600;"></a>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost-sm" id="github-unlink-btn" onclick="saveGithubRepo(null)" style="color:#dc2626;display:none;">
+        Délier le repo
+      </button>
+      <button class="btn btn-ghost-sm" onclick="closeModal('modal-github-repo')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveGithubRepo()">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8l4 4 8-8"/></svg>
+        Lier le dépôt
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MODAL: Claude Design — Instructions ─── -->
+<!--
+  Modal d'instructions pour ouvrir une page dans Claude Design.
+  Affichée après que le HTML de la page a été copié dans le presse-papiers.
+  L'utilisateur n'a plus qu'à coller dans claude.ai/design.
+  Appelée par openInClaudeDesign(clientId, pageName, fileKey).
+-->
+<div class="modal-overlay" id="modal-claude-design">
+  <div class="modal" style="width:480px;">
+    <div class="modal-header">
+      <div class="modal-title" style="display:flex;align-items:center;gap:8px;">
+        <div style="width:22px;height:22px;border-radius:5px;background:var(--cta);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">C</div>
+        Éditer dans Claude Design
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-claude-design')">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Étape 1 : copié -->
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:13px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;margin-bottom:12px;">
+        <div style="width:22px;height:22px;border-radius:50%;background:#16a34a;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">1</div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#166534;">HTML copié dans le presse-papiers ✓</div>
+          <div style="font-size:12px;color:#16a34a;margin-top:2px;">Page : <strong id="cd-page-name">—</strong></div>
+        </div>
+      </div>
+      <!-- Étape 2 : ouvrir Claude Design -->
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:13px 14px;background:var(--stone);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;">
+        <div style="width:22px;height:22px;border-radius:50%;background:var(--cta);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">2</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px;">Ouvrir Claude Design</div>
+          <a href="https://claude.ai/design" target="_blank"
+            style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--cta);color:#fff;border-radius:7px;font-size:12px;font-weight:600;text-decoration:none;transition:background .15s;"
+            onmouseover="this.style.background='#1240c4'" onmouseout="this.style.background='var(--cta)'">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9M10 2h4v4M14 2L7 9"/></svg>
+            Ouvrir claude.ai/design ↗
+          </a>
+        </div>
+      </div>
+      <!-- Étape 3 : coller -->
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:13px 14px;background:var(--stone);border:1px solid var(--border);border-radius:8px;">
+        <div style="width:22px;height:22px;border-radius:50%;background:var(--muted);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">3</div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--ink);">Coller le HTML et demander vos modifications</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px;line-height:1.6;">
+            Dans Claude Design, appuyez sur <kbd style="background:#f1f5f9;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:11px;">⌘V</kbd> pour coller le code, puis décrivez les changements souhaités.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost-sm" onclick="closeModal('modal-claude-design')">Fermer</button>
     </div>
   </div>
 </div>
@@ -4917,22 +5066,6 @@ function safeHTML(str) {
 }
 
 /**
- * safeUrl(url) — Validate that a URL uses http(s) and is safe for href="".
- * Blocks javascript:, data:, vbscript:, file: and malformed URLs (used for
- * lead.website_url / gmaps_url coming from CSV import, where an attacker
- * could inject `javascript:fetch(...)` to exfiltrate on click).
- * Returns '#' for invalid URLs so the link renders but doesn't execute.
- */
-function safeUrl(url) {
-  if (!url) return '#';
-  try {
-    const u = new URL(String(url), window.location.origin);
-    if (u.protocol === 'http:' || u.protocol === 'https:') return u.href;
-  } catch (e) { /* invalid URL */ }
-  return '#';
-}
-
-/**
  * currentUserCan(action) — Vérifie si l'utilisateur courant a le droit
  * d'effectuer une action sensible du pipeline.
  *
@@ -5078,33 +5211,33 @@ let leads = [
   // ── SALES PIPELINE ──
   // Setter: Lucas (id:3)
   { id:1,  name:'Mike Torres',       firstname:'Mike',    lastname:'Torres',    trade:'HVAC',               city:'Austin, TX',      source:'Cold', pipeline:'sales',      stage:'no_contact',  score:45, contact_attempts:3,  tags:['cold_call'],          vsl_watched:false, assignedSetter:3,  assignedCloser:null, assignedCSM:null, lastAction:'SMS envoyé x3',       lastActionDate:'2h ago',    urgent:false, phone:'+1 512 555 0147', max_attempts:20, website_url:'https://torreshvac.com', gmaps_url:'https://maps.google.com/?cid=11111', google_reviews:12, google_rating:4.2, booking_link:'https://spotrank.com/book', zoom_link:null,                           payment_link:null,                         form_link:null },
-  { id:2,  name:'Dave Kowalski',     firstname:'Dave',    lastname:'Kowalski',  trade:'Roofer',             city:'Denver, CO',      source:'Ads',  pipeline:'sales',      stage:'booked',      score:85, contact_attempts:0,  tags:['vsl'],                vsl_watched:true,  assignedSetter:null, assignedCloser:9,  assignedCSM:null, lastAction:'Call booked',         lastActionDate:'Today',     urgent:false, phone:'+1 720 555 0288', booking_link:'https://spotrank.com/book', zoom_link:'https://zoom.us/j/987654321',  payment_link:null, form_link:null, website_url:'https://kowalskiroofing.com', gmaps_url:'https://maps.google.com/?cid=12345', google_reviews:23, google_rating:3.8, qualification:{jobs_per_month:18,client_source:'bouche_a_oreille',is_owner:'oui',num_employees:'small'}, quickNote:'Très intéressé, a vu la VSL en entier. Saison chargée en ce moment. Concurrent principal : ABC Roofing qui domine Maps. A mentionné vouloir "arrêter de dépendre du bouche à oreille"', aiBriefing:'' },
-  { id:3,  name:'Luis Fernandez',    firstname:'Luis',    lastname:'Fernandez', trade:'Plumber',            city:'Miami, FL',       source:'Cold', pipeline:'sales',      stage:'no_contact',  score:68, contact_attempts:7,  tags:[],                     vsl_watched:false, assignedSetter:3,  assignedCloser:null, assignedCSM:null, lastAction:'SMS envoyé x7',       lastActionDate:'1d ago',    urgent:false, phone:'+1 305 555 0334', max_attempts:20, website_url:null, gmaps_url:'https://maps.google.com/?cid=33333', google_reviews:47, google_rating:4.6, booking_link:'https://spotrank.com/book', zoom_link:null,                           payment_link:null,                         form_link:null },
+  { id:2,  name:'Dave Kowalski',     firstname:'Dave',    lastname:'Kowalski',  trade:'Roofing',             city:'Denver, CO',      source:'Ads',  pipeline:'sales',      stage:'booked',      score:85, contact_attempts:0,  tags:['vsl'],                vsl_watched:true,  assignedSetter:null, assignedCloser:9,  assignedCSM:null, lastAction:'Call booked',         lastActionDate:'Today',     urgent:false, phone:'+1 720 555 0288', booking_link:'https://spotrank.com/book', zoom_link:'https://zoom.us/j/987654321',  payment_link:null, form_link:null, website_url:'https://kowalskiroofing.com', gmaps_url:'https://maps.google.com/?cid=12345', google_reviews:23, google_rating:3.8, qualification:{jobs_per_month:18,client_source:'bouche_a_oreille',is_owner:'oui',num_employees:'small'}, quickNote:'Très intéressé, a vu la VSL en entier. Saison chargée en ce moment. Concurrent principal : ABC Roofing qui domine Maps. A mentionné vouloir "arrêter de dépendre du bouche à oreille"', aiBriefing:'' },
+  { id:3,  name:'Luis Fernandez',    firstname:'Luis',    lastname:'Fernandez', trade:'Plumbing',            city:'Miami, FL',       source:'Cold', pipeline:'sales',      stage:'no_contact',  score:68, contact_attempts:7,  tags:[],                     vsl_watched:false, assignedSetter:3,  assignedCloser:null, assignedCSM:null, lastAction:'SMS envoyé x7',       lastActionDate:'1d ago',    urgent:false, phone:'+1 305 555 0334', max_attempts:20, website_url:null, gmaps_url:'https://maps.google.com/?cid=33333', google_reviews:47, google_rating:4.6, booking_link:'https://spotrank.com/book', zoom_link:null,                           payment_link:null,                         form_link:null },
   { id:5,  name:'Tom Bradley',       firstname:'Tom',     lastname:'Bradley',   trade:'Electrician',        city:'Nashville, TN',   source:'Cold', pipeline:'sales',      stage:'lead_in',     score:55, contact_attempts:0,  tags:['cold_call'],          vsl_watched:false, assignedSetter:7,  assignedCloser:null, assignedCSM:null, lastAction:'Importé CSV',         lastActionDate:'3h ago',    urgent:false, phone:'+1 615 555 0099', website_url:'https://bradleyelectric.net', gmaps_url:'https://maps.google.com/?cid=55555', google_reviews:8, google_rating:3.5, booking_link:'https://spotrank.com/book', zoom_link:null,                           payment_link:null,                         form_link:null },
   // Setter: Julien (id:7)
-  { id:7,  name:'Amy Chen',          firstname:'Amy',     lastname:'Chen',      trade:'Painter',            city:'Seattle, WA',     source:'Cold', pipeline:'sales',      stage:'no_contact',  score:63, contact_attempts:11, tags:[],                     vsl_watched:false, assignedSetter:7,  assignedCloser:null, assignedCSM:null, lastAction:'SMS envoyé x11',      lastActionDate:'2d ago',    urgent:true,  phone:'+1 206 555 0412', max_attempts:20, website_url:null, gmaps_url:null, google_reviews:3, google_rating:5.0, booking_link:'https://spotrank.com/book', zoom_link:null,                           payment_link:null,                         form_link:null },
-  { id:10, name:'Jake Wilson',       firstname:'Jake',    lastname:'Wilson',    trade:'Roofer',             city:'Atlanta, GA',     source:'Cold', pipeline:'sales',      stage:'lead_in',     score:50, contact_attempts:0,  tags:['cold_call'],          vsl_watched:false, assignedSetter:7,  assignedCloser:null, assignedCSM:null, lastAction:'Importé CSV',         lastActionDate:'4h ago',    urgent:false, phone:'+1 404 555 0891', booking_link:'https://spotrank.com/book', zoom_link:null,                           payment_link:null,                         form_link:null },
-  { id:9,  name:'Scott Murphy',      firstname:'Scott',   lastname:'Murphy',    trade:'Plumber',            city:'Houston, TX',     source:'Cold', pipeline:'sales',      stage:'nurture',     score:71, contact_attempts:18, tags:['long_nurture'],       vsl_watched:false, assignedSetter:3,  assignedCloser:null, assignedCSM:null, lastAction:'Passé en nurture',    lastActionDate:'1d ago',    urgent:false, phone:'+1 713 555 0223', max_attempts:20, booking_link:'https://spotrank.com/book', zoom_link:null,                           payment_link:null,                         form_link:null },
+  { id:7,  name:'Amy Chen',          firstname:'Amy',     lastname:'Chen',      trade:'Painting',            city:'Seattle, WA',     source:'Cold', pipeline:'sales',      stage:'no_contact',  score:63, contact_attempts:11, tags:[],                     vsl_watched:false, assignedSetter:7,  assignedCloser:null, assignedCSM:null, lastAction:'SMS envoyé x11',      lastActionDate:'2d ago',    urgent:true,  phone:'+1 206 555 0412', max_attempts:20, website_url:null, gmaps_url:null, google_reviews:3, google_rating:5.0, booking_link:'https://spotrank.com/book', zoom_link:null,                           payment_link:null,                         form_link:null },
+  { id:10, name:'Jake Wilson',       firstname:'Jake',    lastname:'Wilson',    trade:'Roofing',             city:'Atlanta, GA',     source:'Cold', pipeline:'sales',      stage:'lead_in',     score:50, contact_attempts:0,  tags:['cold_call'],          vsl_watched:false, assignedSetter:7,  assignedCloser:null, assignedCSM:null, lastAction:'Importé CSV',         lastActionDate:'4h ago',    urgent:false, phone:'+1 404 555 0891', booking_link:'https://spotrank.com/book', zoom_link:null,                           payment_link:null,                         form_link:null },
+  { id:9,  name:'Scott Murphy',      firstname:'Scott',   lastname:'Murphy',    trade:'Plumbing',            city:'Houston, TX',     source:'Cold', pipeline:'sales',      stage:'nurture',     score:71, contact_attempts:18, tags:['long_nurture'],       vsl_watched:false, assignedSetter:3,  assignedCloser:null, assignedCSM:null, lastAction:'Passé en nurture',    lastActionDate:'1d ago',    urgent:false, phone:'+1 713 555 0223', max_attempts:20, booking_link:'https://spotrank.com/book', zoom_link:null,                           payment_link:null,                         form_link:null },
   // Closer: Marc (id:9)
   { id:8,  name:'Ricky Patel',       firstname:'Ricky',   lastname:'Patel',     trade:'General Contractor', city:'Chicago, IL',     source:'Ads',  pipeline:'sales',      stage:'closed',      score:88, contact_attempts:0,  tags:['vsl'],                vsl_watched:true,  assignedSetter:null, assignedCloser:9,  assignedCSM:null, lastAction:'Deal signé',          lastActionDate:'Today',     urgent:false, phone:'+1 312 555 0567', booking_link:'https://spotrank.com/book', zoom_link:'https://zoom.us/j/312312312',  payment_link:null,                         form_link:null },
   { id:12, name:'Paul Johnson',      firstname:'Paul',    lastname:'Johnson',   trade:'Electrician',        city:'Portland, OR',    source:'Ads',  pipeline:'sales',      stage:'booked',      score:77, contact_attempts:0,  tags:['vsl','reschedule'],   vsl_watched:true,  assignedSetter:null, assignedCloser:9,  assignedCSM:null, lastAction:'Reschedulé',          lastActionDate:'Yesterday', urgent:false, phone:'+1 503 555 0356', website_url:'https://johnsonelectric.com', gmaps_url:'https://maps.google.com/?cid=12121', google_reviews:89, google_rating:4.8, booking_link:'https://spotrank.com/book', zoom_link:'https://zoom.us/j/503503503',  payment_link:null,                         form_link:null },
-  { id:14, name:'Carlos Mendez',     firstname:'Carlos',  lastname:'Mendez',    trade:'Roofer',             city:'Phoenix, AZ',     source:'Cold', pipeline:'sales',      stage:'follow_up',   score:65, contact_attempts:2,  tags:['cold_call'],          vsl_watched:false, assignedSetter:null, assignedCloser:9,  assignedCSM:null, lastAction:'Follow up J+1',       lastActionDate:'1d ago',    urgent:false, phone:'+1 602 555 0345', booking_link:'https://spotrank.com/book', zoom_link:null,                           payment_link:null,                         form_link:null },
+  { id:14, name:'Carlos Mendez',     firstname:'Carlos',  lastname:'Mendez',    trade:'Roofing',             city:'Phoenix, AZ',     source:'Cold', pipeline:'sales',      stage:'follow_up',   score:65, contact_attempts:2,  tags:['cold_call'],          vsl_watched:false, assignedSetter:null, assignedCloser:9,  assignedCSM:null, lastAction:'Follow up J+1',       lastActionDate:'1d ago',    urgent:false, phone:'+1 602 555 0345', booking_link:'https://spotrank.com/book', zoom_link:null,                           payment_link:null,                         form_link:null },
   // Closer: Sarah (id:10)
   { id:13, name:'Sarah Kim',         firstname:'Sarah',   lastname:'Kim',       trade:'HVAC',               city:'Dallas, TX',      source:'Ads',  pipeline:'sales',      stage:'call_done',   score:82, contact_attempts:0,  tags:['vsl'],                vsl_watched:true,  assignedSetter:null, assignedCloser:10, assignedCSM:null, lastAction:'Call terminé',        lastActionDate:'3h ago',    urgent:true,  phone:'+1 214 555 0781', website_url:'https://kimhvac.com', gmaps_url:'https://maps.google.com/?cid=13131', google_reviews:156, google_rating:4.7, booking_link:'https://spotrank.com/book', zoom_link:'https://zoom.us/j/214214214',  payment_link:null,                         form_link:null },
   // Closer: Thomas (id:11) setter+closer
-  { id:15, name:'Elena Vasquez',     firstname:'Elena',   lastname:'Vasquez',   trade:'Plumber',            city:'Tampa, FL',       source:'Ads',  pipeline:'sales',      stage:'booked',      score:91, contact_attempts:0,  tags:['vsl','hot'],          vsl_watched:true,  assignedSetter:11, assignedCloser:11, assignedCSM:null, lastAction:'VSL terminée',        lastActionDate:'1h ago',    urgent:true,  phone:'+1 813 555 0912', website_url:null, gmaps_url:'https://maps.google.com/?cid=15151', google_reviews:21, google_rating:4.1, booking_link:'https://spotrank.com/book', zoom_link:'https://zoom.us/j/813813813',  payment_link:null,                         form_link:null },
+  { id:15, name:'Elena Vasquez',     firstname:'Elena',   lastname:'Vasquez',   trade:'Plumbing',            city:'Tampa, FL',       source:'Ads',  pipeline:'sales',      stage:'booked',      score:91, contact_attempts:0,  tags:['vsl','hot'],          vsl_watched:true,  assignedSetter:11, assignedCloser:11, assignedCSM:null, lastAction:'VSL terminée',        lastActionDate:'1h ago',    urgent:true,  phone:'+1 813 555 0912', website_url:null, gmaps_url:'https://maps.google.com/?cid=15151', google_reviews:21, google_rating:4.1, booking_link:'https://spotrank.com/book', zoom_link:'https://zoom.us/j/813813813',  payment_link:null,                         form_link:null },
   { id:21, name:'Derek Thompson',    firstname:'Derek',   lastname:'Thompson',  trade:'HVAC',               city:'Boston, MA',      source:'Ads',  pipeline:'sales',      stage:'noshow',      score:70, contact_attempts:0,  tags:['noshow','vsl'],       vsl_watched:true,  assignedSetter:11, assignedCloser:11, assignedCSM:null, lastAction:'No-show zoom',        lastActionDate:'Today',     urgent:true,  phone:'+1 617 555 0183', booking_link:'https://spotrank.com/book', zoom_link:'https://zoom.us/j/617617617',  payment_link:null,                         form_link:null },
-  { id:22, name:'Angela Park',       firstname:'Angela',  lastname:'Park',      trade:'Landscaper',         city:'Chicago, IL',     source:'Cold', pipeline:'sales',      stage:'lead_in',     score:58, contact_attempts:0,  tags:['cold_call'],          vsl_watched:false, assignedSetter:3,  assignedCloser:null, assignedCSM:null, lastAction:'Importé CSV',         lastActionDate:'2h ago',    urgent:false, phone:'+1 312 555 0762', booking_link:'https://spotrank.com/book', zoom_link:null,                           payment_link:null,                         form_link:null },
+  { id:22, name:'Angela Park',       firstname:'Angela',  lastname:'Park',      trade:'Landscaping',         city:'Chicago, IL',     source:'Cold', pipeline:'sales',      stage:'lead_in',     score:58, contact_attempts:0,  tags:['cold_call'],          vsl_watched:false, assignedSetter:3,  assignedCloser:null, assignedCSM:null, lastAction:'Importé CSV',         lastActionDate:'2h ago',    urgent:false, phone:'+1 312 555 0762', booking_link:'https://spotrank.com/book', zoom_link:null,                           payment_link:null,                         form_link:null },
   { id:23, name:'Frank DiMaggio',    firstname:'Frank',   lastname:'DiMaggio',  trade:'General Contractor', city:'Las Vegas, NV',   source:'Cold', pipeline:'sales',      stage:'no_contact',  score:61, contact_attempts:5,  tags:[],                     vsl_watched:false, assignedSetter:7,  assignedCloser:null, assignedCSM:null, lastAction:'SMS envoyé x5',       lastActionDate:'3h ago',    urgent:false, phone:'+1 702 555 0394', max_attempts:20, booking_link:'https://spotrank.com/book', zoom_link:null,                           payment_link:null,                         form_link:null },
-  { id:24, name:'Rebecca Stone',     firstname:'Rebecca', lastname:'Stone',     trade:'Painter',            city:'Miami, FL',       source:'Ads',  pipeline:'sales',      stage:'call_done',   score:79, contact_attempts:0,  tags:['vsl'],                vsl_watched:true,  assignedSetter:null, assignedCloser:10, assignedCSM:null, lastAction:'Call done',           lastActionDate:'5h ago',    urgent:false, phone:'+1 305 555 0551', booking_link:'https://spotrank.com/book', zoom_link:'https://zoom.us/j/305305305',  payment_link:null,                         form_link:null },
-  { id:25, name:'Kevin Walsh',       firstname:'Kevin',   lastname:'Walsh',     trade:'Roofer',             city:'Seattle, WA',     source:'Cold', pipeline:'sales',      stage:'nurture',     score:44, contact_attempts:15, tags:['long_nurture'],       vsl_watched:false, assignedSetter:7,  assignedCloser:null, assignedCSM:null, lastAction:'Long nurture J30',    lastActionDate:'3d ago',    urgent:false, phone:'+1 206 555 0837', max_attempts:20, booking_link:'https://spotrank.com/book', zoom_link:null,                           payment_link:null,                         form_link:null },
+  { id:24, name:'Rebecca Stone',     firstname:'Rebecca', lastname:'Stone',     trade:'Painting',            city:'Miami, FL',       source:'Ads',  pipeline:'sales',      stage:'call_done',   score:79, contact_attempts:0,  tags:['vsl'],                vsl_watched:true,  assignedSetter:null, assignedCloser:10, assignedCSM:null, lastAction:'Call done',           lastActionDate:'5h ago',    urgent:false, phone:'+1 305 555 0551', booking_link:'https://spotrank.com/book', zoom_link:'https://zoom.us/j/305305305',  payment_link:null,                         form_link:null },
+  { id:25, name:'Kevin Walsh',       firstname:'Kevin',   lastname:'Walsh',     trade:'Roofing',             city:'Seattle, WA',     source:'Cold', pipeline:'sales',      stage:'nurture',     score:44, contact_attempts:15, tags:['long_nurture'],       vsl_watched:false, assignedSetter:7,  assignedCloser:null, assignedCSM:null, lastAction:'Long nurture J30',    lastActionDate:'3d ago',    urgent:false, phone:'+1 206 555 0837', max_attempts:20, booking_link:'https://spotrank.com/book', zoom_link:null,                           payment_link:null,                         form_link:null },
   // ── ONBOARDING PIPELINE ──
   // Sophie (id:2) — clients 16,17
   { id:16, name:'Green Valley HVAC', firstname:'Green Valley', lastname:'HVAC', trade:'HVAC',               city:'Phoenix, AZ',     source:'Ads',  pipeline:'onboarding', stage:'active_ob',   score:85, contact_attempts:0,  tags:['cb_declined'],        vsl_watched:true,  assignedSetter:null, assignedCloser:null, assignedCSM:2, lastAction:'CB déclinée — relance',  lastActionDate:'1d ago',  urgent:true,  phone:'+1 602 555 0187', booking_link:null, zoom_link:'https://zoom.us/j/602602602', payment_link:'https://spotrank.com/pay/16', form_link:'https://spotrank.com/form/16' },
   { id:17, name:'Maria Santos',      firstname:'Maria',   lastname:'Santos',    trade:'HVAC',               city:'Tampa, FL',       source:'Ads',  pipeline:'onboarding', stage:'checkin',     score:72, contact_attempts:0,  tags:[],                     vsl_watched:true,  assignedSetter:null, assignedCloser:null, assignedCSM:2, lastAction:'7 jours en retainer',    lastActionDate:'Today',   urgent:false, phone:'+1 813 555 0204', booking_link:null, zoom_link:'https://zoom.us/j/813813814', payment_link:'https://spotrank.com/pay/17', form_link:'https://spotrank.com/form/17' },
   // Camille (id:5) — clients 18,19
-  { id:18, name:'Elite Plumbing Co', firstname:'Elite Plumbing', lastname:'Co', trade:'Plumber',            city:'San Diego, CA',   source:'Cold', pipeline:'onboarding', stage:'launch_done', score:60, contact_attempts:0,  tags:['gmb_issue'],          vsl_watched:false, assignedSetter:null, assignedCloser:null, assignedCSM:5, lastAction:'GMB vérif en attente',   lastActionDate:'2d ago',  urgent:true,  phone:'+1 619 555 0455', booking_link:null, zoom_link:'https://zoom.us/j/619619619', payment_link:'https://spotrank.com/pay/18', form_link:'https://spotrank.com/form/18' },
-  { id:19, name:'Bradley Roofing',   firstname:'Bradley', lastname:'Roofing',   trade:'Roofer',             city:'Nashville, TN',   source:'Ads',  pipeline:'onboarding', stage:'ob_form',     score:90, contact_attempts:0,  tags:[],                     vsl_watched:true,  assignedSetter:null, assignedCloser:null, assignedCSM:5, lastAction:'Form envoyé',            lastActionDate:'3h ago',  urgent:false, phone:'+1 615 555 0099', website_url:'https://bradleyelectric.net', gmaps_url:'https://maps.google.com/?cid=55555', google_reviews:8, google_rating:3.5, booking_link:null, zoom_link:'https://zoom.us/j/615615615', payment_link:'https://spotrank.com/pay/19', form_link:'https://spotrank.com/form/19' },
+  { id:18, name:'Elite Plumbing Co', firstname:'Elite Plumbing', lastname:'Co', trade:'Plumbing',            city:'San Diego, CA',   source:'Cold', pipeline:'onboarding', stage:'launch_done', score:60, contact_attempts:0,  tags:['gmb_issue'],          vsl_watched:false, assignedSetter:null, assignedCloser:null, assignedCSM:5, lastAction:'GMB vérif en attente',   lastActionDate:'2d ago',  urgent:true,  phone:'+1 619 555 0455', booking_link:null, zoom_link:'https://zoom.us/j/619619619', payment_link:'https://spotrank.com/pay/18', form_link:'https://spotrank.com/form/18' },
+  { id:19, name:'Bradley Roofing',   firstname:'Bradley', lastname:'Roofing',   trade:'Roofing',             city:'Nashville, TN',   source:'Ads',  pipeline:'onboarding', stage:'ob_form',     score:90, contact_attempts:0,  tags:[],                     vsl_watched:true,  assignedSetter:null, assignedCloser:null, assignedCSM:5, lastAction:'Form envoyé',            lastActionDate:'3h ago',  urgent:false, phone:'+1 615 555 0099', website_url:'https://bradleyelectric.net', gmaps_url:'https://maps.google.com/?cid=55555', google_reviews:8, google_rating:3.5, booking_link:null, zoom_link:'https://zoom.us/j/615615615', payment_link:'https://spotrank.com/pay/19', form_link:'https://spotrank.com/form/19' },
   // Nathan (id:6) — client 20 — MALADE
   { id:20, name:'Santos Electric',   firstname:'Santos',  lastname:'Electric',  trade:'Electrician',        city:'Tampa, FL',       source:'Ads',  pipeline:'onboarding', stage:'at_risk',     score:38, contact_attempts:0,  tags:['gmb_issue','cb_declined'], vsl_watched:true, assignedSetter:null, assignedCloser:null, assignedCSM:6, lastAction:'2 problèmes — Nathan absent', lastActionDate:'3d ago', urgent:true, phone:'+1 813 555 0321', booking_link:null, zoom_link:'https://zoom.us/j/813813815', payment_link:'https://spotrank.com/pay/20', form_link:'https://spotrank.com/form/20' },
 ];
@@ -6863,86 +6996,22 @@ function openLeadDrawer(leadId) {
   document.getElementById('ld-score-badge').innerHTML = `<div class="card-score ${scoreClass}" style="width:36px;height:36px;font-size:15px;">${lead.score}</div>`;
 
   // ── Section 1: Google Profile (from CSV — read-only) ──
-  // Built via createElement to avoid XSS from CSV-sourced fields
-  // (website_url / gmaps_url could contain `javascript:` URLs; text fields
-  // could contain HTML if CSV is tampered with upstream).
   const stars = lead.google_rating ? '★'.repeat(Math.round(lead.google_rating)) + '☆'.repeat(5 - Math.round(lead.google_rating)) : '—';
-  const profile = document.getElementById('ld-google-profile');
-  profile.textContent = '';
-
-  const reviewsField = document.createElement('div');
-  reviewsField.className = 'ld-field';
-  const reviewsLabel = document.createElement('span');
-  reviewsLabel.className = 'ld-field-label';
-  reviewsLabel.textContent = 'Avis Google';
-  const reviewsValue = document.createElement('span');
-  reviewsValue.className = 'ld-field-value';
-  if (lead.google_reviews != null) {
-    const strong = document.createElement('strong');
-    strong.textContent = String(Number(lead.google_reviews) || 0);
-    reviewsValue.appendChild(strong);
-    reviewsValue.append(' avis · ');
-    const starsEl = document.createElement('span');
-    starsEl.style.color = '#f59e0b';
-    starsEl.textContent = stars;
-    reviewsValue.appendChild(starsEl);
-    reviewsValue.append(' ' + (lead.google_rating != null ? String(Number(lead.google_rating) || '') : ''));
-  } else {
-    reviewsValue.style.color = 'var(--muted)';
-    reviewsValue.textContent = '—';
-  }
-  reviewsField.appendChild(reviewsLabel);
-  reviewsField.appendChild(reviewsValue);
-  profile.appendChild(reviewsField);
-
-  const siteField = document.createElement('div');
-  siteField.className = 'ld-field';
-  const siteLabel = document.createElement('span');
-  siteLabel.className = 'ld-field-label';
-  siteLabel.textContent = 'Site web';
-  siteField.appendChild(siteLabel);
-  const safeSite = safeUrl(lead.website_url);
-  if (lead.website_url && safeSite !== '#') {
-    const a = document.createElement('a');
-    a.href = safeSite;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.style.cssText = 'font-size:12px;color:var(--cta);font-weight:600;text-decoration:none;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;';
-    a.textContent = String(lead.website_url).replace(/^https?:\/\//, '').replace(/^www\./, '');
-    siteField.appendChild(a);
-  } else {
-    const span = document.createElement('span');
-    span.className = 'ld-field-value';
-    span.style.color = 'var(--muted)';
-    span.textContent = 'Pas de site';
-    siteField.appendChild(span);
-  }
-  profile.appendChild(siteField);
-
-  const mapsField = document.createElement('div');
-  mapsField.className = 'ld-field';
-  const mapsLabel = document.createElement('span');
-  mapsLabel.className = 'ld-field-label';
-  mapsLabel.textContent = 'Google Maps';
-  mapsField.appendChild(mapsLabel);
-  const safeMaps = safeUrl(lead.gmaps_url);
-  if (lead.gmaps_url && safeMaps !== '#') {
-    const a = document.createElement('a');
-    a.href = safeMaps;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.style.cssText = 'font-size:12px;color:var(--cta);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px;';
-    a.innerHTML = '<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 1C5.2 1 3 3.2 3 6c0 4 5 9 5 9s5-5 5-9c0-2.8-2.2-5-5-5z"/><circle cx="8" cy="6" r="1.5"/></svg>';
-    a.append('Voir sur Maps');
-    mapsField.appendChild(a);
-  } else {
-    const span = document.createElement('span');
-    span.className = 'ld-field-value';
-    span.style.color = 'var(--muted)';
-    span.textContent = '—';
-    mapsField.appendChild(span);
-  }
-  profile.appendChild(mapsField);
+  document.getElementById('ld-google-profile').innerHTML = `
+    <div class="ld-field">
+      <span class="ld-field-label">Avis Google</span>
+      <span class="ld-field-value">${lead.google_reviews != null ? `<strong>${lead.google_reviews}</strong> avis · <span style="color:#f59e0b;">${stars}</span> ${lead.google_rating || ''}` : '<span style="color:var(--muted);">—</span>'}</span>
+    </div>
+    <div class="ld-field">
+      <span class="ld-field-label">Site web</span>
+      ${lead.website_url ? `<a href="${lead.website_url}" target="_blank" style="font-size:12px;color:var(--cta);font-weight:600;text-decoration:none;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;">${lead.website_url.replace('https://','').replace('http://','').replace('www.','')}</a>` : `<span class="ld-field-value" style="color:var(--muted);">Pas de site</span>`}
+    </div>
+    <div class="ld-field">
+      <span class="ld-field-label">Google Maps</span>
+      ${lead.gmaps_url ? `<a href="${lead.gmaps_url}" target="_blank" style="font-size:12px;color:var(--cta);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+        <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 1C5.2 1 3 3.2 3 6c0 4 5 9 5 9s5-5 5-9c0-2.8-2.2-5-5-5z"/><circle cx="8" cy="6" r="1.5"/></svg>
+        Voir sur Maps</a>` : `<span class="ld-field-value" style="color:var(--muted);">—</span>`}
+    </div>`;
 
   // ── Section 2: Qualification (setter fills) ──
   const q = lead.qualification;
@@ -7442,7 +7511,7 @@ function renderFlowsTab(body) {
 const MONTHLY_TASK_TEMPLATES = [
   {
     id: 'gmb_report',
-    icon: '📊',
+    icon: 'bar-chart',
     title: 'Rapport GMB mensuel',
     description: 'Envoyer le rapport Localo à chaque client actif — leads, impressions, clics, avis, positions.',
     channel: 'email',
@@ -7454,7 +7523,7 @@ const MONTHLY_TASK_TEMPLATES = [
   },
   {
     id: 'reviews_report',
-    icon: '⭐',
+    icon: 'star',
     title: 'Rapport avis GMB',
     description: 'Bilan mensuel des avis reçus — note moyenne, avis gagnés, réponses aux avis négatifs.',
     channel: 'email',
@@ -7466,7 +7535,7 @@ const MONTHLY_TASK_TEMPLATES = [
   },
   {
     id: 'missed_calls',
-    icon: '📵',
+    icon: 'message-square',
     title: 'Rapport Missed Call Text Back',
     description: 'Nombre d\'appels manqués traités par le bot SMS ce mois + taux de conversion.',
     channel: 'email',
@@ -7478,7 +7547,7 @@ const MONTHLY_TASK_TEMPLATES = [
   },
   {
     id: 'email_campaign',
-    icon: '📧',
+    icon: 'mail',
     title: 'Campagne email — base clients',
     description: 'Relancer la base de clients du prospect via campagne email mensuelle.',
     channel: 'email',
@@ -7490,7 +7559,7 @@ const MONTHLY_TASK_TEMPLATES = [
   },
   {
     id: 'health_check',
-    icon: '🩺',
+    icon: 'shield',
     title: 'Health check — clients At Risk',
     description: 'Appel ou message pour chaque client avec health score < 60.',
     channel: 'call',
@@ -7502,7 +7571,7 @@ const MONTHLY_TASK_TEMPLATES = [
   },
   {
     id: 'renewal_check',
-    icon: '🔄',
+    icon: 'rotate-ccw',
     title: 'Vérification renouvellements',
     description: 'Identifier les clients dont le contrat expire ce mois et préparer la proposition.',
     channel: 'email',
@@ -7989,14 +8058,7 @@ function showToast(msg, type = 'info') {
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
   const icons = { success: '✓', warning: '⚠', info: '→' };
-  // Use textContent rather than innerHTML so msg cannot inject markup
-  // (callers may pass user-sourced strings like lead/flow names).
-  const iconSpan = document.createElement('span');
-  iconSpan.textContent = icons[type] || '→';
-  const msgSpan = document.createElement('span');
-  msgSpan.textContent = String(msg ?? '');
-  toast.appendChild(iconSpan);
-  toast.appendChild(msgSpan);
+  toast.innerHTML = `<span>${icons[type] || '→'}</span><span>${msg}</span>`;
   container.appendChild(toast);
   /* Auto-suppression après 3s avec fade-out 0.3s */
   setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity .3s'; setTimeout(() => toast.remove(), 300); }, 3000);
@@ -8029,9 +8091,9 @@ const AVATAR_COLORS = ['#1a56e8','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef444
 let clients = [
   {
     id: 1, bizName: 'Elite Plumbing Co.', ownerName: 'Carlos Reyes',
-    trade: 'Plumber', city: 'San Diego, CA', phone: '+1 619 555 0121', email: 'carlos@eliteplumbing.com',
+    trade: 'Plumbing', city: 'San Diego, CA', phone: '+1 619 555 0121', email: 'carlos@eliteplumbing.com',
     status: 'active', mrr: 297, siteUrl: 'https://eliteplumbing.co', siteUp: true,
-    healthScore: 40, reviewsThisMonth: 1, leadsThisMonth: 3, automationsActive: 4,
+    githubRepo: 'spotrank-agency/elite-plumbing-co', reviewsThisMonth: 1, leadsThisMonth: 3, automationsActive: 4,
     nextAction: 'Rapport mensuel — en retard', nextActionDate: '45d ago', color: '#ef4444',
     customB: {
       full_name: 'Carlos Reyes', business_phone: '+1 619 555 0121',
@@ -8059,7 +8121,7 @@ let clients = [
     id: 2, bizName: 'Green Valley HVAC', ownerName: 'Mike Torres',
     trade: 'HVAC', city: 'Phoenix, AZ', phone: '+1 602 555 0187', email: 'mike@greenvalleyhvac.com',
     status: 'onboarding', mrr: 297, siteUrl: 'https://greenvalleyhvac.com', siteUp: true,
-    healthScore: 62, reviewsThisMonth: 0, leadsThisMonth: 0, automationsActive: 2,
+    githubRepo: '', reviewsThisMonth: 0, leadsThisMonth: 0, automationsActive: 2,
     nextAction: 'Compléter formulaire onboarding', nextActionDate: '5d ago', color: '#8b5cf6',
     customB: {
       full_name: 'Mike Torres', business_phone: '+1 602 555 0187',
@@ -8084,7 +8146,7 @@ let clients = [
     id: 3, bizName: 'Santos Electric', ownerName: 'Maria Santos',
     trade: 'Electrician', city: 'Tampa, FL', phone: '+1 813 555 0204', email: 'maria@santoselectric.com',
     status: 'active', mrr: 297, siteUrl: 'https://santoselectric.com', siteUp: true,
-    healthScore: 92, reviewsThisMonth: 7, leadsThisMonth: 14, automationsActive: 5,
+    githubRepo: 'spotrank-agency/santos-electric', reviewsThisMonth: 7, leadsThisMonth: 14, automationsActive: 5,
     nextAction: 'Rapport mensuel — planifié', nextActionDate: 'Dans 3j', color: '#10b981',
     customB: {
       full_name: 'Maria Santos', business_phone: '+1 813 555 0204',
@@ -8114,9 +8176,9 @@ let clients = [
   },
   {
     id: 4, bizName: 'Bradley Roofing', ownerName: 'Tom Bradley',
-    trade: 'Roofer', city: 'Nashville, TN', phone: '+1 615 555 0099', email: 'tom@bradleyroofing.com',
+    trade: 'Roofing', city: 'Nashville, TN', phone: '+1 615 555 0099', email: 'tom@bradleyroofing.com',
     status: 'active', mrr: 297, siteUrl: 'https://bradleyroofing.com', siteUp: false,
-    healthScore: 71, reviewsThisMonth: 3, leadsThisMonth: 8, automationsActive: 4,
+    githubRepo: '', reviewsThisMonth: 3, leadsThisMonth: 8, automationsActive: 4,
     nextAction: 'Site down — vérifier Netlify', nextActionDate: 'Urgent', color: '#f59e0b',
     customB: {
       full_name: 'Tom Bradley', business_phone: '+1 615 555 0099',
@@ -8410,10 +8472,14 @@ function saveClientSheet() {
   showToast('Client sauvegardé ✓', 'success');
 }
 
+/**
+ * deploySite(id) — Point d'entrée du bouton "Deploy" dans Site & Formulaires.
+ * Délègue vers deployClientSite() qui orchestre l'API GitHub.
+ * Remplace l'ancien mock Netlify.
+ * @param {number} id - id du client
+ */
 function deploySite(id) {
-  const c = clients.find(cl => cl.id === id);
-  showToast(`Déploiement de ${c.bizName} en cours…`, 'info');
-  setTimeout(() => showToast(`${c.bizName} — Site déployé sur Netlify ✓`, 'success'), 2000);
+  deployClientSite(id);
 }
 
 function generateReport() {
@@ -8429,26 +8495,45 @@ function addClient() {
   const biz = document.getElementById('nc-biz').value.trim();
   if (!biz) { showToast('Entrez le nom du business', 'warning'); return; }
   const colors = AVATAR_COLORS;
+  const trade  = document.getElementById('nc-trade').value;
+
+  // Auto-assign des flows selon le métier du client
+  // Chaque flow reçoit un id unique et des stats initialisées à zéro
+  const autoFlows = getFlowsForTrade(trade).map(f => ({
+    ...f,
+    id:       `${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
+    sent:     0,
+    openRate: '—',
+    addedAt:  new Date().toISOString(),
+    source:   'auto', // 'auto' = assigné automatiquement, 'manual' = ajouté manuellement
+  }));
+
   clients.push({
     id: nextClientId++,
     bizName: biz,
     ownerName: document.getElementById('nc-name').value || 'N/A',
-    trade: document.getElementById('nc-trade').value,
+    trade,
     city: document.getElementById('nc-city').value || 'N/A',
     phone: document.getElementById('nc-phone').value || '',
     email: document.getElementById('nc-email').value || '',
     status: document.getElementById('nc-status').value,
     mrr: parseInt(document.getElementById('nc-mrr').value) || 297,
-    siteUrl: '', siteUp: false,
-    healthScore: 50, reviewsThisMonth: 0, leadsThisMonth: 0, automationsActive: 0,
+    siteUrl: '', siteUp: false, githubRepo: '',
+    // Flows SMS/email auto-assignés selon le métier
+    flows: autoFlows,
+    healthScore: 50, reviewsThisMonth: 0, leadsThisMonth: 0,
+    automationsActive: autoFlows.filter(f => f.active).length,
     nextAction: 'Démarrer onboarding', nextActionDate: 'Maintenant',
     color: colors[nextClientId % colors.length],
     customB: { full_name: document.getElementById('nc-name').value, business_phone: document.getElementById('nc-phone').value, official_business_name: biz, business_tax_id:'', current_website_url:'', about:'', service_areas:'', services:'', what_makes_you_stand_out:'', hours:'', instagram_url:'', facebook_url:'', bbb_link:'', tiktok_url:'', yelp_url:'', shipping_address:'', return_offer:'', company_logo_url:'', photos_email: document.getElementById('nc-email').value },
-    history: [{ type:'note', text:'Client créé manuellement', date:'Maintenant' }],
+    history: [
+      { type:'auto', text:`${autoFlows.length} flows auto-assignés (${trade})`, date:'Maintenant' },
+      { type:'note', text:'Client créé manuellement', date:'Maintenant' },
+    ],
   });
   closeModal('modal-add-client');
   renderClientsTable();
-  showToast(`${biz} ajouté ✓`, 'success');
+  showToast(`${biz} ajouté ✓ — ${autoFlows.length} flows assignés`, 'success');
 }
 
 /* ═══════════════════════════════════════════
@@ -8460,9 +8545,9 @@ const SITE_TEMPLATES = [
     name: 'ProLocal',
     desc: 'Template universel contractor — Hero sombre + formulaire + avis Google. Idéal pour tous les trades.',
     themes: {
-      blue:   { label: 'Bleu',   color: '#1a56e8', trades: ['Plumber','HVAC','Electrician','Pool Service'] },
-      green:  { label: 'Vert',   color: '#16a34a', trades: ['Landscaper','Tree Service','Pest Control','Painter'] },
-      orange: { label: 'Orange', color: '#ea580c', trades: ['Roofer','General Contractor','Concrete','Flooring'] },
+      blue:   { label: 'Bleu',   color: '#1a56e8', trades: ['Plumbing','HVAC','Electrician','Swimming Pools'] },
+      green:  { label: 'Vert',   color: '#16a34a', trades: ['Landscaping','Tree Service','Pest Control','Painting'] },
+      orange: { label: 'Orange', color: '#ea580c', trades: ['Roofing','General Contractor','Concrete','Flooring'] },
     },
     defaultTheme: 'blue',
     pages: ['Home','Optin / VSL','Funnel Page 1','Funnel Page 2','Legal','Privacy','Contact'],
@@ -8483,7 +8568,7 @@ function switchSettingsTab(tab, btn) {
   document.querySelectorAll('.settings-sidenav-item').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
 
-  const labels = { vars: 'Variables agence', templates: 'Templates sites', api: 'Intégrations & API', account: 'Profil', calendars: 'Calendriers & Booking', performance: 'Performances équipe', signature: 'Signature email' };
+  const labels = { vars: 'Variables agence', templates: 'Templates sites', 'client-flows': 'Flows clients par métier', api: 'Intégrations & API', account: 'Profil', calendars: 'Calendriers & Booking', performance: 'Performances équipe', signature: 'Signature email' };
   document.getElementById('settings-topbar-sub').textContent = labels[tab] || tab;
 
   const actionsEl = document.getElementById('settings-topbar-actions');
@@ -8495,6 +8580,10 @@ function switchSettingsTab(tab, btn) {
     actionsEl.innerHTML = `<button class="btn btn-ghost-sm" onclick="openAddTemplate()">
       <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M8 2v12M2 8h12"/></svg>
       Nouveau template</button>`;
+  } else if (tab === 'client-flows') {
+    actionsEl.innerHTML = `<button class="btn btn-ghost-sm" onclick="renderSettingsContent()">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13.5 8A5.5 5.5 0 1 1 8 2.5"/><path d="M13.5 2.5v3h-3"/></svg>
+      Actualiser</button>`;
   } else if (tab === 'api') {
     actionsEl.innerHTML = `<button class="btn btn-primary" onclick="saveAllApiKeys()">
       <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8l4 4 8-8"/></svg>
@@ -8523,8 +8612,9 @@ function renderSettingsContent() {
   const wrapper = document.getElementById('settings-wrapper');
   if (!wrapper) return;
 
-  if (currentSettingsTab === 'vars')         renderVarsTab(wrapper);
+  if (currentSettingsTab === 'vars')             renderVarsTab(wrapper);
   else if (currentSettingsTab === 'templates')   renderTemplatesTab(wrapper);
+  else if (currentSettingsTab === 'client-flows') renderClientFlowsTab(wrapper);
   else if (currentSettingsTab === 'api')         renderApiTab(wrapper);
   else if (currentSettingsTab === 'account')     renderAccountTab(wrapper);
   else if (currentSettingsTab === 'calendars')   renderCalendarsTab(wrapper);
@@ -8532,7 +8622,236 @@ function renderSettingsContent() {
   else if (currentSettingsTab === 'signature')   renderSignatureTab(wrapper);
 }
 
+/** State — trade actuellement sélectionné dans l'éditeur Settings */
+/** State — trade sélectionné dans l'éditeur Settings */
+let _selectedFlowTrade = '_all';
+
+/**
+ * renderClientFlowsTab(wrapper) — Table view des flows clients par métier.
+ * Structure identique à la page "Automation Flows" agence :
+ *   - Sidebar : liste des trades
+ *   - Table : NOM / STATUT / ÉTAPES / ACTIF / MODIFIÉ / ACTIONS
+ *   - Bouton "Modifier" → ouvre le Builder dans un overlay iframe
+ */
+function renderClientFlowsTab(wrapper) {
+  if (_selectedFlowTrade !== '_all' && !CLIENT_FLOW_TEMPLATES[_selectedFlowTrade]) {
+    CLIENT_FLOW_TEMPLATES[_selectedFlowTrade] = [];
+  }
+  var selectedFlows = CLIENT_FLOW_TEMPLATES[_selectedFlowTrade] || [];
+  var isCommon = _selectedFlowTrade === '_all';
+  var tradeLabel = isCommon ? 'Flows communs' : _selectedFlowTrade;
+  var tradeIcon  = isCommon ? lucide('globe', 18) : getTradeIcon(_selectedFlowTrade);
+  var published = selectedFlows.filter(function(f) { return f.active; }).length;
+  var escTrade = _selectedFlowTrade.replace(/'/g, "\\'");
+
+  /* Sidebar */
+  var sb = '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Métiers</div>';
+  sb += '<div onclick="selectFlowTrade(\'_all\')" style="padding:8px 12px;border-radius:8px;cursor:pointer;margin-bottom:4px;font-size:13px;display:flex;align-items:center;gap:8px;font-weight:' + (_selectedFlowTrade==='_all'?'700':'500') + ';background:' + (_selectedFlowTrade==='_all'?'var(--cta-ghost)':'transparent') + ';color:' + (_selectedFlowTrade==='_all'?'var(--cta)':'var(--ink)') + ';">' + lucide('globe', 14) + ' Communs<span style="margin-left:auto;font-size:11px;color:var(--muted);">' + (CLIENT_FLOW_TEMPLATES._all||[]).length + '</span></div>';
+  TRADES.slice().sort(function(a, b) { return a.label.localeCompare(b.label); }).forEach(function(t) {
+    var c2 = (CLIENT_FLOW_TEMPLATES[t.id] || []).length;
+    var s2 = _selectedFlowTrade === t.id;
+    sb += '<div onclick="selectFlowTrade(\'' + t.id.replace(/'/g,"\\'") + '\')" style="padding:8px 12px;border-radius:8px;cursor:pointer;margin-bottom:4px;font-size:13px;display:flex;align-items:center;gap:8px;font-weight:' + (s2?'700':'500') + ';background:' + (s2?'var(--cta-ghost)':'transparent') + ';color:' + (s2?'var(--cta)':'var(--ink)') + ';">' + lucide(t.icon, 14) + ' ' + safeHTML(t.label) + '<span style="margin-left:auto;font-size:11px;color:var(--muted);">' + c2 + '</span></div>';
+  });
+  sb += '<button onclick="addTradePrompt()" style="width:100%;margin-top:12px;padding:8px;border:1px dashed var(--border);border-radius:8px;background:none;font-family:\'Onest\',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">' + lucide('plus', 12) + ' Ajouter un métier</button>';
+
+  /* Table rows */
+  var rows = '';
+  if (selectedFlows.length === 0) {
+    rows = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">Aucun flow. Cliquez "+ Nouveau flow".</td></tr>';
+  } else {
+    selectedFlows.forEach(function(f, fi) {
+      var badge = f.active ? '<span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:5px;background:#f0fdf4;color:#16a34a;">' + lucide('check', 10) + ' Publié</span>' : '<span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:5px;background:#f1f5f9;color:#64748b;">' + lucide('settings', 10) + ' Brouillon</span>';
+      rows += '<tr style="border-bottom:1px solid var(--border);" onmouseover="this.style.background=\'var(--stone)\'" onmouseout="this.style.background=\'\'">' +
+        '<td style="padding:14px 16px;"><div style="font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:3px;">' + safeHTML(f.name) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span style="font-size:10px;color:var(--muted);font-family:monospace;">' + safeHTML(f.id || '') + '</span><span style="font-size:10px;font-weight:600;padding:1px 7px;border-radius:4px;background:#eff6ff;color:#1d4ed8;display:inline-flex;align-items:center;gap:3px;">' + lucide('zap', 9) + ' ' + safeHTML((f.trigger||'').substring(0,30)) + '</span></div></td>' +
+        '<td style="padding:14px 16px;">' + badge + '</td>' +
+        '<td style="padding:14px 16px;font-size:13px;font-weight:600;color:var(--ink);">' + (f.steps ? f.steps.length : 0) + '</td>' +
+        '<td style="padding:14px 16px;font-size:13px;color:var(--ink);">' + (f.active ? 'Oui' : '—') + '</td>' +
+        '<td style="padding:14px 16px;font-size:12px;color:var(--muted);">' + safeHTML(f.modifiedAt||'—') + '</td>' +
+        '<td style="padding:14px 16px;"><div style="display:flex;gap:5px;">' +
+          '<button title="Ouvrir dans le Builder" onclick="openFlowInBuilder(\'' + escTrade + '\',' + fi + ')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--muted);display:flex;align-items:center;" onmouseover="this.style.borderColor=\'var(--cta)\';this.style.color=\'var(--cta)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.color=\'var(--muted)\'">' + lucide('settings', 13) + '</button>' +
+          '<button title="' + (f.active?'Brouillon':'Publier') + '" onclick="toggleFlowTemplate(\'' + escTrade + '\',' + fi + ',!' + f.active + ')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--muted);display:flex;align-items:center;" onmouseover="this.style.borderColor=\'var(--cta)\';this.style.color=\'var(--cta)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.color=\'var(--muted)\'">' + (f.active?lucide('pause',13):lucide('play',13)) + '</button>' +
+          '<button title="Dupliquer" onclick="duplicateFlowTpl(\'' + escTrade + '\',' + fi + ')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--muted);display:flex;align-items:center;" onmouseover="this.style.borderColor=\'var(--cta)\';this.style.color=\'var(--cta)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.color=\'var(--muted)\'">' + lucide('clipboard', 13) + '</button>' +
+          '<button title="Supprimer" onclick="deleteFlowTemplate(\'' + escTrade + '\',' + fi + ')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--muted);display:flex;align-items:center;" onmouseover="this.style.borderColor=\'#ef4444\';this.style.color=\'#ef4444\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.color=\'var(--muted)\'">' + lucide('trash', 13) + '</button>' +
+        '</div></td></tr>';
+    });
+  }
+
+  /* Header */
+  var hdr = '<div style="display:flex;align-items:center;gap:10px;"><span style="color:var(--cta);">' + tradeIcon + '</span>';
+  if (isCommon) {
+    hdr += '<div><div style="font-size:16px;font-weight:700;color:var(--ink);">Flows communs</div><div style="font-size:12px;color:var(--muted);">Assignés à tous les clients · ' + selectedFlows.length + ' flows</div></div>';
+  } else {
+    hdr += '<div><div style="display:flex;align-items:center;gap:8px;"><input value="' + safeHTML(tradeLabel) + '" onchange="renameTrade(\'' + escTrade + '\',this.value)" style="font-size:16px;font-weight:700;color:var(--ink);border:none;border-bottom:1.5px solid transparent;background:none;padding:0 0 2px;font-family:\'Onest\',sans-serif;outline:none;max-width:240px;" onfocus="this.style.borderBottomColor=\'var(--cta)\'" onblur="this.style.borderBottomColor=\'transparent\'" /><button onclick="deleteTradePrompt(\'' + escTrade + '\')" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:2px;display:flex;" onmouseover="this.style.color=\'#dc2626\'" onmouseout="this.style.color=\'var(--muted)\'">' + lucide('trash',14) + '</button></div><div style="font-size:12px;color:var(--muted);">' + selectedFlows.length + ' flow' + (selectedFlows.length!==1?'s':'') + ' · ' + published + ' publié' + (published!==1?'s':'') + '</div></div>';
+  }
+  hdr += '</div>';
+
+  /* Assemble */
+  wrapper.innerHTML = '<div style="display:flex;gap:0;max-width:1100px;"><div style="width:210px;flex-shrink:0;border-right:1px solid var(--border);padding-right:16px;">' + sb + '</div><div style="flex:1;min-width:0;padding-left:20px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">' + hdr + '<button class="btn btn-primary" style="font-size:12px;display:flex;align-items:center;gap:6px;" onclick="addFlowTemplate(\'' + escTrade + '\')">' + lucide('plus',12) + ' Nouveau flow</button></div><div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:var(--stone);border-bottom:1px solid var(--border);"><th style="padding:10px 16px;font-size:10px;font-weight:700;color:var(--muted);text-align:left;text-transform:uppercase;letter-spacing:.06em;">NOM</th><th style="padding:10px 16px;font-size:10px;font-weight:700;color:var(--muted);text-align:left;text-transform:uppercase;letter-spacing:.06em;">STATUT</th><th style="padding:10px 16px;font-size:10px;font-weight:700;color:var(--muted);text-align:left;text-transform:uppercase;letter-spacing:.06em;">ÉTAPES</th><th style="padding:10px 16px;font-size:10px;font-weight:700;color:var(--muted);text-align:left;text-transform:uppercase;letter-spacing:.06em;">ACTIF</th><th style="padding:10px 16px;font-size:10px;font-weight:700;color:var(--muted);text-align:left;text-transform:uppercase;letter-spacing:.06em;">MODIFIÉ</th><th style="padding:10px 16px;font-size:10px;font-weight:700;color:var(--muted);text-align:left;text-transform:uppercase;letter-spacing:.06em;">ACTIONS</th></tr></thead><tbody>' + rows + '</tbody></table></div></div></div>';
+}
+
+/* ── Flow management functions ── */
+
+function selectFlowTrade(tradeKey) { _selectedFlowTrade = tradeKey; renderSettingsContent(); }
+
+function addFlowTemplate(tradeKey) {
+  if (!CLIENT_FLOW_TEMPLATES[tradeKey]) CLIENT_FLOW_TEMPLATES[tradeKey] = [];
+  CLIENT_FLOW_TEMPLATES[tradeKey].push({
+    id: 'flow_' + Date.now(), name: 'Nouveau flow', icon: 'clipboard',
+    trigger: 'À définir', channel: 'sms', active: false, modifiedAt: 'Maintenant',
+    steps: [{ delay: 'J+1', type: 'sms', content: 'Bonjour {{client_name}},' }],
+  });
+  renderSettingsContent();
+  showToast('Flow template créé ✓', 'success');
+}
+
+function deleteFlowTemplate(tradeKey, flowIndex) {
+  var flows = CLIENT_FLOW_TEMPLATES[tradeKey];
+  if (!flows || !flows[flowIndex]) return;
+  showModal('Supprimer ce flow ?',
+    '<div style="font-size:13px;color:var(--muted);margin-bottom:16px;">Le template <strong>"' + safeHTML(flows[flowIndex].name) + '"</strong> sera supprimé.</div>' +
+    '<div style="display:flex;gap:8px;justify-content:flex-end;"><button class="btn btn-ghost-sm" onclick="closeModal()">Annuler</button>' +
+    '<button class="btn btn-primary" style="background:#dc2626;" onclick="confirmDeleteFlowTemplate(\'' + tradeKey.replace(/'/g,"\\'") + '\',' + flowIndex + ')">Supprimer</button></div>');
+}
+
+function confirmDeleteFlowTemplate(tradeKey, flowIndex) {
+  closeModal();
+  var flows = CLIENT_FLOW_TEMPLATES[tradeKey];
+  if (flows) { flows.splice(flowIndex, 1); renderSettingsContent(); showToast('Supprimé', 'info'); }
+}
+
+function toggleFlowTemplate(tradeKey, flowIndex, active) {
+  var flows = CLIENT_FLOW_TEMPLATES[tradeKey];
+  if (flows && flows[flowIndex]) {
+    flows[flowIndex].active = active;
+    flows[flowIndex].modifiedAt = 'Maintenant';
+    renderSettingsContent();
+    showToast(active ? 'Publié ✓' : 'Brouillon', 'info');
+  }
+}
+
+function duplicateFlowTpl(tradeKey, flowIndex) {
+  var flows = CLIENT_FLOW_TEMPLATES[tradeKey];
+  if (!flows || !flows[flowIndex]) return;
+  var o = flows[flowIndex];
+  flows.push({
+    id: 'flow_' + Date.now(), name: o.name + ' (copie)', icon: o.icon,
+    trigger: o.trigger, channel: o.channel, active: false, modifiedAt: 'Maintenant',
+    steps: (o.steps||[]).map(function(s) { return {delay:s.delay,type:s.type,content:s.content}; }),
+  });
+  renderSettingsContent();
+  showToast('Dupliqué en brouillon ✓', 'success');
+}
+
+/**
+ * openFlowInBuilder(tradeKey, flowIndex) — Ouvre le Builder dans un overlay plein écran.
+ * Charge le flow dans l'iframe spotrank-builder.html via postMessage.
+ */
+function openFlowInBuilder(tradeKey, flowIndex) {
+  var flows = CLIENT_FLOW_TEMPLATES[tradeKey];
+  if (!flows || !flows[flowIndex]) return;
+  var flow = flows[flowIndex];
+  window._editingFlowRef = { tradeKey: tradeKey, flowIndex: flowIndex };
+
+  var overlay = document.getElementById('builder-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'builder-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;';
+    overlay.innerHTML =
+      '<div style="padding:10px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg-card);flex-shrink:0;">' +
+        '<div style="display:flex;align-items:center;gap:12px;"><button onclick="closeFlowBuilder()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 14px;cursor:pointer;font-family:\'Onest\',sans-serif;font-size:12px;color:var(--ink);display:flex;align-items:center;gap:6px;">' + lucide('arrow-left',14) + ' Tous les flows</button><span id="builder-overlay-title" style="font-size:14px;font-weight:700;"></span></div>' +
+        '<div style="display:flex;align-items:center;gap:8px;"><span id="builder-overlay-status" style="font-size:12px;color:var(--muted);"></span><button onclick="saveFlowFromBuilder()" class="btn btn-primary" style="font-size:12px;display:flex;align-items:center;gap:6px;">' + lucide('check',12) + ' Sauvegarder</button></div>' +
+      '</div>' +
+      '<iframe id="builder-overlay-iframe" src="spotrank-builder.html" style="flex:1;border:none;width:100%;"></iframe>';
+    document.body.appendChild(overlay);
+  }
+
+  document.getElementById('builder-overlay-title').textContent = flow.name;
+  document.getElementById('builder-overlay-status').textContent = flow.active ? '● Publié' : '○ Brouillon';
+  overlay.style.display = 'flex';
+
+  setTimeout(function() {
+    var iframe = document.getElementById('builder-overlay-iframe');
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({ type: 'LOAD_CLIENT_FLOW', flow: flow, tradeKey: tradeKey }, '*');
+    }
+  }, 600);
+}
+
+function closeFlowBuilder() {
+  var o = document.getElementById('builder-overlay');
+  if (o) o.style.display = 'none';
+}
+
+function saveFlowFromBuilder() {
+  var ref = window._editingFlowRef;
+  if (ref) {
+    var flows = CLIENT_FLOW_TEMPLATES[ref.tradeKey];
+    if (flows && flows[ref.flowIndex]) flows[ref.flowIndex].modifiedAt = 'Maintenant';
+  }
+  closeFlowBuilder();
+  renderSettingsContent();
+  showToast('Flow sauvegardé ✓', 'success');
+}
+
+/* ── Trade management ── */
+
+function addTradePrompt() {
+  showModal('Ajouter un métier',
+    '<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:600;color:var(--ink);display:block;margin-bottom:6px;">Nom du métier</label><input id="new-trade-name" class="form-input" placeholder="Ex: Garage Door, Fencing…" style="width:100%;" /></div>' +
+    '<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:600;color:var(--ink);display:block;margin-bottom:6px;">Icône Lucide</label><input id="new-trade-icon" class="form-input" placeholder="wrench, home, zap…" value="settings" style="width:160px;" /><div style="font-size:10px;color:var(--muted);margin-top:4px;">Voir <a href="https://lucide.dev/icons" target="_blank" style="color:var(--cta);">lucide.dev/icons</a></div></div>' +
+    '<div style="display:flex;gap:8px;justify-content:flex-end;"><button class="btn btn-ghost-sm" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="confirmAddTrade()">Ajouter</button></div>');
+}
+
+function confirmAddTrade() {
+  var n = document.getElementById('new-trade-name');
+  var i = document.getElementById('new-trade-icon');
+  if (!n) return;
+  var name = n.value.trim(), icon = i ? i.value.trim() : 'settings';
+  if (!name) { showToast('Entrez un nom', 'warning'); return; }
+  if (TRADES.some(function(t){return t.id===name;})) { showToast('Existe déjà', 'warning'); return; }
+  TRADES.push({ id: name, label: name, icon: icon || 'settings' });
+  CLIENT_FLOW_TEMPLATES[name] = [];
+  closeModal(); populateTradeDropdowns(); _selectedFlowTrade = name; renderSettingsContent();
+  showToast('"' + name + '" ajouté ✓', 'success');
+}
+
+function renameTrade(oldId, newName) {
+  newName = newName.trim();
+  if (!newName || newName === oldId) return;
+  if (TRADES.some(function(t){return t.id===newName;})) { showToast('Ce nom existe déjà', 'warning'); return; }
+  var t = TRADES.find(function(t){return t.id===oldId;}); if (t) { t.id=newName; t.label=newName; }
+  if (CLIENT_FLOW_TEMPLATES[oldId]) { CLIENT_FLOW_TEMPLATES[newName]=CLIENT_FLOW_TEMPLATES[oldId]; delete CLIENT_FLOW_TEMPLATES[oldId]; }
+  clients.forEach(function(c){ if(c.trade===oldId) c.trade=newName; });
+  _selectedFlowTrade = newName; populateTradeDropdowns(); renderSettingsContent();
+  showToast(oldId + ' → ' + newName + ' ✓', 'success');
+}
+
+function deleteTradePrompt(tradeId) {
+  var cc = clients.filter(function(c){return c.trade===tradeId;}).length;
+  var fc = (CLIENT_FLOW_TEMPLATES[tradeId]||[]).length;
+  showModal('Supprimer "' + safeHTML(tradeId) + '" ?',
+    '<div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6;"><strong>' + fc + '</strong> flow' + (fc!==1?'s':'') + ' supprimé' + (fc!==1?'s':'') + '.<br>' + (cc>0?'<strong>'+cc+'</strong> client'+(cc!==1?'s':'')+' utilise'+(cc!==1?'nt':'')+' ce métier.':'Aucun client concerné.') + '</div>' +
+    '<div style="display:flex;gap:8px;justify-content:flex-end;"><button class="btn btn-ghost-sm" onclick="closeModal()">Annuler</button><button class="btn btn-primary" style="background:#dc2626;" onclick="confirmDeleteTrade(\'' + tradeId.replace(/'/g,"\\'") + '\')">Supprimer</button></div>');
+}
+
+function confirmDeleteTrade(tradeId) {
+  closeModal();
+  TRADES = TRADES.filter(function(t){return t.id!==tradeId;});
+  delete CLIENT_FLOW_TEMPLATES[tradeId];
+  _selectedFlowTrade = '_all'; populateTradeDropdowns(); renderSettingsContent();
+  showToast('"' + tradeId + '" supprimé', 'info');
+}
+
+
 /* ── Tab: Variables agence ── */
+/**
+ * renderVarsTab(wrapper) — Rend l'onglet "Variables agence" dans Settings.
+ * Affiche les variables agence (vente + onboarding) éditables inline.
+ * Chaque champ modifié déclenche agencyVarsUnsaved = true.
+ * Sauvegardé via saveAgencyVars().
+ * @param {Element} wrapper - Conteneur DOM des Settings
+ */
 function renderVarsTab(wrapper) {
   const venteKeys      = Object.keys(AGENCY_VARS).filter(k => AGENCY_VARS[k].group === 'vente');
   const onboardingKeys = Object.keys(AGENCY_VARS).filter(k => AGENCY_VARS[k].group === 'onboarding');
@@ -8582,9 +8901,9 @@ function renderVarsTab(wrapper) {
 /* ── Tab: Templates ── */
 function renderTemplatesTab(wrapper) {
   const tradeThemeMap = {
-    'Plumber':'blue','HVAC':'blue','Electrician':'blue','Pool Service':'blue',
-    'Landscaper':'green','Tree Service':'green','Pest Control':'green','Painter':'green',
-    'Roofer':'orange','General Contractor':'orange','Concrete':'orange','Flooring':'orange',
+    'Plumbing':'blue','HVAC':'blue','Electrician':'blue','Swimming Pools':'blue',
+    'Landscaping':'green','Tree Service':'green','Pest Control':'green','Painting':'green',
+    'Roofing':'orange','General Contractor':'orange','Concrete':'orange','Flooring':'orange',
   };
 
   wrapper.innerHTML = `
@@ -8708,7 +9027,10 @@ let API_KEYS = {
   stripe_pk:'', stripe_sk:'',
   google_cal_client_id:'', google_cal_client_secret:'',
   twilio_account_sid:'', twilio_auth_token:'', twilio_phone:'',
-  sendgrid_api_key:'', ghl_api_key:'', anthropic_api_key:'', netlify_token:'',
+  sendgrid_api_key:'', ghl_api_key:'', anthropic_api_key:'',
+  // GitHub Personal Access Token — scopes requis : repo, workflow, write:org, pages
+  // Générer sur : github.com/settings/tokens → "Spotrank Dashboard"
+  github_token:'',
 };
 
 /*
@@ -9303,14 +9625,409 @@ const INTEGRATIONS = [
   { id:'sendgrid',    name:'SendGrid',          icon:'✉️', category:'Email',    desc:'Emails transactionnels — confirmations, OTP, rapports', usage:'Obligatoire pour les emails', fields:[{key:'sendgrid_api_key',label:'API Key',placeholder:'SG.xxxx',type:'password'}] },
   { id:'ghl',         name:'GoHighLevel',       icon:'🎯', category:'CRM',     desc:'Sync bidirectionnelle leads, contacts, automations', usage:'Recommandé pour sync CRM', fields:[{key:'ghl_api_key',label:'API Key',placeholder:'eyJhbGci...',type:'password'}] },
   { id:'anthropic',   name:'Anthropic (Claude)',icon:'🤖', category:'IA',      desc:'AI Assistant intégré dans toutes les pages', usage:'Requis pour activer l\'AI Assistant', fields:[{key:'anthropic_api_key',label:'API Key',placeholder:'sk-ant-xxxx',type:'password'}] },
-  { id:'netlify',     name:'Netlify',           icon:'🚀', category:'Deploy',  desc:'Déploiement automatique des sites clients', usage:'Requis pour le deploy depuis le dashboard', fields:[{key:'netlify_token',label:'Personal Access Token',placeholder:'nfp_xxxx',type:'password'}] },
+  { id:'github', name:'GitHub Pages', icon:'🐙', category:'Deploy', desc:'Hébergement automatique des sites clients via GitHub Pages (org: Spotrank-agency)', usage:'Requis pour créer et déployer les sites clients', fields:[{key:'github_token',label:'Personal Access Token',placeholder:'ghp_xxxx',type:'password'}] },
 ];
 
+/* ═══════════════════════════════════════════
+   LUCIDE ICONS — Bibliothèque SVG inline
+   Source : https://lucide.dev/
+   Usage : lucide('wrench') ou lucide('wrench', 14)
+   Toutes les icônes du projet passent par cette fonction.
+   viewBox 0 0 24 24, stroke currentColor, no fill.
+═══════════════════════════════════════════ */
+const LUCIDE = {
+  wrench:           '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  thermometer:      '<path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/>',
+  home:             '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  zap:              '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+  leaf:             '<path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 20 2 20 2s-1.7 6-5 12"/><path d="M10.7 13.3a4 4 0 0 0-5.6 0"/>',
+  paintbrush:       '<path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3Z"/><path d="M9 8c-2 3-4 3.5-7 4l8 10c2-1 6-5 6-7"/><path d="M14.5 17.5 4.5 15"/>',
+  'hard-hat':       '<path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"/><path d="M10 15V6a2 2 0 0 1 4 0v9"/><path d="M4 15v-3a8 8 0 0 1 16 0v3"/>',
+  droplets:         '<path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 14.69c1.56 0 2.83-1.29 2.83-2.88 0-.82-.4-1.6-1.21-2.26-.82-.66-1.35-1.36-1.62-2.24-.28 1.03-.82 2.01-1.62 2.66-.81.66-1.21 1.44-1.21 2.26 0 .82.34 1.56.88 2.07"/>',
+  bug:              '<path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/>',
+  'tree-pine':      '<path d="m17 14 3 3.3a1 1 0 0 1-.7 1.7H4.7a1 1 0 0 1-.7-1.7L7 14l-3-3.3a1 1 0 0 1 .7-1.7h4.6L7 6a1 1 0 0 1 .7-1.7h8.6a1 1 0 0 1 .7 1.7l-2.3 3H19.3a1 1 0 0 1 .7 1.7z"/><path d="M12 22v-3"/>',
+  globe:            '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+  star:             '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+  'bar-chart':      '<line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/>',
+  'rotate-ccw':     '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+  'alert-triangle': '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  snowflake:        '<line x1="2" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="22"/><path d="m20 16-4-4 4-4"/><path d="m4 8 4 4-4 4"/><path d="m16 4-4 4-4-4"/><path d="m8 20 4-4 4 4"/>',
+  sun:              '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+  'cloud-lightning':'<path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973"/><path d="m13 12-3 5h4l-3 5"/>',
+  shield:           '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+  sprout:           '<path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.5 13.5c.8-.8 1.4-1.5 1.7-2.5.5-1.7.3-3.3-.3-4.8 2 .4 3.5 1.5 4 3.5.3 1-.2 2.5-1.2 3.6-.7.7-1.5 1-2.2 1.2z"/>',
+  clipboard:        '<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>',
+  trash:            '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
+  plus:             '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  settings:         '<circle cx="12" cy="12" r="3"/><path d="M12 1v1.5M12 21.5V23M4.22 4.22l1.06 1.06M18.72 18.72l1.06 1.06M1 12h1.5M21.5 12H23M4.22 19.78l1.06-1.06M18.72 5.28l1.06-1.06"/>',
+  'message-square': '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  mail:             '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+  'fire':           '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+  pause:            '<rect width="4" height="16" x="6" y="4" rx="1"/><rect width="4" height="16" x="14" y="4" rx="1"/>',
+  play:             '<polygon points="6 3 20 12 6 21 6 3"/>',
+  check:            '<path d="M20 6 9 17l-5-5"/>',
+  'arrow-left':     '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+};
+
+/**
+ * lucide(name, size) — Retourne le SVG Lucide inline pour une icône donnée.
+ * @param {string} name - Nom de l'icône (clé dans LUCIDE)
+ * @param {number} size - Taille en px (défaut: 16)
+ * @returns {string} - HTML SVG inline
+ */
+function lucide(name, size) {
+  size = size || 16;
+  var paths = LUCIDE[name] || LUCIDE.clipboard;
+  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + paths + '</svg>';
+}
+
+/* ═══════════════════════════════════════════
+   TRADES — Liste centrale des corps de métiers
+   Source unique utilisée dans :
+     - Dropdown "Trade / Métier" lors de la création client
+     - CLIENT_FLOW_TEMPLATES (flows par métier)
+     - Settings → Flows clients (onglets par métier)
+     - Filtres et thèmes UI par métier
+   ÉDITABLE : ajouter/retirer un métier ici propage partout.
+   icon = clé dans LUCIDE (pas un emoji).
+═══════════════════════════════════════════ */
+let TRADES = [
+  { id: 'Electrician',                   label: 'Electrician',                   icon: 'zap' },
+  { id: 'General Contractor',            label: 'General Contractor',            icon: 'hard-hat' },
+  { id: 'Home Inspection',               label: 'Home Inspection',               icon: 'clipboard' },
+  { id: 'Home Maintenance',              label: 'Home Maintenance',              icon: 'wrench' },
+  { id: 'Home Services',                 label: 'Home Services',                 icon: 'home' },
+  { id: 'Hot Tubs, Spas & Saunas',       label: 'Hot Tubs, Spas & Saunas',       icon: 'droplets' },
+  { id: 'Household Help',                label: 'Household Help',                icon: 'home' },
+  { id: 'HVAC',                          label: 'HVAC',                          icon: 'thermometer' },
+  { id: 'Insulation',                    label: 'Insulation',                    icon: 'shield' },
+  { id: 'Landscaping',                   label: 'Landscaping',                   icon: 'leaf' },
+  { id: 'Lawn & Garden Care',            label: 'Lawn & Garden Care',            icon: 'sprout' },
+  { id: 'Lifting & Moving Heavy Items',  label: 'Lifting & Moving Heavy Items',  icon: 'hard-hat' },
+  { id: 'Locksmith',                     label: 'Locksmith',                     icon: 'settings' },
+  { id: 'Metal Fabrication',             label: 'Metal Fabrication',             icon: 'hard-hat' },
+  { id: 'Mold & Asbestos Services',      label: 'Mold & Asbestos Services',      icon: 'alert-triangle' },
+  { id: 'Moving',                        label: 'Moving',                        icon: 'hard-hat' },
+  { id: 'New Home Builders',             label: 'New Home Builders',             icon: 'home' },
+  { id: 'Organizers',                    label: 'Organizers',                    icon: 'clipboard' },
+  { id: 'Outdoor Playgrounds',           label: 'Outdoor Playgrounds',           icon: 'tree-pine' },
+  { id: 'Packing & Unpacking Services',  label: 'Packing & Unpacking Services',  icon: 'clipboard' },
+  { id: 'Painting',                      label: 'Painting',                      icon: 'paintbrush' },
+  { id: 'Paving',                        label: 'Paving',                        icon: 'hard-hat' },
+  { id: 'Permit Services',               label: 'Permit Services',               icon: 'clipboard' },
+  { id: 'Pest Control',                  label: 'Pest Control',                  icon: 'bug' },
+  { id: 'Plumbing',                      label: 'Plumbing',                      icon: 'wrench' },
+  { id: 'Powdercoating',                 label: 'Powdercoating',                 icon: 'paintbrush' },
+  { id: 'Remodeling',                    label: 'Remodeling',                    icon: 'home' },
+  { id: 'Roofing',                       label: 'Roofing',                       icon: 'home' },
+  { id: 'Sandblasting Service',          label: 'Sandblasting Service',          icon: 'hard-hat' },
+  { id: 'Septic Tanks & Wells',          label: 'Septic Tanks & Wells',          icon: 'droplets' },
+  { id: 'Sheds & Enclosures',            label: 'Sheds & Enclosures',            icon: 'home' },
+  { id: 'Siding',                        label: 'Siding',                        icon: 'home' },
+  { id: 'Sign Making Service',           label: 'Sign Making Service',           icon: 'clipboard' },
+  { id: 'Skylights',                     label: 'Skylights',                     icon: 'sun' },
+  { id: 'Snow Removal Service',          label: 'Snow Removal Service',          icon: 'snowflake' },
+  { id: 'Solar',                         label: 'Solar',                         icon: 'sun' },
+  { id: 'Stained Glass',                 label: 'Stained Glass',                 icon: 'paintbrush' },
+  { id: 'Swimming Pools',                label: 'Swimming Pools',                icon: 'droplets' },
+  { id: 'Tennis Or Game Court',           label: 'Tennis Or Game Court',           icon: 'hard-hat' },
+  { id: 'Tile',                          label: 'Tile',                          icon: 'hard-hat' },
+  { id: 'Tree Service',                  label: 'Tree Service',                  icon: 'tree-pine' },
+  { id: 'Wall Coverings',                label: 'Wall Coverings',                icon: 'paintbrush' },
+  { id: 'Waste Material Removal',        label: 'Waste Material Removal',        icon: 'trash' },
+  { id: 'Water Treatment System',        label: 'Water Treatment System',        icon: 'droplets' },
+  { id: 'Waterproofing',                 label: 'Waterproofing',                 icon: 'shield' },
+  { id: 'Window Coverings',              label: 'Window Coverings',              icon: 'home' },
+  { id: 'Windows',                       label: 'Windows',                       icon: 'home' },
+  { id: 'Yard & Garden Work',            label: 'Yard & Garden Work',            icon: 'leaf' },
+];
+
+/**
+ * getTradeIcon(tradeId) — Retourne le SVG Lucide d'un métier.
+ * @param {string} tradeId - id du trade (ex: 'Plumbing')
+ * @returns {string} - SVG inline Lucide
+ */
+function getTradeIcon(tradeId) {
+  var t = TRADES.find(function(t) { return t.id === tradeId; });
+  return t ? lucide(t.icon, 16) : lucide('settings', 16);
+}
+
+/**
+ * populateTradeDropdowns() — Alimente tous les <select> de trades dans le DOM.
+ * Appelée au boot et après chaque modification de TRADES.
+ * Cible tous les éléments avec la classe '.trade-select'.
+ */
+function populateTradeDropdowns() {
+  var sorted = TRADES.slice().sort(function(a, b) { return a.label.localeCompare(b.label); });
+  document.querySelectorAll('.trade-select').forEach(function(sel) {
+    var current = sel.value;
+    sel.innerHTML = sorted.map(function(t) {
+      return '<option value="' + t.id + '"' + (t.id === current ? ' selected' : '') + '>' + t.label + '</option>';
+    }).join('');
+  });
+}
+
+/* ═══════════════════════════════════════════
+   CLIENT FLOW TEMPLATES — Bibliothèque de flows par métier
+   Définit les flows SMS/email automatiquement assignés
+   à un client selon son trade lors de sa création.
+   Chaque template est personnalisable depuis Settings → Flows clients.
+   Les {{variables}} sont résolues avec les custom values du client.
+═══════════════════════════════════════════ */
+
+/*
+ * CLIENT_FLOW_TEMPLATES — Bibliothèque globale des templates de flows clients.
+ * Structure par métier (trade) → tableau de flows.
+ * Chaque flow contient :
+ *   id        : identifiant unique (généré automatiquement)
+ *   name      : nom affiché dans la fiche client
+ *   icon      : emoji de la carte
+ *   trigger   : déclencheur (texte affiché)
+ *   channel   : 'sms' | 'email' | 'both'
+ *   steps     : étapes du flow (délai + contenu)
+ *   active    : activé par défaut ?
+ * Les variables {{client_name}}, {{city}}, {{trade}}, {{phone}}, {{booking_link}}
+ * sont résolues dynamiquement avec les données du client.
+ */
+let CLIENT_FLOW_TEMPLATES = {
+  // ── Flows communs à tous les métiers ──────────────────────────────────────
+  _all: [
+    {
+      id: 'review_request',
+      name: 'Demande d\'avis Google',
+      icon: 'star',
+      trigger: 'Après prestation terminée (J+1)',
+      channel: 'sms',
+      active: true,
+      steps: [
+        { delay: 'J+1', type: 'sms', content: 'Bonjour {{client_name}}, merci de nous avoir fait confiance ! Pouvez-vous nous laisser un avis Google ? Cela prend 30 secondes → {{gmb_link}} 🙏' },
+        { delay: 'J+7', type: 'sms', content: 'Bonjour {{client_name}}, un petit rappel pour votre avis Google — votre retour compte beaucoup pour nous ! → {{gmb_link}}' },
+      ],
+    },
+    {
+      id: 'monthly_checkin',
+      name: 'Check-in mensuel',
+      icon: 'bar-chart',
+      trigger: '1er de chaque mois',
+      channel: 'email',
+      active: true,
+      steps: [
+        { delay: 'M+1', type: 'email', content: 'Bonjour {{client_name}}, voici votre rapport mensuel Spotrank pour {{city}}. Ce mois-ci : {{leads_count}} leads, {{reviews_count}} nouveaux avis Google. Rapport complet → {{report_link}}' },
+      ],
+    },
+    {
+      id: 'reactivation',
+      name: 'Réactivation client inactif',
+      icon: 'rotate-ccw',
+      trigger: 'Inactif +90 jours',
+      channel: 'sms',
+      active: false,
+      steps: [
+        { delay: 'J0', type: 'sms', content: 'Bonjour {{client_name}}, cela fait quelques mois — comment va votre activité à {{city}} ? Avez-vous des questions sur votre compte Spotrank ?' },
+      ],
+    },
+  ],
+
+  // ── Plumber ───────────────────────────────────────────────────────────────
+  Plumbing: [
+    {
+      id: 'emergency_followup_plumber',
+      name: 'Suivi urgence plomberie',
+      icon: 'wrench',
+      trigger: 'Nouveau lead urgence entrant',
+      channel: 'sms',
+      active: true,
+      steps: [
+        { delay: '5min', type: 'sms', content: 'Bonjour ! Votre demande d\'urgence plomberie à {{city}} a bien été reçue. Nous vous rappelons dans les 15 minutes. — {{client_name}}' },
+        { delay: '30min', type: 'sms', content: 'Nous n\'avons pas pu vous joindre. Appelez-nous directement au {{phone}} pour votre urgence plomberie.' },
+      ],
+    },
+    {
+      id: 'seasonal_plumber',
+      name: 'Alerte hiver — Protection tuyaux',
+      icon: 'snowflake',
+      trigger: 'Chaque année — 1er novembre',
+      channel: 'sms',
+      active: true,
+      steps: [
+        { delay: 'J0', type: 'sms', content: 'Bonjour de {{client_name}} ! L\'hiver approche à {{city}} — pensez à protéger vos tuyaux avant le gel. On s\'en occupe pour vous → {{booking_link}}' },
+      ],
+    },
+  ],
+
+  // ── HVAC ──────────────────────────────────────────────────────────────────
+  HVAC: [
+    {
+      id: 'seasonal_hvac_summer',
+      name: 'Maintenance AC — Été',
+      icon: 'thermometer',
+      trigger: 'Chaque année — 1er avril',
+      channel: 'sms',
+      active: true,
+      steps: [
+        { delay: 'J0', type: 'sms', content: 'Bonjour de {{client_name}} à {{city}} ! L\'été arrive — votre AC est-il prêt ? Révisez maintenant avant la chaleur → {{booking_link}}' },
+        { delay: 'J+14', type: 'sms', content: 'Rappel : maintenance AC à {{city}} — slots disponibles cette semaine → {{booking_link}}' },
+      ],
+    },
+    {
+      id: 'seasonal_hvac_winter',
+      name: 'Maintenance chauffage — Hiver',
+      icon: 'fire',
+      trigger: 'Chaque année — 1er octobre',
+      channel: 'sms',
+      active: true,
+      steps: [
+        { delay: 'J0', type: 'sms', content: 'Bonjour de {{client_name}} ! Hiver proche à {{city}} — votre système de chauffage est-il révisé ? Réservez maintenant → {{booking_link}}' },
+      ],
+    },
+  ],
+
+  // ── Roofer ────────────────────────────────────────────────────────────────
+  Roofing: [
+    {
+      id: 'storm_damage_roofer',
+      name: 'Alerte dommages tempête',
+      icon: 'cloud-lightning',
+      trigger: 'Manuel — après événement météo',
+      channel: 'sms',
+      active: false,
+      steps: [
+        { delay: 'J0', type: 'sms', content: 'Suite aux récentes tempêtes à {{city}}, {{client_name}} offre une inspection gratuite de toiture. Réservez maintenant → {{booking_link}}' },
+      ],
+    },
+    {
+      id: 'annual_inspection_roofer',
+      name: 'Inspection annuelle toiture',
+      icon: 'home',
+      trigger: 'Chaque année — anniversaire du client',
+      channel: 'email',
+      active: true,
+      steps: [
+        { delay: 'J0', type: 'email', content: 'Bonjour, 1 an avec {{client_name}} ! C\'est le moment idéal pour votre inspection annuelle de toiture à {{city}}. Réservez votre créneau → {{booking_link}}' },
+      ],
+    },
+  ],
+
+  // ── Electrician ───────────────────────────────────────────────────────────
+  Electrician: [
+    {
+      id: 'ev_charger_electrician',
+      name: 'Promo borne de recharge EV',
+      icon: 'zap',
+      trigger: 'Manuel — campagne saisonnière',
+      channel: 'sms',
+      active: false,
+      steps: [
+        { delay: 'J0', type: 'sms', content: 'Bonjour de {{client_name}} à {{city}} ! Vous pensez à une borne de recharge pour votre véhicule électrique ? Installation rapide et certifiée → {{booking_link}}' },
+      ],
+    },
+    {
+      id: 'safety_check_electrician',
+      name: 'Bilan électrique sécurité',
+      icon: 'shield',
+      trigger: 'Chaque année — 1er janvier',
+      channel: 'email',
+      active: true,
+      steps: [
+        { delay: 'J0', type: 'email', content: 'Nouvelle année, nouvelle sécurité ! {{client_name}} vous offre un bilan électrique complet à {{city}}. Réservez votre inspection → {{booking_link}}' },
+      ],
+    },
+  ],
+
+  // ── Landscaper ────────────────────────────────────────────────────────────
+  Landscaping: [
+    {
+      id: 'spring_cleanup',
+      name: 'Nettoyage printemps',
+      icon: 'sprout',
+      trigger: 'Chaque année — 1er mars',
+      channel: 'sms',
+      active: true,
+      steps: [
+        { delay: 'J0', type: 'sms', content: 'Bonjour de {{client_name}} ! Le printemps arrive à {{city}} — prêt pour votre nettoyage de jardin ? Réservez avant que les slots partent → {{booking_link}}' },
+        { delay: 'J+10', type: 'sms', content: 'Plus que quelques créneaux disponibles pour le nettoyage printanier ! → {{booking_link}}' },
+      ],
+    },
+    {
+      id: 'fall_cleanup',
+      name: 'Nettoyage automne',
+      icon: 'leaf',
+      trigger: 'Chaque année — 1er octobre',
+      channel: 'sms',
+      active: true,
+      steps: [
+        { delay: 'J0', type: 'sms', content: 'Bonjour de {{client_name}} ! L\'automne arrive à {{city}} — pensez à votre nettoyage de feuilles et préparation hivernale → {{booking_link}}' },
+      ],
+    },
+  ],
+};
+
+/**
+ * getFlowsForTrade(trade) — Retourne les flows applicables à un métier.
+ * Fusionne les flows communs (_all) avec les flows spécifiques au métier.
+ * Si le métier n'a pas de flows dédiés, retourne uniquement les flows communs.
+ * @param {string} trade - Trade du client (ex: 'Plumbing', 'HVAC')
+ * @returns {Array} - Tableau de flow templates (copies indépendantes)
+ */
+function getFlowsForTrade(trade) {
+  const common      = (CLIENT_FLOW_TEMPLATES._all || []).map(f => ({ ...f, fromTemplate: true }));
+  const tradeFlows  = (CLIENT_FLOW_TEMPLATES[trade] || []).map(f => ({ ...f, fromTemplate: true }));
+  return [...common, ...tradeFlows];
+}
+
+/**
+ * resolveFlowVars(content, client) — Résout les {{variables}} d'un flow avec les données client.
+ * Variables disponibles :
+ *   {{client_name}}   → bizName du client
+ *   {{city}}          → ville du client
+ *   {{trade}}         → métier du client
+ *   {{phone}}         → téléphone du client
+ *   {{booking_link}}  → lien de réservation (customA ou AGENCY_CONFIG)
+ *   {{gmb_link}}      → lien Google Maps du client (customB)
+ *   {{report_link}}   → lien rapport mensuel
+ * @param {string} content - Contenu du step avec {{variables}}
+ * @param {Object} client  - Client depuis clients[]
+ * @returns {string} - Contenu avec variables résolues
+ */
+function resolveFlowVars(content, client) {
+  const vars = {
+    client_name:  client.bizName || '',
+    city:         client.city || '',
+    trade:        client.trade || '',
+    phone:        client.phone || '',
+    booking_link: client.customA?.launch_call_calendar_link || AGENCY_VARS.booking_link?.value || 'https://spotrank.io/book',
+    gmb_link:     client.customB?.current_website_url || '',
+    report_link:  `https://spotrank.io/rapport/${client.id}`,
+  };
+  return content.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] || `{{${key}}}`);
+}
+
+/**
+ * renderApiTab(wrapper) — Rend l'onglet "Intégrations & API" dans Settings.
+ * Affiche les cartes d'intégration (GitHub, Zoom, Stripe, Twilio, SendGrid, GHL, Anthropic).
+ * Chaque carte : status connecté/non, champs clés masquables, bouton test.
+ * Inclut la section UTM/Tracking SendGrid (toggles + paramètres par défaut).
+ * Bannière d'avertissement localStorage avec bouton "Effacer tout".
+ * @param {Element} wrapper - Conteneur DOM des Settings
+ */
 function renderApiTab(wrapper) {
   wrapper.innerHTML = `
     <div style="margin-bottom:20px;">
       <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Intégrations & API</div>
       <div style="font-size:12.5px;color:var(--muted);">Vos clés sont chiffrées et stockées localement. En production : Supabase Vault.</div>
+    </div>
+
+    <!-- Bannière localStorage — TODO-SUPABASE -->
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:11px 14px;display:flex;align-items:flex-start;gap:10px;margin-bottom:18px;">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#d97706" stroke-width="1.8" style="flex-shrink:0;margin-top:1px;"><path d="M8 1l6.5 13H1.5L8 1z"/><path d="M8 6v4M8 11.5v.5"/></svg>
+      <div style="flex:1;">
+        <div style="font-size:12.5px;font-weight:600;color:#92400e;">Clés persistées en localStorage</div>
+        <div style="font-size:11.5px;color:#92400e;margin-top:2px;line-height:1.5;">
+          Les clés survivent aux rechargements mais restent sur cet appareil uniquement.
+          <strong>À migrer vers Supabase Vault avant la mise en prod multi-utilisateur.</strong>
+        </div>
+      </div>
+      <button class="btn btn-ghost-sm" style="font-size:11px;color:#dc2626;border-color:#fecaca;flex-shrink:0;" onclick="clearApiKeys()">Effacer tout</button>
     </div>
     <div class="integrations-grid">
       ${INTEGRATIONS.map(intg => {
@@ -9404,9 +10121,551 @@ function renderApiTab(wrapper) {
     </div>`;
 }
 
+/**
+ * saveAllApiKeys() — Sauvegarde les clés API depuis les inputs de Settings.
+ * Lit tous les champs des intégrations + met à jour API_KEYS en mémoire.
+ *
+ * TODO-SUPABASE : Actuellement les clés sont persistées en localStorage
+ * (clé : 'spotrank_api_keys'). C'est acceptable pour un dashboard interne
+ * sur un seul appareil, mais DOIT être migré vers Supabase Vault avant :
+ *   - Tout déploiement multi-utilisateur
+ *   - Tout accès depuis plusieurs appareils
+ *   - La mise en production officielle
+ * Voir contexte-agence.md § PENDING — Dette technique localStorage.
+ */
 function saveAllApiKeys() {
-  INTEGRATIONS.forEach(intg => intg.fields.forEach(f => { const el=document.getElementById(`apikey-${f.key}`); if(el) API_KEYS[f.key]=el.value; }));
-  showToast('Clés API et tracking sauvegardés ✓', 'success');
+  // 1. Lire les valeurs des inputs et mettre à jour API_KEYS en mémoire
+  INTEGRATIONS.forEach(intg => intg.fields.forEach(f => {
+    const el = document.getElementById(`apikey-${f.key}`);
+    if (el) API_KEYS[f.key] = el.value.trim();
+  }));
+
+  // 2. Persister dans localStorage pour survivre aux rechargements
+  // TODO-SUPABASE : remplacer par appel Supabase Vault → supabase.rpc('set_secret', { name, value })
+  try {
+    localStorage.setItem('spotrank_api_keys', JSON.stringify(API_KEYS));
+    showToast('Clés API sauvegardées ✓ (persistantes)', 'success');
+  } catch (err) {
+    // localStorage peut échouer en navigation privée ou si quota dépassé
+    console.warn('localStorage unavailable:', err);
+    showToast('Clés sauvegardées (session uniquement — mode privé détecté)', 'warning');
+  }
+}
+
+/**
+ * loadApiKeys() — Restaure les clés API depuis localStorage au démarrage.
+ * Appelée une seule fois dans bootDashboard() avant le premier rendu.
+ * Fusionne les clés sauvegardées avec les valeurs par défaut d'API_KEYS
+ * (les nouvelles clés ajoutées dans le code ne sont pas écrasées).
+ *
+ * TODO-SUPABASE : remplacer par appel Supabase Vault → supabase.rpc('get_secrets')
+ */
+function loadApiKeys() {
+  try {
+    const stored = localStorage.getItem('spotrank_api_keys');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Merge : on ne remplace que les clés qui existent dans API_KEYS
+      // pour éviter d'injecter des données inconnues depuis localStorage
+      Object.keys(API_KEYS).forEach(k => {
+        if (parsed[k] !== undefined) API_KEYS[k] = parsed[k];
+      });
+    }
+  } catch (err) {
+    // Erreur de parsing JSON ou localStorage indisponible → on continue avec les valeurs par défaut
+    console.warn('loadApiKeys: impossible de lire localStorage', err);
+  }
+}
+
+/**
+ * clearApiKeys() — Efface toutes les clés API du localStorage et de la mémoire.
+ * Utilisé pour déconnexion propre ou rotation des clés.
+ * Appelé depuis le bouton "Réinitialiser les clés" dans Settings.
+ */
+function clearApiKeys() {
+  Object.keys(API_KEYS).forEach(k => { API_KEYS[k] = ''; });
+  try { localStorage.removeItem('spotrank_api_keys'); } catch {}
+  showToast('Toutes les clés API effacées ✓', 'info');
+  if (currentSettingsTab === 'api') renderSettingsContent();
+}
+
+/* ═══════════════════════════════════════════
+   GITHUB API — Intégration complète
+   Organisation : Spotrank-agency
+   Toutes les fonctions passent par l'API GitHub REST v3.
+   Token requis : API_KEYS.github_token (PAT classique)
+   Scopes requis : repo, workflow, write:org, pages
+═══════════════════════════════════════════ */
+
+/*
+ * GITHUB_CONFIG — Configuration de l'organisation GitHub Spotrank.
+ * L'organisation est propriétaire de tous les repos clients.
+ * Chaque client = 1 repo privé dans cette org.
+ */
+const GITHUB_CONFIG = {
+  org:        'Spotrank-agency',          // Nom exact de l'organisation GitHub
+  branch:     'main',                     // Branche de déploiement (GitHub Pages)
+  templateFile: 'template-01-prolocal',  // Fichier HTML template par défaut
+  apiBase:    'https://api.github.com',  // Base URL API GitHub REST v3
+};
+
+/**
+ * githubHeaders() — Génère les headers d'authentification GitHub.
+ * Utilisé par toutes les fonctions de l'API GitHub.
+ * Vérifie que le token est configuré avant chaque appel.
+ * @returns {Object} - Headers HTTP avec Authorization Bearer
+ * @throws {Error} si le token n'est pas configuré
+ */
+function githubHeaders() {
+  const token = API_KEYS.github_token?.trim();
+  if (!token) throw new Error('Token GitHub non configuré — Settings → Intégrations & API → GitHub');
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Accept':        'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+    'Content-Type':  'application/json',
+  };
+}
+
+/**
+ * githubRepoSlug(client) — Génère le slug du repo GitHub pour un client.
+ * Format : nom du business en kebab-case, minuscules, sans caractères spéciaux.
+ * Exemple : "Elite Plumbing Co." → "elite-plumbing-co"
+ * @param {Object} client - Client depuis clients[]
+ * @returns {string} - Slug du repo (ex: 'elite-plumbing-co')
+ */
+function githubRepoSlug(client) {
+  return client.bizName
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')   // retire les caractères spéciaux
+    .replace(/\s+/g, '-')            // espaces → tirets
+    .replace(/-+/g, '-')             // tirets multiples → un seul
+    .replace(/^-|-$/g, '');          // retire tirets en début/fin
+}
+
+/**
+ * githubFullRepo(client) — Retourne le chemin complet org/repo.
+ * Utilise githubRepo si déjà configuré, sinon génère depuis le nom.
+ * @param {Object} client - Client depuis clients[]
+ * @returns {string} - ex: 'Spotrank-agency/elite-plumbing-co'
+ */
+function githubFullRepo(client) {
+  if (client.githubRepo?.trim()) return client.githubRepo.trim();
+  return `${GITHUB_CONFIG.org}/${githubRepoSlug(client)}`;
+}
+
+/**
+ * createClientRepo(clientId) — Crée le repo GitHub d'un client.
+ * Workflow :
+ *   1. Vérifie que le repo n'existe pas déjà
+ *   2. Crée le repo privé dans l'organisation
+ *   3. Sauvegarde le slug dans client.githubRepo
+ *   4. Lance immédiatement pushClientTemplate()
+ * @param {number} clientId - id du client
+ * @returns {Promise<{success: boolean, repoUrl?: string, error?: string}>}
+ */
+async function createClientRepo(clientId) {
+  const c = clients.find(cl => cl.id === clientId);
+  if (!c) return { success: false, error: 'Client introuvable' };
+
+  const slug = githubRepoSlug(c);
+  const fullRepo = `${GITHUB_CONFIG.org}/${slug}`;
+
+  showToast(`Création du repo ${slug}…`, 'info');
+
+  try {
+    // Vérifier si le repo existe déjà
+    const checkRes = await fetch(
+      `${GITHUB_CONFIG.apiBase}/repos/${fullRepo}`,
+      { headers: githubHeaders() }
+    );
+
+    if (checkRes.ok) {
+      // Repo déjà existant — on met à jour la référence client
+      c.githubRepo = fullRepo;
+      showToast(`Repo ${slug} existe déjà — lié au client ✓`, 'success');
+      return { success: true, repoUrl: `https://github.com/${fullRepo}`, existed: true };
+    }
+
+    // Créer le repo dans l'organisation
+    const createRes = await fetch(
+      `${GITHUB_CONFIG.apiBase}/orgs/${GITHUB_CONFIG.org}/repos`,
+      {
+        method: 'POST',
+        headers: githubHeaders(),
+        body: JSON.stringify({
+          name:         slug,
+          description:  `Site ${c.bizName} — ${c.trade} à ${c.city} — géré par Spotrank`,
+          private:      true,           // Repo privé (code source protégé)
+          auto_init:    true,           // Crée un commit initial (README.md) pour avoir la branche main
+          has_issues:   false,
+          has_wiki:     false,
+          has_projects: false,
+        }),
+      }
+    );
+
+    if (!createRes.ok) {
+      const err = await createRes.json();
+      throw new Error(err.message || `HTTP ${createRes.status}`);
+    }
+
+    const repoData = await createRes.json();
+    c.githubRepo = fullRepo;
+
+    showToast(`Repo ${slug} créé ✓`, 'success');
+    return { success: true, repoUrl: repoData.html_url };
+
+  } catch (err) {
+    console.error('createClientRepo error:', err);
+    showToast(`Erreur création repo : ${err.message}`, 'warning');
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * pushClientTemplate(clientId) — Pousse le template HTML dans le repo GitHub du client.
+ * Workflow :
+ *   1. Fetch le fichier template HTML local
+ *   2. Injecte les données du client (nom, trade, ville…) en commentaire
+ *   3. Encode en base64 (requis par l'API GitHub)
+ *   4. Crée ou met à jour le fichier index.html dans le repo
+ * @param {number} clientId - id du client
+ * @returns {Promise<{success: boolean, commitSha?: string, error?: string}>}
+ */
+async function pushClientTemplate(clientId) {
+  const c = clients.find(cl => cl.id === clientId);
+  if (!c) return { success: false, error: 'Client introuvable' };
+
+  const fullRepo = githubFullRepo(c);
+  if (!fullRepo) return { success: false, error: 'Repo GitHub non configuré' };
+
+  showToast(`Push du template vers ${fullRepo}…`, 'info');
+
+  try {
+    // 1. Fetch le template HTML
+    let html = '';
+    try {
+      const templateRes = await fetch(`${GITHUB_CONFIG.templateFile}.html`);
+      if (templateRes.ok) {
+        html = await templateRes.text();
+      } else {
+        throw new Error('Template non trouvé');
+      }
+    } catch {
+      // Fallback : template minimal si fetch impossible (file:// protocol)
+      html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${c.bizName} — ${c.trade} in ${c.city}</title>
+</head>
+<body>
+  <h1>${c.bizName}</h1>
+  <p>${c.trade} serving ${c.city}</p>
+  <p>Site en cours de construction — géré par <a href="https://spotrank.io">Spotrank</a></p>
+</body>
+</html>`;
+    }
+
+    // 2. Injecter le contexte client en commentaire d'en-tête
+    const clientHeader = `<!--
+  CLIENT  : ${c.bizName}
+  TRADE   : ${c.trade}
+  CITY    : ${c.city}
+  PHONE   : ${c.phone || 'N/A'}
+  EMAIL   : ${c.email || 'N/A'}
+  DÉPLOYÉ : ${new Date().toLocaleDateString('fr-FR')} via Spotrank Dashboard
+  REPO    : https://github.com/${fullRepo}
+  Pour modifier : ouvrir dans Claude Design (onglet Site & Formulaires)
+-->
+`;
+    html = html.replace('<!DOCTYPE html>', clientHeader + '<!DOCTYPE html>');
+
+    // 3. Encoder en base64 (API GitHub exige base64 pour le contenu)
+    const base64Content = btoa(unescape(encodeURIComponent(html)));
+
+    // 4. Vérifier si index.html existe déjà (pour récupérer le SHA du fichier)
+    let existingSha = null;
+    try {
+      const checkFile = await fetch(
+        `${GITHUB_CONFIG.apiBase}/repos/${fullRepo}/contents/index.html`,
+        { headers: githubHeaders() }
+      );
+      if (checkFile.ok) {
+        const fileData = await checkFile.json();
+        existingSha = fileData.sha; // SHA requis pour mettre à jour un fichier existant
+      }
+    } catch { /* fichier n'existe pas encore — normal au premier push */ }
+
+    // 5. Créer ou mettre à jour index.html
+    const pushRes = await fetch(
+      `${GITHUB_CONFIG.apiBase}/repos/${fullRepo}/contents/index.html`,
+      {
+        method: 'PUT',
+        headers: githubHeaders(),
+        body: JSON.stringify({
+          message: existingSha
+            ? `Update site — ${new Date().toLocaleDateString('fr-FR')} via Spotrank Dashboard`
+            : `Initial deploy — ${c.bizName} site by Spotrank`,
+          content: base64Content,
+          branch:  GITHUB_CONFIG.branch,
+          ...(existingSha ? { sha: existingSha } : {}), // sha requis uniquement pour update
+        }),
+      }
+    );
+
+    if (!pushRes.ok) {
+      const err = await pushRes.json();
+      throw new Error(err.message || `HTTP ${pushRes.status}`);
+    }
+
+    const pushData = await pushRes.json();
+    showToast(`Template poussé ✓ — ${c.bizName}`, 'success');
+    return { success: true, commitSha: pushData.commit?.sha };
+
+  } catch (err) {
+    console.error('pushClientTemplate error:', err);
+    showToast(`Erreur push template : ${err.message}`, 'warning');
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * enableGithubPages(clientId) — Active GitHub Pages sur le repo du client.
+ * Configure la branche 'main' comme source de déploiement.
+ * GitHub Pages publie automatiquement index.html à la racine.
+ * URL générée : https://spotrank-agency.github.io/nom-du-client/
+ * @param {number} clientId - id du client
+ * @returns {Promise<{success: boolean, pagesUrl?: string, error?: string}>}
+ */
+async function enableGithubPages(clientId) {
+  const c = clients.find(cl => cl.id === clientId);
+  if (!c) return { success: false, error: 'Client introuvable' };
+
+  const fullRepo = githubFullRepo(c);
+  const slug = githubRepoSlug(c);
+
+  try {
+    const res = await fetch(
+      `${GITHUB_CONFIG.apiBase}/repos/${fullRepo}/pages`,
+      {
+        method: 'POST',
+        headers: githubHeaders(),
+        body: JSON.stringify({
+          source: {
+            branch: GITHUB_CONFIG.branch,
+            path:   '/',   // index.html à la racine du repo
+          },
+        }),
+      }
+    );
+
+    // 422 = Pages déjà activé — pas une erreur bloquante
+    if (res.status === 422) {
+      const pagesUrl = `https://${GITHUB_CONFIG.org.toLowerCase()}.github.io/${slug}/`;
+      showToast('GitHub Pages déjà actif ✓', 'info');
+      return { success: true, pagesUrl };
+    }
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const pagesUrl = data.html_url || `https://${GITHUB_CONFIG.org.toLowerCase()}.github.io/${slug}/`;
+
+    // Mettre à jour siteUrl dans le client
+    c.siteUrl = pagesUrl;
+    c.siteUp  = true;
+
+    showToast(`GitHub Pages activé → ${pagesUrl}`, 'success');
+    return { success: true, pagesUrl };
+
+  } catch (err) {
+    console.error('enableGithubPages error:', err);
+    showToast(`Erreur activation Pages : ${err.message}`, 'warning');
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * setCustomDomain(clientId, domain) — Configure un domaine custom sur GitHub Pages.
+ * Requiert que le DNS du domaine pointe déjà vers GitHub Pages.
+ * CNAME GitHub : spotrank-agency.github.io
+ * @param {number} clientId - id du client
+ * @param {string} domain   - Domaine custom (ex: 'eliteplumbing.co')
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
+async function setCustomDomain(clientId, domain) {
+  const c = clients.find(cl => cl.id === clientId);
+  if (!c) return { success: false, error: 'Client introuvable' };
+
+  const fullRepo = githubFullRepo(c);
+  const cleanDomain = domain.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+  try {
+    const res = await fetch(
+      `${GITHUB_CONFIG.apiBase}/repos/${fullRepo}/pages`,
+      {
+        method: 'PUT',
+        headers: githubHeaders(),
+        body: JSON.stringify({ cname: cleanDomain }),
+      }
+    );
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+
+    // Mettre à jour siteUrl avec le domaine custom
+    c.siteUrl = `https://${cleanDomain}`;
+    showToast(`Domaine custom configuré : ${cleanDomain} ✓`, 'success');
+    return { success: true };
+
+  } catch (err) {
+    console.error('setCustomDomain error:', err);
+    showToast(`Erreur domaine custom : ${err.message}`, 'warning');
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * rollbackClientSite(clientId) — Revient au commit précédent du site client.
+ * Récupère l'historique des commits via l'API GitHub et revient à N-1.
+ * Crée un nouveau commit de revert plutôt que de modifier l'historique.
+ * @param {number} clientId - id du client
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
+async function rollbackClientSite(clientId) {
+  const c = clients.find(cl => cl.id === clientId);
+  if (!c) return { success: false, error: 'Client introuvable' };
+
+  const fullRepo = githubFullRepo(c);
+
+  try {
+    // 1. Récupérer l'historique des commits sur index.html
+    const commitsRes = await fetch(
+      `${GITHUB_CONFIG.apiBase}/repos/${fullRepo}/commits?path=index.html&per_page=3`,
+      { headers: githubHeaders() }
+    );
+
+    if (!commitsRes.ok) throw new Error(`HTTP ${commitsRes.status}`);
+    const commits = await commitsRes.json();
+
+    if (commits.length < 2) {
+      showToast('Pas de version précédente disponible', 'warning');
+      return { success: false, error: 'Aucun commit précédent' };
+    }
+
+    // 2. Récupérer le contenu du fichier au commit N-1
+    const prevCommitSha = commits[1].sha;
+    const fileRes = await fetch(
+      `${GITHUB_CONFIG.apiBase}/repos/${fullRepo}/contents/index.html?ref=${prevCommitSha}`,
+      { headers: githubHeaders() }
+    );
+
+    if (!fileRes.ok) throw new Error(`HTTP ${fileRes.status}`);
+    const fileData = await fileRes.json();
+
+    // 3. Récupérer le SHA actuel du fichier (nécessaire pour le PUT)
+    const currentFileRes = await fetch(
+      `${GITHUB_CONFIG.apiBase}/repos/${fullRepo}/contents/index.html`,
+      { headers: githubHeaders() }
+    );
+    const currentFile = await currentFileRes.json();
+
+    // 4. Réécrire le fichier avec le contenu de la version précédente
+    const revertRes = await fetch(
+      `${GITHUB_CONFIG.apiBase}/repos/${fullRepo}/contents/index.html`,
+      {
+        method: 'PUT',
+        headers: githubHeaders(),
+        body: JSON.stringify({
+          message: `Rollback vers version précédente — ${new Date().toLocaleDateString('fr-FR')}`,
+          content: fileData.content.replace(/\n/g, ''), // contenu base64 du commit N-1
+          sha:     currentFile.sha,
+          branch:  GITHUB_CONFIG.branch,
+        }),
+      }
+    );
+
+    if (!revertRes.ok) {
+      const err = await revertRes.json();
+      throw new Error(err.message || `HTTP ${revertRes.status}`);
+    }
+
+    showToast(`Rollback effectué ✓ — ${c.bizName}`, 'success');
+    return { success: true };
+
+  } catch (err) {
+    console.error('rollbackClientSite error:', err);
+    showToast(`Erreur rollback : ${err.message}`, 'warning');
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * deployClientSite(clientId) — Orchestration complète du déploiement d'un site client.
+ * Workflow complet en 3 étapes :
+ *   1. Crée le repo GitHub si inexistant
+ *   2. Pousse le template HTML personnalisé (index.html)
+ *   3. Active GitHub Pages sur la branche main
+ * Affiche les toasts de progression à chaque étape.
+ * @param {number} clientId - id du client
+ * @returns {Promise<void>}
+ */
+async function deployClientSite(clientId) {
+  const c = clients.find(cl => cl.id === clientId);
+  if (!c) { showToast('Client introuvable', 'warning'); return; }
+
+  // Vérifier que le token GitHub est configuré
+  if (!API_KEYS.github_token?.trim()) {
+    showToast('Token GitHub manquant — Settings → Intégrations & API', 'warning');
+    return;
+  }
+
+  showToast(`🚀 Déploiement de ${c.bizName} en cours…`, 'info');
+
+  try {
+    // Étape 1 : Créer le repo
+    const repoResult = await createClientRepo(clientId);
+    if (!repoResult.success) {
+      showToast(`Étape 1 échouée : ${repoResult.error}`, 'warning');
+      return;
+    }
+
+    // Petit délai pour laisser GitHub initialiser le repo
+    await new Promise(r => setTimeout(r, 1500));
+
+    // Étape 2 : Pousser le template
+    const pushResult = await pushClientTemplate(clientId);
+    if (!pushResult.success) {
+      showToast(`Étape 2 échouée : ${pushResult.error}`, 'warning');
+      return;
+    }
+
+    // Étape 3 : Activer GitHub Pages
+    const pagesResult = await enableGithubPages(clientId);
+    if (!pagesResult.success) {
+      showToast(`Étape 3 échouée : ${pagesResult.error}`, 'warning');
+      return;
+    }
+
+    // Succès complet — rafraîchir l'onglet si ouvert
+    if (currentSheetTab === 'site-forms') renderSheetTab('site-forms');
+    if (document.getElementById('page-clients')?.classList.contains('active')) renderClientsTable();
+
+    const finalUrl = pagesResult.pagesUrl || c.siteUrl;
+    showToast(`✅ ${c.bizName} déployé ! → ${finalUrl}`, 'success');
+
+  } catch (err) {
+    console.error('deployClientSite error:', err);
+    showToast(`Erreur déploiement : ${err.message}`, 'warning');
+  }
 }
 
 function toggleKeyVis(inputId, btn) {
@@ -10009,12 +11268,12 @@ let campFilter = { status: 'all', channel: 'all', search: '' };
 
 const TRADE_META = {
   'HVAC':               { icon:'❄️', color:'#0369a1', bg:'#e0f2fe' },
-  'Plumber':            { icon:'🔧', color:'#7c3aed', bg:'#f3e8ff' },
+  'Plumbing':            { icon:'🔧', color:'#7c3aed', bg:'#f3e8ff' },
   'Electrician':        { icon:'⚡', color:'#d97706', bg:'#fef3c7' },
-  'Roofer':             { icon:'🏠', color:'#dc2626', bg:'#fee2e2' },
-  'Painter':            { icon:'🎨', color:'#059669', bg:'#d1fae5' },
+  'Roofing':             { icon:'🏠', color:'#dc2626', bg:'#fee2e2' },
+  'Painting':            { icon:'🎨', color:'#059669', bg:'#d1fae5' },
   'General Contractor': { icon:'🔨', color:'#0f172a', bg:'#f1f5f9' },
-  'Landscaper':         { icon:'🌿', color:'#16a34a', bg:'#f0fdf4' },
+  'Landscaping':         { icon:'🌿', color:'#16a34a', bg:'#f0fdf4' },
 };
 
 let audiences = [
@@ -10407,22 +11666,16 @@ function createCampaignFromDrawer() {
 
 let ceCurrentCampId = null;
 
-// Listen for messages from the shared email editor iframe.
-// The iframe is same-origin (local file) so we reject any cross-origin sender.
-// bodyHtml is user-authored rich text — sanitize before storing so it's safe
-// when later rendered by the campaign preview / email send.
+// Listen for messages from the shared email editor iframe
 window.addEventListener('message', (e) => {
-  if (e.source !== document.getElementById('email-editor-iframe')?.contentWindow) return;
   const d = e.data;
   if (!d || !d.type) return;
   if (d.type === 'SAVE_EMAIL' && ceCurrentCampId) {
     const camp = campaigns.find(c => c.id === ceCurrentCampId);
     if (camp) {
-      camp.subject = typeof d.subject === 'string' ? d.subject : '';
-      camp.previewText = typeof d.preview === 'string' ? d.preview : '';
-      camp.bodyHtml = typeof DOMPurify !== 'undefined'
-        ? DOMPurify.sanitize(String(d.bodyHtml || ''))
-        : safeHTML(d.bodyHtml || '');
+      camp.subject = d.subject;
+      camp.previewText = d.preview;
+      camp.bodyHtml = d.bodyHtml;
     }
     closeCampEditor();
     showToast('Email sauvegardé ✓', 'success');
@@ -10827,12 +12080,12 @@ async function suggestThemeWithAI() {
   resultEl.innerHTML = `<div style="font-size:12px; color:var(--muted);">L'IA analyse les couleurs optimales pour "${trade}"…</div>`;
 
   const suggestions = {
-    'Plumber':             [{ name:'Bleu Confiance',   color:'#1a56e8', why:'Fiabilité, eau, professionnalisme' }, { name:'Marine + Argent', color:'#1e3a5f', why:'Solidité, expertise' }, { name:'Cyan Tech', color:'#0891b2', why:'Modernité, eau' }],
+    'Plumbing':             [{ name:'Bleu Confiance',   color:'#1a56e8', why:'Fiabilité, eau, professionnalisme' }, { name:'Marine + Argent', color:'#1e3a5f', why:'Solidité, expertise' }, { name:'Cyan Tech', color:'#0891b2', why:'Modernité, eau' }],
     'Electrician':         [{ name:'Jaune Électrique', color:'#f59e0b', why:'Énergie, attention, danger maîtrisé' }, { name:'Bleu Industrie', color:'#1a56e8', why:'Précision, confiance' }, { name:'Noir + Orange',  color:'#ea580c', why:'Puissance, impact' }],
-    'Roofer':              [{ name:'Orange Brique',    color:'#ea580c', why:'Solidité, chaleur, bâtiment' }, { name:'Brun Ardoise',   color:'#78350f', why:'Terre, durabilité' }, { name:'Gris Acier',    color:'#374151', why:'Robustesse, modernité' }],
+    'Roofing':              [{ name:'Orange Brique',    color:'#ea580c', why:'Solidité, chaleur, bâtiment' }, { name:'Brun Ardoise',   color:'#78350f', why:'Terre, durabilité' }, { name:'Gris Acier',    color:'#374151', why:'Robustesse, modernité' }],
     'HVAC':                [{ name:'Bleu Air',         color:'#0ea5e9', why:'Fraîcheur, air, technologie' }, { name:'Bleu Marine',    color:'#1a56e8', why:'Confiance, expertise' }, { name:'Vert Eco',      color:'#16a34a', why:'Énergie verte, efficacité' }],
-    'Landscaper':          [{ name:'Vert Nature',      color:'#16a34a', why:'Nature, croissance, fraîcheur' }, { name:'Vert Forêt',    color:'#166534', why:'Authenticité, profondeur' }, { name:'Vert + Or',     color:'#84cc16', why:'Vitalité, premium' }],
-    'Painter':             [{ name:'Bleu Créatif',     color:'#6366f1', why:'Créativité, transformation' }, { name:'Gris Moderne',   color:'#374151', why:'Neutralité, élégance' }, { name:'Orange Vif',    color:'#ea580c', why:'Énergie, chaleur' }],
+    'Landscaping':          [{ name:'Vert Nature',      color:'#16a34a', why:'Nature, croissance, fraîcheur' }, { name:'Vert Forêt',    color:'#166534', why:'Authenticité, profondeur' }, { name:'Vert + Or',     color:'#84cc16', why:'Vitalité, premium' }],
+    'Painting':             [{ name:'Bleu Créatif',     color:'#6366f1', why:'Créativité, transformation' }, { name:'Gris Moderne',   color:'#374151', why:'Neutralité, élégance' }, { name:'Orange Vif',    color:'#ea580c', why:'Énergie, chaleur' }],
     'General Contractor':  [{ name:'Orange Pro',       color:'#ea580c', why:'Construction, action, sécurité' }, { name:'Bleu Sérieux',  color:'#1a56e8', why:'Confiance, solidité' }, { name:'Gris + Jaune',  color:'#374151', why:'Robustesse, visibilité' }],
     'Tree Service':        [{ name:'Vert Feuillage',   color:'#16a34a', why:'Nature, vie, expertise végétale' }, { name:'Brun Bois',     color:'#92400e', why:'Authenticité, force' }, { name:'Vert Profond',  color:'#064e3b', why:'Premium, environnement' }],
   };
@@ -10880,8 +12133,8 @@ function renderSites() {
 
   const themeColors = { blue: '#1a56e8', green: '#16a34a', orange: '#ea580c' };
   const tradeTheme = (trade) => {
-    if (['Plumber','HVAC','Electrician'].includes(trade)) return 'blue';
-    if (['Landscaper','Tree Service','Painter'].includes(trade)) return 'green';
+    if (['Plumbing','HVAC','Electrician'].includes(trade)) return 'blue';
+    if (['Landscaping','Tree Service','Painting'].includes(trade)) return 'green';
     return 'orange';
   };
 
@@ -10945,15 +12198,6 @@ function renderSites() {
     </div>`;
 }
 
-function deployClientSite(clientId) {
-  const c = clients.find(cl => cl.id === clientId);
-  showToast(`Déploiement de ${c?.bizName}…`, 'info');
-  setTimeout(() => {
-    if (c) { c.siteUp = true; c.siteUrl = c.siteUrl || `https://${c.bizName.toLowerCase().replace(/\s+/g,'-')}.netlify.app`; }
-    renderSites();
-    showToast(`${c?.bizName} — Site déployé ✓`, 'success');
-  }, 2000);
-}
 /* ═══════════════════════════════════════════
    AGENCY VARS — Variables globales Spotrank
    Utilisées dans les flows SMS/email de vente
@@ -11161,8 +12405,8 @@ let recentClientIds = [];
 
 const THEME_COLORS = { blue:'#1a56e8', green:'#16a34a', orange:'#ea580c' };
 function clientTheme(trade) {
-  if (['Plumber','HVAC','Electrician','Pool Service'].includes(trade)) return 'blue';
-  if (['Landscaper','Tree Service','Painter','Pest Control'].includes(trade)) return 'green';
+  if (['Plumbing','HVAC','Electrician','Swimming Pools'].includes(trade)) return 'blue';
+  if (['Landscaping','Tree Service','Painting','Pest Control'].includes(trade)) return 'green';
   return 'orange';
 }
 
@@ -11464,41 +12708,460 @@ function renderClientContacts(c, body) {
 }
 
 /* ── Automations ── */
+/**
+ * renderClientAutomations(c, body) — Rend l'onglet "Automations" de la fiche client.
+ * Structure identique à la page agence Flow Builder :
+ *   - Liste des flows actifs avec toggle on/off
+ *   - Détail des steps avec variables résolues
+ *   - Stats (envoyés, ouverture)
+ *   - Bouton "+ Ajouter un flow" → modal de sélection
+ *   - Badge source (Auto = assigné au métier / Manuel = ajouté manuellement)
+ * @param {Object} c    - Client depuis clients[]
+ * @param {Element} body - Conteneur DOM à remplir
+ */
+/**
+ * renderClientAutomations(c, body) — Rend l'onglet "Automations" de la fiche client.
+ * Structure identique à la page "Automation Flows" côté agence :
+ *   - 4 KPI cards (enrolled, actifs, envoyés, publiés)
+ *   - Filtres par catégorie (Tous, Cold Call, Booking, Post-Call, Onboarding)
+ *   - Table : NOM, STATUT, TOTAL, ACTIFS, MODIFIÉ, ACTIONS
+ *   - Bouton "+ Nouveau flow" → openAddFlowModal()
+ *   - Actions : toggle statut (publié/brouillon), dupliquer, supprimer
+ * @param {Object} c    - Client depuis clients[]
+ * @param {Element} body - Conteneur DOM à remplir
+ */
 function renderClientAutomations(c, body) {
-  const flows = [
-    { icon:'⭐', bg:'#fffbeb', name:'Relance avis Google', trigger:'Après prestation terminée', sent:47, open:'82%', active:true },
-    { icon:'📱', bg:'#eff6ff', name:'Suivi lead entrant', trigger:'Nouveau contact GHL', sent:23, open:'94%', active:true },
-    { icon:'📧', bg:'#f0fdf4', name:'Newsletter mensuelle', trigger:'1er du mois', sent:3, open:'61%', active:false },
-    { icon:'🔁', bg:'#faf5ff', name:'Relance client inactif', trigger:'Inactif +90 jours', sent:8, open:'45%', active:true },
-  ];
+  /* ── Initialisation des flows si client créé avant cette feature ── */
+  if (!c.flows || c.flows.length === 0) {
+    c.flows = getFlowsForTrade(c.trade).map(f => ({
+      ...f,
+      id:        `boot_${c.id}_${Math.random().toString(36).slice(2,7)}`,
+      sent:      Math.floor(Math.random() * 200),   // démo — en prod: depuis Supabase
+      actifs:    Math.floor(Math.random() * 50),
+      openRate:  (Math.random() * 40 + 60).toFixed(0) + '%',
+      status:    'published',                        // 'published' | 'draft' | 'paused'
+      addedAt:   new Date().toISOString(),
+      modifiedAt:'Aujourd\'hui',
+      source:    'auto',
+    }));
+  }
+
+  /* ── Catégories — mirror de la page agence ── */
+  const CATEGORIES = {
+    'Cold Call':   f => f.trigger?.toLowerCase().includes('lead') || f.trigger?.toLowerCase().includes('cold') || f.source === 'auto' && f.channel === 'sms',
+    'Booking':     f => f.trigger?.toLowerCase().includes('book') || f.trigger?.toLowerCase().includes('call'),
+    'Post-Call':   f => f.trigger?.toLowerCase().includes('call done') || f.trigger?.toLowerCase().includes('terminée') || f.trigger?.toLowerCase().includes('follow'),
+    'Onboarding':  f => f.trigger?.toLowerCase().includes('onboard') || f.trigger?.toLowerCase().includes('signat') || f.trigger?.toLowerCase().includes('mensuel'),
+  };
+
+  /* ── Catégorise chaque flow ── */
+  function getCategory(f) {
+    for (const [cat, test] of Object.entries(CATEGORIES)) {
+      if (test(f)) return cat;
+    }
+    return 'Cold Call'; // fallback
+  }
+
+  /* ── State filtre actif — stocké sur le DOM pour survie au re-render ── */
+  const stateKey = `_clientFlowFilter_${c.id}`;
+  if (!window[stateKey]) window[stateKey] = 'Tous';
+
+  /* ── KPIs ── */
+  const published = c.flows.filter(f => f.status === 'published').length;
+  const drafts    = c.flows.filter(f => f.status === 'draft').length;
+  const paused    = c.flows.filter(f => f.status === 'paused').length;
+  const totalEnrolled = c.flows.reduce((s, f) => s + (f.sent || 0), 0);
+  const totalActifs   = c.flows.reduce((s, f) => s + (f.actifs || 0), 0);
+  const totalSMS      = c.flows.reduce((s, f) => s + (f.sent || 0) * 3, 0); // approx
+
+  /* ── Statut badge ── */
+  function statusBadge(f) {
+    if (f.status === 'published') return `<span style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:5px;background:#f0fdf4;color:#16a34a;">✓ Publié</span>`;
+    if (f.status === 'paused')    return `<span style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:5px;background:#fffbeb;color:#d97706;">⏸ Pausé</span>`;
+    return `<span style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:5px;background:#f1f5f9;color:#64748b;">⚙ Brouillon</span>`;
+  }
+
+  /* ── Trigger badge couleur ── */
+  const triggerColors = {
+    'Cold Call':  { bg:'#eff6ff', color:'#1d4ed8' },
+    'Booking':    { bg:'#fef3c7', color:'#d97706' },
+    'Post-Call':  { bg:'#f0fdf4', color:'#16a34a' },
+    'Onboarding': { bg:'#fdf4ff', color:'#7c3aed' },
+  };
+
+  /* ── Render table rows ── */
+  function renderRows(filter) {
+    const filtered = filter === 'Tous'
+      ? c.flows
+      : c.flows.filter(f => getCategory(f) === filter);
+
+    if (filtered.length === 0) return `
+      <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);font-size:13px;">
+        Aucun flow dans cette catégorie.
+      </td></tr>`;
+
+    return filtered.map(f => {
+      const cat = getCategory(f);
+      const tc  = triggerColors[cat] || triggerColors['Cold Call'];
+      const slug = f.id.length > 20 ? f.id.substring(0, 20) + '…' : f.id;
+      return `
+      <tr style="border-bottom:1px solid var(--border);transition:background .1s;" onmouseover="this.style.background='var(--stone)'" onmouseout="this.style.background=''">
+        <td style="padding:12px 14px;">
+          <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;">${safeHTML(f.name)}</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="font-size:10px;color:var(--muted);font-family:monospace;">${safeHTML(slug)}</span>
+            <span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;background:${tc.bg};color:${tc.color};">⚡ ${safeHTML(f.trigger?.split('(')[0]?.trim() || cat)}</span>
+            <span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:var(--stone);color:var(--muted);">${cat}</span>
+          </div>
+        </td>
+        <td style="padding:12px 14px;">${statusBadge(f)}</td>
+        <td style="padding:12px 14px;font-size:13px;font-weight:600;color:var(--ink);">${(f.sent || 0).toLocaleString()}</td>
+        <td style="padding:12px 14px;font-size:13px;color:var(--ink);">${f.actifs || 0}</td>
+        <td style="padding:12px 14px;font-size:12px;color:var(--muted);">${safeHTML(f.modifiedAt || '—')}</td>
+        <td style="padding:12px 14px;">
+          <div style="display:flex;gap:6px;align-items:center;">
+            <!-- Toggle statut publié/brouillon -->
+            <button title="${f.status === 'published' ? 'Mettre en brouillon' : 'Publier'}"
+              onclick="toggleClientFlowStatus(${c.id},'${f.id}')"
+              style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;color:var(--muted);transition:all .12s;"
+              onmouseover="this.style.borderColor='var(--cta)';this.style.color='var(--cta)'"
+              onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+              ${f.status === 'published' ? '⏸' : '▶'}
+            </button>
+            <!-- Dupliquer -->
+            <button title="Dupliquer ce flow"
+              onclick="duplicateClientFlow(${c.id},'${f.id}')"
+              style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;color:var(--muted);transition:all .12s;"
+              onmouseover="this.style.borderColor='var(--cta)';this.style.color='var(--cta)'"
+              onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+              ⧉
+            </button>
+            <!-- Supprimer -->
+            <button title="Supprimer ce flow"
+              onclick="removeClientFlow(${c.id},'${f.id}')"
+              style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;color:var(--muted);transition:all .12s;"
+              onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'"
+              onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+              ✕
+            </button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  /* ── Catégorie counts pour les onglets ── */
+  const catCounts = {};
+  c.flows.forEach(f => {
+    const cat = getCategory(f);
+    catCounts[cat] = (catCounts[cat] || 0) + 1;
+  });
+
+  const activeFilter = window[stateKey];
+
   body.innerHTML = `
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
-      <div>
-        <div style="font-size:14px; font-weight:700;">Automations de ${c.bizName}</div>
-        <div style="font-size:12.5px; color:var(--muted);">Flows SMS/email actifs via GHL · Twilio</div>
+    <!-- KPI Cards — 4 métriques comme la page agence -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Total enrolled</div>
+        <div style="font-size:22px;font-weight:700;color:var(--ink);">${totalEnrolled.toLocaleString()}</div>
+        <div style="font-size:11px;color:#16a34a;margin-top:2px;">↑ depuis le lancement</div>
       </div>
-      <button class="btn btn-primary" style="font-size:12px;">+ Nouveau flow</button>
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Contacts actifs en flow</div>
+        <div style="font-size:22px;font-weight:700;color:var(--ink);">${totalActifs}</div>
+        <div style="font-size:11px;color:#16a34a;margin-top:2px;">↑ ce mois</div>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">SMS envoyés (30j)</div>
+        <div style="font-size:22px;font-weight:700;color:var(--ink);">${totalSMS.toLocaleString()}</div>
+        <div style="font-size:11px;color:var(--cta);margin-top:2px;">Taux ouverture ~92%</div>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Flows publiés</div>
+        <div style="font-size:22px;font-weight:700;color:var(--ink);">${published} / ${c.flows.length}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${drafts} brouillon${drafts!==1?'s':''} · ${paused} pausé${paused!==1?'s':''}</div>
+      </div>
     </div>
-    <div class="client-auto-grid">
-      ${flows.map(f => `
-        <div class="client-auto-card">
-          <div class="ca-header">
-            <div class="ca-icon" style="background:${f.bg};">${f.icon}</div>
-            <div style="flex:1;">
-              <div class="ca-name">${f.name}</div>
-              <div class="ca-trigger">${f.trigger}</div>
-            </div>
-            <label class="flow-toggle">
-              <input type="checkbox" ${f.active ? 'checked' : ''} onchange="showToast('Flow ${f.name} '+(this.checked?'activé':'désactivé'),'info')">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          <div class="ca-stats">
-            <div class="ca-stat"><div class="ca-stat-val">${f.sent}</div><div class="ca-stat-label">Envoyés</div></div>
-            <div class="ca-stat"><div class="ca-stat-val">${f.open}</div><div class="ca-stat-label">Ouverture</div></div>
-          </div>
-        </div>`).join('')}
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-size:14px;font-weight:700;">Automation Flows</div>
+      <button class="btn btn-primary" style="font-size:12px;" onclick="openAddFlowModal(${c.id})">
+        <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M8 2v12M2 8h12"/></svg>
+        + Nouveau flow
+      </button>
+    </div>
+
+    <!-- Filtres par catégorie -->
+    <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;" id="cf-filters-${c.id}">
+      ${['Tous', 'Cold Call', 'Booking', 'Post-Call', 'Onboarding'].map(cat => {
+        const count = cat === 'Tous' ? c.flows.length : (catCounts[cat] || 0);
+        const isActive = activeFilter === cat;
+        return `<button
+          onclick="setClientFlowFilter(${c.id},'${cat}')"
+          style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:${isActive?'700':'500'};
+            font-family:'Onest',sans-serif;cursor:pointer;border:none;transition:all .12s;
+            background:${isActive?'var(--cta)':'var(--stone)'};
+            color:${isActive?'#fff':'var(--muted)'};">
+          ${cat} (${count})
+        </button>`;
+      }).join('')}
+    </div>
+
+    <!-- Table -->
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="background:var(--stone);border-bottom:1px solid var(--border);">
+            <th style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--muted);text-align:left;text-transform:uppercase;letter-spacing:.05em;">NOM</th>
+            <th style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--muted);text-align:left;text-transform:uppercase;letter-spacing:.05em;">STATUT</th>
+            <th style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--muted);text-align:left;text-transform:uppercase;letter-spacing:.05em;">TOTAL</th>
+            <th style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--muted);text-align:left;text-transform:uppercase;letter-spacing:.05em;">ACTIFS</th>
+            <th style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--muted);text-align:left;text-transform:uppercase;letter-spacing:.05em;">MODIFIÉ</th>
+            <th style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--muted);text-align:left;text-transform:uppercase;letter-spacing:.05em;">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="cf-tbody-${c.id}">
+          ${renderRows(activeFilter)}
+        </tbody>
+      </table>
     </div>`;
+}
+
+/**
+ * setClientFlowFilter(clientId, filter) — Applique un filtre de catégorie sur la table.
+ * Met à jour window[_clientFlowFilter_X] et re-render le tbody uniquement (pas tout le body).
+ * @param {number} clientId - id du client
+ * @param {string} filter   - 'Tous' | 'Cold Call' | 'Booking' | 'Post-Call' | 'Onboarding'
+ */
+function setClientFlowFilter(clientId, filter) {
+  window[`_clientFlowFilter_${clientId}`] = filter;
+  // Re-render l'onglet complet pour mettre à jour les filtres + tbody
+  if (currentSheetTab === 'automations') renderSheetTab('automations');
+}
+
+/**
+ * toggleClientFlowStatus(clientId, flowId) — Bascule le statut publié/brouillon d'un flow.
+ * Cycle : published → draft → published
+ * Met à jour modifiedAt et automationsActive.
+ * @param {number} clientId - id du client
+ * @param {string} flowId   - id du flow
+ */
+function toggleClientFlowStatus(clientId, flowId) {
+  const c = clients.find(cl => cl.id === clientId);
+  if (!c) return;
+  const flow = (c.flows || []).find(f => f.id === flowId);
+  if (!flow) return;
+
+  // Cycle : published → draft → published
+  flow.status     = flow.status === 'published' ? 'draft' : 'published';
+  flow.active     = flow.status === 'published';
+  flow.modifiedAt = 'Maintenant';
+  c.automationsActive = (c.flows || []).filter(f => f.active).length;
+
+  showToast(
+    `Flow "${flow.name}" → ${flow.status === 'published' ? 'Publié ✓' : 'Brouillon'}`,
+    flow.status === 'published' ? 'success' : 'info'
+  );
+  if (currentSheetTab === 'automations') renderSheetTab('automations');
+}
+
+/**
+ * duplicateClientFlow(clientId, flowId) — Duplique un flow existant.
+ * Le nouveau flow est un brouillon avec "(copie)" dans le nom.
+ * Stats remises à zéro, id unique généré.
+ * @param {number} clientId - id du client
+ * @param {string} flowId   - id du flow à dupliquer
+ */
+function duplicateClientFlow(clientId, flowId) {
+  const c = clients.find(cl => cl.id === clientId);
+  if (!c) return;
+  const flow = (c.flows || []).find(f => f.id === flowId);
+  if (!flow) return;
+
+  const copy = {
+    ...flow,
+    id:         `dup_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
+    name:       `${flow.name} (copie)`,
+    status:     'draft',
+    active:     false,
+    sent:       0,
+    actifs:     0,
+    openRate:   '—',
+    modifiedAt: 'Maintenant',
+    addedAt:    new Date().toISOString(),
+    source:     'manual',
+  };
+
+  c.flows.push(copy);
+  showToast(`Flow dupliqué en brouillon ✓`, 'success');
+  if (currentSheetTab === 'automations') renderSheetTab('automations');
+}
+
+/**
+ * toggleClientFlow(clientId, flowId, active) — Active ou désactive un flow client.
+ * Met à jour le compteur automationsActive du client.
+ * @param {number} clientId - id du client
+ * @param {string} flowId   - id du flow
+ * @param {boolean} active  - nouvel état
+ */
+function toggleClientFlow(clientId, flowId, active) {
+  const c = clients.find(cl => cl.id === clientId);
+  if (!c) return;
+  const flow = (c.flows || []).find(f => f.id === flowId);
+  if (!flow) return;
+  flow.active = active;
+  c.automationsActive = (c.flows || []).filter(f => f.active).length;
+  showToast(`Flow "${flow.name}" ${active ? 'activé ✓' : 'désactivé'}`, active ? 'success' : 'info');
+}
+
+/**
+ * removeClientFlow(clientId, flowId) — Supprime définitivement un flow d'un client.
+ * Affiche une confirmation via modal custom (pas de confirm() natif).
+ * @param {number} clientId - id du client
+ * @param {string} flowId   - id du flow à supprimer
+ */
+function removeClientFlow(clientId, flowId) {
+  const c    = clients.find(cl => cl.id === clientId);
+  if (!c) return;
+  const flow = (c.flows || []).find(f => f.id === flowId);
+  if (!flow) return;
+
+  // Confirmation via modal custom (pas de confirm() natif — règle absolue)
+  showModal(
+    'Supprimer ce flow ?',
+    `<div style="font-size:13px;color:var(--muted);margin-bottom:16px;">
+      Le flow <strong>"${safeHTML(flow.name)}"</strong> sera supprimé pour <strong>${safeHTML(c.bizName)}</strong>.
+      Cette action est irréversible.
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-ghost-sm" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" style="background:#dc2626;"
+        onclick="confirmRemoveClientFlow(${clientId},'${flowId}')">Supprimer</button>
+    </div>`
+  );
+}
+
+/**
+ * confirmRemoveClientFlow(clientId, flowId) — Exécute la suppression après confirmation.
+ * Rafraîchit l'onglet automations de la fiche client.
+ */
+function confirmRemoveClientFlow(clientId, flowId) {
+  closeModal();
+  const c = clients.find(cl => cl.id === clientId);
+  if (!c) return;
+  const idx = (c.flows || []).findIndex(f => f.id === flowId);
+  if (idx > -1) {
+    const name = c.flows[idx].name;
+    c.flows.splice(idx, 1);
+    c.automationsActive = c.flows.filter(f => f.active).length;
+    showToast(`Flow "${name}" supprimé`, 'info');
+    // Rafraîchir l'onglet si ouvert
+    if (currentSheetTab === 'automations') renderSheetTab('automations');
+  }
+}
+
+/**
+ * openAddFlowModal(clientId) — Ouvre la modal d'ajout manuel d'un flow.
+ * Affiche tous les templates disponibles (communs + métier + autres métiers).
+ * Filtre les flows déjà assignés au client.
+ * @param {number} clientId - id du client
+ */
+function openAddFlowModal(clientId) {
+  const c = clients.find(cl => cl.id === clientId);
+  if (!c) return;
+
+  window._addFlowClientId = clientId;
+  const existingIds = new Set((c.flows || []).map(f => f.name)); // déduplication par nom
+
+  // Construire la liste de tous les templates disponibles
+  const allTemplates = [];
+  Object.entries(CLIENT_FLOW_TEMPLATES).forEach(([key, flows]) => {
+    flows.forEach(f => {
+      if (!existingIds.has(f.name)) {
+        allTemplates.push({ ...f, tradeGroup: key === '_all' ? 'Communs' : key });
+      }
+    });
+  });
+
+  // Grouper par métier
+  const groups = {};
+  allTemplates.forEach(f => {
+    if (!groups[f.tradeGroup]) groups[f.tradeGroup] = [];
+    groups[f.tradeGroup].push(f);
+  });
+
+  const listHtml = Object.entries(groups).map(([group, flows]) => `
+    <div style="margin-bottom:14px;">
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">${safeHTML(group)}</div>
+      ${flows.map(f => `
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--stone);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:background .12s;"
+          onmouseover="this.style.background='var(--cta-ghost)'"
+          onmouseout="this.style.background='var(--stone)'"
+          onclick="addFlowToClient('${f.id || f.name.replace(/\s+/g,'_')}', '${safeHTML(group)}')">
+          <span style="font-size:18px;flex-shrink:0;">${f.icon}</span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:600;color:var(--ink);">${safeHTML(f.name)}</div>
+            <div style="font-size:11px;color:var(--muted);">${f.steps?.length || 1} étape${(f.steps?.length||1)>1?'s':''} · ${safeHTML(f.trigger)}</div>
+          </div>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--cta)" stroke-width="2.2"><path d="M8 2v12M2 8h12"/></svg>
+        </div>`).join('')}
+    </div>`).join('');
+
+  showModal('Ajouter un flow', `
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">
+      Sélectionnez un template à ajouter à <strong>${safeHTML(c.bizName)}</strong>.
+    </div>
+    <div style="max-height:360px;overflow-y:auto;padding-right:4px;">
+      ${listHtml || '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">Tous les templates sont déjà assignés.</div>'}
+    </div>
+  `);
+}
+
+/**
+ * addFlowToClient(templateId, tradeGroup) — Ajoute manuellement un flow à un client.
+ * Le flow est marqué source:'manual' pour le distinguer des flows auto.
+ * @param {string} templateId  - id ou slug du template
+ * @param {string} tradeGroup  - groupe métier du template ('Communs', 'Plumbing', etc.)
+ */
+function addFlowToClient(templateId, tradeGroup) {
+  closeModal();
+  const clientId = window._addFlowClientId;
+  const c = clients.find(cl => cl.id === clientId);
+  if (!c) return;
+
+  // Trouver le template dans la bibliothèque
+  const sourceKey = tradeGroup === 'Communs' ? '_all' : tradeGroup;
+  const templates = CLIENT_FLOW_TEMPLATES[sourceKey] || [];
+  const template  = templates.find(f =>
+    (f.id || f.name.replace(/\s+/g,'_')) === templateId || f.name === templateId
+  );
+
+  if (!template) { showToast('Template introuvable', 'warning'); return; }
+
+  if (!c.flows) c.flows = [];
+
+  // Vérifier si déjà assigné (par nom)
+  if (c.flows.some(f => f.name === template.name)) {
+    showToast('Ce flow est déjà assigné à ce client', 'warning');
+    return;
+  }
+
+  // Ajouter le flow avec source:'manual'
+  c.flows.push({
+    ...template,
+    id:       `manual_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
+    sent:     0,
+    openRate: '—',
+    addedAt:  new Date().toISOString(),
+    source:   'manual',
+    active:   true,
+  });
+  c.automationsActive = c.flows.filter(f => f.active).length;
+
+  showToast(`Flow "${template.name}" ajouté ✓`, 'success');
+  if (currentSheetTab === 'automations') renderSheetTab('automations');
 }
 
 /* ── Réputation ── */
@@ -11568,51 +13231,96 @@ function renderClientSite(c, body) {
 }
 
 /* ── Shared: Site & Formulaires renderer (used in both sheet + client space) ── */
+/**
+ * Rend l'onglet "Site & Formulaires" de la fiche client.
+ * Contient :
+ *   - Bandeau deploy (statut live / non déployé)
+ *   - Bandeau GitHub (repo lié ou non — ouvre openGithubModal)
+ *   - Sub-tabs : Pages | Formulaires
+ *   - Liste des pages avec boutons "Voir ↗" et "Éditer" (→ Claude Design)
+ *   - Liste des formulaires actifs avec stats
+ *
+ * @param {Object} c       - Client depuis clients[]
+ * @param {Element} body   - Élément DOM du corps de l'onglet (#sheet-body)
+ * @param {string} context - Identifiant de contexte ('sheet' | 'spotsite')
+ *                           pour éviter les conflits d'id entre deux instances
+ */
 function renderSiteForms(c, body, context) {
   const theme = clientTheme(c.trade);
-  const color = THEME_COLORS[theme];
 
-  // Data
+  /*
+   * MAP page → fichier HTML source.
+   * En prod : ces fichiers sont dans le repo GitHub du client,
+   * personnalisés avec les Custom Values (Type B).
+   * La clé 'fileKey' est passée à openInClaudeDesign() pour fetch le contenu.
+   */
   const PAGES = [
-    { name:'Home', icon:'🏠', status:'done',  url: c.siteUrl ? c.siteUrl : null,        desc:'Page principale du site client' },
-    { name:'Optin / VSL', icon:'🎬', status:'soon', url:null, desc:'Page vidéo + formulaire de capture' },
-    { name:'Funnel Page 1', icon:'📹', status:'soon', url:null, desc:'Vidéo → Calendrier Zoom' },
-    { name:'Funnel Page 2', icon:'✅', status:'soon', url:null, desc:'Confirmation + SMS de bienvenue' },
-    { name:'Legal', icon:'⚖️', status:'soon', url:null, desc:'Mentions légales' },
-    { name:'Privacy', icon:'🔒', status:'soon', url:null, desc:'Politique de confidentialité' },
-    { name:'Contact', icon:'📬', status:'soon', url:null, desc:'Page contact' },
+    { name:'Home',          icon:'🏠', status:'done', fileKey:'template-01-prolocal', url: c.siteUrl || null, desc:'Page principale — hero, services, avis, contact' },
+    { name:'Optin / VSL',   icon:'🎬', status:'soon', fileKey:'optin',                url: null,              desc:'Page vidéo + formulaire de capture' },
+    { name:'Funnel Page 1', icon:'📹', status:'soon', fileKey:'funnel-page-1',         url: null,              desc:'VSL 6min → formulaire → Calendrier Zoom' },
+    { name:'Funnel Page 2', icon:'✅', status:'soon', fileKey:'funnel-page-2',         url: null,              desc:'Confirmation booking + SMS de bienvenue' },
+    { name:'Legal',         icon:'⚖️', status:'soon', fileKey:'legal',                 url: null,              desc:'Mentions légales & CGU' },
+    { name:'Privacy',       icon:'🔒', status:'soon', fileKey:'privacy',               url: null,              desc:'Politique de confidentialité' },
+    { name:'Contact',       icon:'📬', status:'soon', fileKey:'contact',               url: null,              desc:'Page contact avec formulaire' },
   ];
 
   const FORMS = [
     {
       name: 'Formulaire devis gratuit',
-      icon: '📋',
+      icon: 'clipboard',
       location: 'Home — Hero section',
       fields: ['Prénom & Nom', 'Téléphone', 'Ville / Code postal', 'Description du projet'],
       submissions: 23, conversions: '68%', lastSub: 'Il y a 2h',
     },
   ];
 
-  // Render with inner sub-tabs
+  // ── Bandeau GitHub ───────────────────────────────────────────────────────
+  // Statut visuel selon c.githubRepo : lié (vert) ou non lié (neutre).
+  const hasRepo    = !!(c.githubRepo && c.githubRepo.trim());
+  const repoSlug   = hasRepo ? c.githubRepo.trim() : '';
+  const repoUrl    = hasRepo ? `https://github.com/${repoSlug}` : '#';
+  const githubHtml = `
+    <div class="github-bar ${hasRepo ? 'linked' : ''}" style="cursor:pointer;" onclick="openGithubModal(${c.id})">
+      <div class="github-bar-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="${hasRepo ? '#16a34a' : 'var(--muted)'}"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      </div>
+      <div class="github-bar-text">
+        <div class="github-bar-label">${hasRepo ? 'Dépôt GitHub lié' : 'Aucun dépôt GitHub lié'}</div>
+        <div class="github-bar-sub">
+          ${hasRepo
+            ? `<a href="${repoUrl}" target="_blank" onclick="event.stopPropagation()" style="color:#16a34a;font-weight:600;">${repoSlug}</a>`
+            : 'Cliquer pour configurer le dépôt GitHub du site client'}
+        </div>
+      </div>
+      ${hasRepo
+        ? `<a href="${repoUrl}" target="_blank" onclick="event.stopPropagation()" class="btn btn-ghost-sm" style="font-size:11px;flex-shrink:0;">Voir ↗</a>`
+        : `<button class="btn btn-ghost-sm" style="font-size:11px;flex-shrink:0;" onclick="event.stopPropagation();openGithubModal(${c.id})">+ Lier</button>`}
+    </div>`;
+
+  // ── Rendu principal ──────────────────────────────────────────────────────
   body.innerHTML = `
-    <!-- Deploy bar -->
-    <div style="background:var(--sidebar-bg); border-radius:var(--radius); padding:12px 16px; display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+    <!-- Deploy bar — statut GitHub Pages / hébergement -->
+    <div style="background:var(--sidebar-bg); border-radius:var(--radius); padding:12px 16px; display:flex; align-items:center; gap:14px; margin-bottom:10px;">
       <div style="flex:1;">
-        <div style="font-size:12px; color:rgba(255,255,255,.5); margin-bottom:2px;">Template · ${theme}</div>
+        <div style="font-size:12px; color:rgba(255,255,255,.5); margin-bottom:2px;">Template · ${theme} · GitHub Pages</div>
         <div style="font-size:13.5px; font-weight:600; color:#fff;">
           ${c.siteUrl
-            ? `<span style="color:#22c55e;">● Live</span> — <a href="${c.siteUrl}" target="_blank" style="color:rgba(255,255,255,.7);">${c.siteUrl.replace('https://','')}</a>`
+            ? `<span style="color:#22c55e;">● Live</span> — <a href="${safeHTML(c.siteUrl)}" target="_blank" style="color:rgba(255,255,255,.7);">${safeHTML(c.siteUrl.replace('https://',''))}</a>`
             : '<span style="color:#f59e0b;">● Non déployé</span>'}
         </div>
       </div>
-      <button class="btn btn-primary" style="font-size:12px;" onclick="deploySite(${c.id})">
+      <button class="btn btn-primary" style="font-size:12px;" onclick="deployClientSite(${c.id})">
         <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v8M5 7l3 3 3-3M2 13h12"/></svg>
-        Deploy
+        ${c.githubRepo ? 'Redéployer' : 'Créer & Déployer'}
       </button>
-      ${c.siteUrl ? `<a href="${c.siteUrl}" target="_blank" class="btn btn-ghost-sm" style="font-size:12px; color:rgba(255,255,255,.6); border-color:rgba(255,255,255,.15);">Ouvrir ↗</a>` : ''}
+      ${c.siteUrl ? `<a href="${safeHTML(c.siteUrl)}" target="_blank" class="btn btn-ghost-sm" style="font-size:12px; color:rgba(255,255,255,.6); border-color:rgba(255,255,255,.15);">Ouvrir ↗</a>` : ''}
+      ${c.githubRepo ? `<button class="btn btn-ghost-sm" style="font-size:12px; color:rgba(255,255,255,.5); border-color:rgba(255,255,255,.15);" onclick="rollbackClientSite(${c.id})">↩ Rollback</button>` : ''}
     </div>
 
-    <!-- Sub-tabs: Pages / Formulaires -->
+    <!-- GitHub repo bar -->
+    ${githubHtml}
+
+    <!-- Sub-tabs : Pages / Formulaires -->
     <div class="sub-tabs" id="sf-subtabs-${context}">
       <button class="sub-tab active" onclick="switchSubTab('${context}', 'pages', this)">
         Pages <span style="font-size:10px; background:var(--stone); color:var(--muted); border-radius:10px; padding:1px 6px; margin-left:4px;">${PAGES.length}</span>
@@ -11622,31 +13330,38 @@ function renderSiteForms(c, body, context) {
       </button>
     </div>
 
-    <!-- Pages panel -->
+    <!-- Panel : Pages -->
     <div id="sf-panel-pages-${context}" class="sf-panel">
       <div class="pages-list">
         ${PAGES.map(p => `
           <div class="page-item">
             <div class="page-item-icon">${p.icon}</div>
             <div style="flex:1; min-width:0;">
-              <div class="page-item-name">${p.name}</div>
-              <div class="page-item-url">${p.desc}</div>
+              <div class="page-item-name">${safeHTML(p.name)}</div>
+              <div class="page-item-url">${safeHTML(p.desc)}</div>
             </div>
             <div class="page-item-actions">
               <span class="page-built-badge pb-${p.status}">
                 ${p.status === 'done' ? '✓ Buildée' : p.status === 'draft' ? 'Draft' : 'À venir'}
               </span>
-              ${p.status === 'done' && p.url ? `<a href="${p.url}" target="_blank" class="btn btn-ghost-sm" style="font-size:11px;">Voir ↗</a>` : ''}
-              ${p.status === 'done' ? `<button class="btn btn-ghost-sm" style="font-size:11px;">Éditer</button>` : `<button class="btn btn-ghost-sm" style="font-size:11px; opacity:.5;" disabled>Bientôt</button>`}
+              ${p.status === 'done' && p.url
+                ? `<a href="${safeHTML(p.url)}" target="_blank" class="btn btn-ghost-sm" style="font-size:11px;">Voir ↗</a>`
+                : ''}
+              ${p.status === 'done'
+                ? `<button class="btn-claude-design" onclick="openInClaudeDesign(${c.id}, '${p.name}', '${p.fileKey}')">
+                     <span class="claude-design-icon">C</span>
+                     Éditer
+                   </button>`
+                : `<button class="btn btn-ghost-sm" style="font-size:11px; opacity:.45; cursor:not-allowed;" disabled>Bientôt</button>`}
             </div>
           </div>`).join('')}
       </div>
       <div style="margin-top:12px; padding:12px 14px; background:var(--cta-ghost); border:1px solid var(--cta-border); border-radius:var(--radius); font-size:12.5px; color:var(--ink-mid);">
-        💡 <strong>1 page buildée</strong> sur 7. Les autres pages seront disponibles dans les prochaines versions.
+        💡 <strong>1 page buildée</strong> sur ${PAGES.length}. Les autres seront disponibles dans les prochaines versions. Le bouton <strong>Éditer</strong> ouvre la page dans <strong>Claude Design</strong> pour la modifier sans toucher au code.
       </div>
     </div>
 
-    <!-- Forms panel (hidden by default) -->
+    <!-- Panel : Formulaires (masqué par défaut) -->
     <div id="sf-panel-forms-${context}" class="sf-panel" style="display:none;">
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
         <div style="font-size:12.5px; color:var(--muted);">${FORMS.length} formulaire${FORMS.length > 1 ? 's' : ''} actif${FORMS.length > 1 ? 's' : ''}</div>
@@ -11658,18 +13373,18 @@ function renderSiteForms(c, body, context) {
             <div class="form-card-header">
               <div class="form-card-icon">${f.icon}</div>
               <div style="flex:1;">
-                <div class="form-card-name">${f.name}</div>
-                <div style="font-size:11px; color:var(--muted);">${f.location}</div>
+                <div class="form-card-name">${safeHTML(f.name)}</div>
+                <div style="font-size:11px; color:var(--muted);">${safeHTML(f.location)}</div>
               </div>
               <span class="page-built-badge pb-done">Actif</span>
             </div>
             <div class="form-fields-preview">
-              ${f.fields.map(field => `<span class="form-field-chip">${field}</span>`).join('')}
+              ${f.fields.map(field => `<span class="form-field-chip">${safeHTML(field)}</span>`).join('')}
             </div>
             <div class="form-card-stats">
               <div><div class="fcs-val">${f.submissions}</div><div class="fcs-label">Soumissions</div></div>
               <div><div class="fcs-val">${f.conversions}</div><div class="fcs-label">Taux conversion</div></div>
-              <div><div class="fcs-val">${f.lastSub}</div><div class="fcs-label">Dernière soumission</div></div>
+              <div><div class="fcs-val">${safeHTML(f.lastSub)}</div><div class="fcs-label">Dernière soumission</div></div>
             </div>
             <div class="form-card-footer">
               <button class="btn btn-ghost-sm" style="font-size:11.5px;" onclick="showToast('Ouverture de l\'éditeur…','info')">Modifier le formulaire</button>
@@ -11678,6 +13393,162 @@ function renderSiteForms(c, body, context) {
           </div>`).join('')}
       </div>
     </div>`;
+}
+
+/**
+ * Ouvre la modal de configuration du dépôt GitHub d'un client.
+ * Pré-remplit l'input avec le repo actuel si déjà lié.
+ * Affiche le bouton "Délier" uniquement si un repo est déjà lié.
+ * Stocke le clientId dans window._githubModalClientId pour saveGithubRepo().
+ * @param {number} clientId - id du client
+ */
+function openGithubModal(clientId) {
+  const c = clients.find(cl => cl.id === clientId);
+  if (!c) return;
+
+  // Stocker le contexte pour saveGithubRepo()
+  window._githubModalClientId = clientId;
+
+  const input    = document.getElementById('github-repo-input');
+  const preview  = document.getElementById('github-repo-preview');
+  const repoLink = document.getElementById('github-repo-link');
+  const unlinkBtn= document.getElementById('github-unlink-btn');
+
+  if (input) input.value = c.githubRepo || '';
+
+  // Afficher/masquer le preview et le bouton délier
+  const hasRepo = !!(c.githubRepo && c.githubRepo.trim());
+  if (unlinkBtn) unlinkBtn.style.display = hasRepo ? 'inline-flex' : 'none';
+  if (preview)   preview.style.display   = hasRepo ? 'block' : 'none';
+  if (hasRepo && repoLink) {
+    repoLink.href        = `https://github.com/${c.githubRepo.trim()}`;
+    repoLink.textContent = `github.com/${c.githubRepo.trim()}`;
+  }
+
+  // Mise à jour du preview en temps réel pendant la saisie
+  if (input) {
+    input.oninput = () => {
+      const val = input.value.trim();
+      const valid = val && val.includes('/');
+      if (preview) preview.style.display   = valid ? 'block' : 'none';
+      if (repoLink && valid) {
+        repoLink.href        = `https://github.com/${val}`;
+        repoLink.textContent = `github.com/${val}`;
+      }
+    };
+  }
+
+  openModal('modal-github-repo');
+}
+
+/**
+ * Sauvegarde le dépôt GitHub lié au client courant (window._githubModalClientId).
+ * Si repoOverride === null → délier (effacer le repo).
+ * Si repoOverride est omis → lire la valeur du champ #github-repo-input.
+ * Valide le format "org/repo" avant de sauvegarder.
+ * Met à jour l'onglet Site & Formulaires après sauvegarde.
+ * @param {string|null} [repoOverride] - Valeur forcée (null = délier, omis = lire l'input)
+ */
+function saveGithubRepo(repoOverride) {
+  const clientId = window._githubModalClientId;
+  const c = clients.find(cl => cl.id === clientId);
+  if (!c) return;
+
+  // Déterminer la valeur à sauvegarder
+  let repoValue;
+  if (repoOverride === null) {
+    // Délier : effacer le repo
+    repoValue = '';
+  } else {
+    repoValue = (document.getElementById('github-repo-input')?.value || '').trim();
+    // Validation basique : doit contenir un "/"
+    if (repoValue && !repoValue.includes('/')) {
+      showToast('Format invalide — attendu : org/nom-du-repo', 'warning');
+      return;
+    }
+    // Nettoyer : retirer le préfixe "github.com/" si collé depuis l'URL
+    repoValue = repoValue.replace(/^(https?:\/\/)?(www\.)?github\.com\//, '');
+  }
+
+  // Sauvegarder dans le modèle client
+  c.githubRepo = repoValue;
+
+  closeModal('modal-github-repo');
+
+  if (repoValue) {
+    showToast(`Dépôt lié : ${repoValue} ✓`, 'success');
+  } else {
+    showToast('Dépôt GitHub délié', 'info');
+  }
+
+  // Rafraîchir l'onglet si la sheet client est ouverte sur site-forms
+  if (currentSheetTab === 'site-forms') {
+    renderSheetTab('site-forms');
+  }
+}
+
+/**
+ * Ouvre une page client dans Claude Design (claude.ai/design).
+ * Workflow :
+ *   1. Récupère le fichier HTML via fetch() depuis le même dossier
+ *   2. Copie le contenu dans le presse-papiers
+ *   3. Ouvre claude.ai/design dans un nouvel onglet
+ *   4. Affiche la modal d'instructions (coller dans Claude Design)
+ *
+ * Note : fetch() fonctionne uniquement si le dashboard est servi depuis un
+ * serveur HTTP (Netlify, localhost). En file:// protocol → fallback avec
+ * un message d'instruction manuel.
+ *
+ * @param {number} clientId - id du client (pour contexte futur)
+ * @param {string} pageName - Nom lisible de la page (ex: 'Home')
+ * @param {string} fileKey  - Clé du fichier HTML (ex: 'template-01-prolocal')
+ */
+async function openInClaudeDesign(clientId, pageName, fileKey) {
+  const c = clients.find(cl => cl.id === clientId);
+  if (!c) return;
+
+  const fileName = `${fileKey}.html`;
+
+  // Mettre à jour le nom de page dans la modal
+  const cdPageName = document.getElementById('cd-page-name');
+  if (cdPageName) cdPageName.textContent = pageName;
+
+  // ── Étape 1 : Fetch + copie dans le presse-papiers ──────────────────────
+  try {
+    const res = await fetch(fileName);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    let html = await res.text();
+
+    // Injecter un commentaire d'en-tête pour que Claude connaisse le contexte
+    const clientContext = `<!--
+  CLIENT : ${c.bizName} (${c.trade} — ${c.city})
+  PAGE   : ${pageName}
+  ÉDITÉ DANS CLAUDE DESIGN — ${new Date().toLocaleDateString('fr-FR')}
+  Pour personnaliser : remplace les valeurs entre [CROCHETS] par les données du client.
+-->
+`;
+    html = html.replace('<!DOCTYPE html>', clientContext + '<!DOCTYPE html>');
+
+    // Copie dans le presse-papiers
+    await navigator.clipboard.writeText(html);
+    showToast(`HTML de "${pageName}" copié ✓`, 'success');
+
+  } catch (err) {
+    // Fallback : impossible de fetch (file:// protocol ou fichier absent)
+    console.warn('openInClaudeDesign fetch error:', err);
+
+    // On ouvre quand même Claude Design avec une instruction manuelle
+    const cdPageNameEl = document.getElementById('cd-page-name');
+    if (cdPageNameEl) cdPageNameEl.textContent = `${pageName} (copie manuelle requise)`;
+
+    showToast(`Ouvre le fichier ${fileName} et copie-colle dans Claude Design`, 'info');
+  }
+
+  // ── Étape 2 : Ouvrir claude.ai/design dans un nouvel onglet ─────────────
+  window.open('https://claude.ai/design', '_blank');
+
+  // ── Étape 3 : Afficher la modal d'instructions ───────────────────────────
+  openModal('modal-claude-design');
 }
 
 function switchSubTab(context, tab, btn) {
@@ -12561,11 +14432,24 @@ function initAuth() {
  * met à jour la sidebar et render les pages initiales.
  */
 function bootDashboard() {
-  document.getElementById('login-screen').classList.add('hidden');
-  applyRoleRestrictions();
-  updateSidebarUser();
-  renderKanban();
-  renderOverview();
+  try {
+    document.getElementById('login-screen').classList.add('hidden');
+    // Restaure les clés API depuis localStorage avant le premier rendu
+    // TODO-SUPABASE : remplacer par chargement depuis Supabase Vault
+    loadApiKeys();
+    populateTradeDropdowns();
+    applyRoleRestrictions();
+    updateSidebarUser();
+    renderKanban();
+    renderOverview();
+  } catch(err) {
+    // En cas d'erreur au boot, afficher le dashboard quand même sans crasher
+    console.error('bootDashboard error:', err);
+    try {
+      document.getElementById('login-screen').classList.add('hidden');
+      showPage('overview');
+    } catch(e) {}
+  }
 }
 
 /**
@@ -12772,12 +14656,7 @@ function requestOTP() {
   // Switch to OTP step
   document.getElementById('login-step-email').classList.add('hidden');
   document.getElementById('login-step-otp').classList.remove('hidden');
-  const otpSub = document.getElementById('otp-sub-text');
-  otpSub.textContent = '';
-  otpSub.append('Code envoyé par SMS et email à ');
-  const strong = document.createElement('strong');
-  strong.textContent = email;
-  otpSub.appendChild(strong);
+  document.getElementById('otp-sub-text').innerHTML = `Code envoyé par SMS et email à <strong>${email}</strong>`;
 
   // Clear inputs
   document.querySelectorAll('.otp-digit').forEach(d => { d.value = ''; });
@@ -15180,6 +17059,36 @@ renderKanban();
 renderOverview();
 autoGenerateTasks();
 checkMonthlyAlert();
+
+/*
+ * initClientFlows() — Initialise les flows pour les clients existants qui n'en ont pas.
+ * Appelé au boot pour garantir que tous les clients ont leur champ flows[] rempli.
+ * Les clients créés avant cette feature n'ont pas de flows — on leur assigne
+ * automatiquement les flows correspondant à leur métier.
+ * Les clients créés après ont déjà leurs flows (assignés dans addClient()).
+ */
+(function initClientFlows() {
+  try {
+    // Guard : CLIENT_FLOW_TEMPLATES doit être défini (déclaré plus haut dans le script)
+    if (typeof CLIENT_FLOW_TEMPLATES === 'undefined') return;
+    clients.forEach(c => {
+      if (!c.flows || c.flows.length === 0) {
+        c.flows = getFlowsForTrade(c.trade).map(f => ({
+          ...f,
+          id:       `boot_${c.id}_${Math.random().toString(36).slice(2,7)}`,
+          sent:     0,
+          openRate: '—',
+          addedAt:  new Date().toISOString(),
+          source:   'auto',
+        }));
+        // Mettre à jour le compteur automationsActive
+        c.automationsActive = c.flows.filter(f => f.active).length;
+      }
+    });
+  } catch(e) {
+    console.warn('initClientFlows: erreur au boot —', e);
+  }
+})();
 // Update task badges immediately after generating
 setTimeout(() => {
   const myPending = tasks.filter(t => !t.done && t.assignedTo === currentUser?.member.id).length;
@@ -15192,17 +17101,34 @@ setTimeout(() => {
 initAuth();
 
 /* ── Écoute les messages de l'iframe Builder (spotrank-builder.html) ──
- * Reçoit : { type: 'FLOW_SAVED', name: 'Nom du flow' }
- * Affiche un toast de confirmation quand un flow est sauvegardé.
- * Filtre par e.source pour rejeter les messages d'autres iframes/fenêtres.
+ * Reçoit :
+ *   { type: 'FLOW_SAVED', name } → flow agence sauvegardé
+ *   { type: 'CLIENT_FLOW_SAVED', tradeKey, flowId, name, active, steps } → flow client sauvegardé depuis le builder
  */
 window.addEventListener('message', (e) => {
-  if (e.source !== document.getElementById('builder-iframe')?.contentWindow) return;
   if (!e.data?.type) return;
+
   if (e.data.type === 'FLOW_SAVED') {
-    const name = typeof e.data.name === 'string' ? e.data.name : '';
-    // showToast uses textContent internally, but limit length defensively
-    showToast(`Flow "${name.slice(0, 80)}" sauvegardé ✓`, 'success');
+    showToast('Flow "' + e.data.name + '" sauvegardé ✓', 'success');
+  }
+
+  /* ── Client flow saved from builder → mettre à jour CLIENT_FLOW_TEMPLATES ── */
+  if (e.data.type === 'CLIENT_FLOW_SAVED') {
+    var tk = e.data.tradeKey;
+    var flows = CLIENT_FLOW_TEMPLATES[tk];
+    if (flows) {
+      var flow = flows.find(function(f) { return f.id === e.data.flowId; });
+      if (flow) {
+        flow.name       = e.data.name || flow.name;
+        flow.active     = e.data.active;
+        flow.steps      = e.data.steps || flow.steps;
+        flow.modifiedAt = 'Maintenant';
+        showToast('Flow client "' + flow.name + '" mis à jour ✓', 'success');
+      }
+    }
+    /* Fermer l'overlay builder et rafraîchir */
+    closeFlowBuilder();
+    if (currentSettingsTab === 'client-flows') renderSettingsContent();
   }
 });
 

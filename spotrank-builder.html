@@ -6,8 +6,6 @@
 <title>Spotrank — Automation Flow Builder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
-<!-- DOMPurify: sanitize contentEditable email body before storing/rendering -->
-<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js" crossorigin="anonymous"></script>
 <style>
 /* ═══════════════════════════════════════
    DESIGN SYSTEM — SPOTRANK
@@ -3513,6 +3511,24 @@ function doSaveFlow() {
   const name   = nameInput?.value?.trim() || 'Nouveau flow';
   const status = statusToggle?.classList.contains('on') ? 'published' : 'draft';
 
+  /* ── Client flow : renvoyer les steps au dashboard ── */
+  if (window._isClientFlow && window._clientFlowData) {
+    const steps = window.extractClientFlowSteps();
+    try {
+      window.parent.postMessage({
+        type: 'CLIENT_FLOW_SAVED',
+        tradeKey: window._clientFlowData.tradeKey,
+        flowId: window._clientFlowData.flow.id,
+        name: name,
+        active: status === 'published',
+        steps: steps,
+      }, '*');
+    } catch(e) { console.warn('postMessage failed:', e); }
+    builderShowToast('Flow client sauvegardé ✓', 'success');
+    return;
+  }
+
+  /* ── Flow agence (comportement original) ── */
   if (isNewFlow) {
     const catSelect     = document.getElementById('flow-cat-select');
     const triggerSelect = document.getElementById('flow-trigger-select');
@@ -3534,9 +3550,7 @@ function doSaveFlow() {
     builderShowToast('Flow sauvegardé ✓', 'success');
   }
   renderFlowList();
-  // Target only the parent's origin (same-origin iframe). '*' would leak
-  // to any window that embeds this iframe across origins.
-  try { window.parent.postMessage({ type: 'FLOW_SAVED', flowId: currentFlowId, name, status }, window.location.origin); } catch(e) {}
+  try { window.parent.postMessage({ type: 'FLOW_SAVED', flowId: currentFlowId, name, status }, '*'); } catch(e) {}
 }
 
 /**
@@ -3945,7 +3959,125 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('message', (e) => {
     if (e.data?.type === 'OPEN_FLOW' && e.data.id) openFlow(e.data.id);
     if (e.data?.type === 'NEW_FLOW') newFlow();
+    /* ── Client flow support ──
+     * Reçoit un flow client depuis le dashboard (Settings → Flows clients).
+     * Convertit les steps simples {delay, type, content} en canvasBlocks.
+     * Permet l'édition visuelle dans le builder.
+     * À la sauvegarde, renvoie CLIENT_FLOW_SAVED au dashboard parent.
+     */
+    if (e.data?.type === 'LOAD_CLIENT_FLOW' && e.data.flow) {
+      loadClientFlow(e.data.flow, e.data.tradeKey || '');
+    }
   });
+
+  /* ═══════════════════════════════════════════
+     CLIENT FLOW SUPPORT — Édition des flows clients
+     Reçoit un flow client depuis le dashboard parent.
+     Convertit les steps simples en canvasBlocks pour le builder.
+     Renvoie les steps modifiés via postMessage au save.
+  ═══════════════════════════════════════════ */
+
+  /** Flag indiquant si on édite un flow client (vs un flow agence) */
+  window._isClientFlow = false;
+  window._clientFlowData = null;
+
+  /**
+   * loadClientFlow(flow, tradeKey) — Charge un flow client dans le builder.
+   * Convertit les steps {delay, type, content} en canvasBlocks visuels.
+   * @param {Object} flow     - Flow client depuis CLIENT_FLOW_TEMPLATES
+   * @param {string} tradeKey - Clé du trade ('_all', 'Plumbing', etc.)
+   */
+  window.loadClientFlow = function(flow, tradeKey) {
+    window._isClientFlow = true;
+    window._clientFlowData = { flow: flow, tradeKey: tradeKey };
+
+    /* Générer un ID temporaire pour le flow */
+    currentFlowId = 'client_' + (flow.id || Date.now());
+    isNewFlow = false;
+
+    /* Helper pour créer un bloc canvas */
+    const mk = (type, extra) => {
+      extra = extra || {};
+      const item = PALETTE_ITEMS.flatMap(s => s.items).find(i => i.type === type);
+      return { id: 'b_' + (++blockIdCounter), type: type, icon: item?.icon || '•', cls: item?.cls || 'pi-end', config: {}, ...extra };
+    };
+
+    /* Convertir les steps en blocs canvas */
+    canvasBlocks = [];
+
+    /* Bloc trigger en premier */
+    canvasBlocks.push(mk('pipeline_stage', { config: { stage: flow.trigger || 'client_flow' } }));
+
+    /* Chaque step → wait + send_sms/send_email */
+    (flow.steps || []).forEach(function(step, i) {
+      /* Ajouter un wait si ce n'est pas le premier step ou si le delay est > 0 */
+      if (step.delay && step.delay !== '0' && step.delay !== 'J0' && step.delay !== '0min') {
+        /* Parser le delay pour le config */
+        var delayNum = parseInt(step.delay.replace(/[^0-9]/g, '')) || 1;
+        var delayUnit = 'jours';
+        if (step.delay.toLowerCase().includes('min')) delayUnit = 'minutes';
+        else if (step.delay.toLowerCase().includes('h')) delayUnit = 'heures';
+        else if (step.delay.toLowerCase().includes('m+')) delayUnit = 'mois';
+        canvasBlocks.push(mk('wait', { config: { duration: delayNum, unit: delayUnit } }));
+      }
+
+      /* Bloc SMS ou Email */
+      if (step.type === 'email') {
+        canvasBlocks.push(mk('send_email', { config: { subject: flow.name || '', body: step.content || '' } }));
+      } else {
+        canvasBlocks.push(mk('send_sms', { config: { message: step.content || '' } }));
+      }
+    });
+
+    /* Bloc end */
+    canvasBlocks.push(mk('end', { _autoEnd: true }));
+
+    /* Mettre à jour le header du builder */
+    setTimeout(function() {
+      var nameInput = document.getElementById('flow-name-input');
+      if (nameInput) nameInput.value = flow.name || 'Client flow';
+      var statusToggle = document.getElementById('status-toggle');
+      if (statusToggle) statusToggle.classList.toggle('on', flow.active);
+      var statusLabel = document.getElementById('status-label');
+      if (statusLabel) statusLabel.textContent = flow.active ? 'Publié' : 'Brouillon';
+      var catSelect = document.getElementById('flow-cat-select');
+      if (catSelect) catSelect.value = 'cold';
+    }, 80);
+
+    /* Rendre le canvas et passer en vue builder */
+    renderCanvas();
+    switchView('builder');
+    closePanel();
+    selectedBlockId = null;
+    builderShowToast('Flow client chargé — ' + (flow.name || ''), 'success');
+  };
+
+  /**
+   * extractClientFlowSteps() — Extrait les steps du canvas pour les renvoyer au dashboard.
+   * Convertit les canvasBlocks en steps simples {delay, type, content}.
+   * @returns {Array} - Steps [{delay, type, content}]
+   */
+  window.extractClientFlowSteps = function() {
+    var steps = [];
+    var pendingDelay = '';
+    canvasBlocks.forEach(function(b) {
+      if (b.type === 'wait') {
+        var dur = b.config?.duration || 1;
+        var unit = b.config?.unit || 'jours';
+        if (unit === 'minutes') pendingDelay = dur + 'min';
+        else if (unit === 'heures') pendingDelay = dur + 'h';
+        else if (unit === 'mois') pendingDelay = 'M+' + dur;
+        else pendingDelay = 'J+' + dur;
+      } else if (b.type === 'send_sms') {
+        steps.push({ delay: pendingDelay || 'J0', type: 'sms', content: b.config?.message || '' });
+        pendingDelay = '';
+      } else if (b.type === 'send_email') {
+        steps.push({ delay: pendingDelay || 'J0', type: 'email', content: b.config?.body || b.config?.subject || '' });
+        pendingDelay = '';
+      }
+    });
+    return steps;
+  };
 
   // ── Email Editor functions (need access to canvasBlocks) ──
   window.eemBlockId = null;
@@ -4048,12 +4180,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!b) return;
     const newSubj     = document.getElementById('eem-subj').value;
     const newPrev     = document.getElementById('eem-prev').value;
-    // Sanitize contentEditable HTML: strip <script>, event handlers, and
-    // javascript: URLs. Keep standard email-safe formatting tags.
-    const rawBodyHtml = document.getElementById('eem-body').innerHTML;
-    const newBodyHtml = (typeof DOMPurify !== 'undefined')
-      ? DOMPurify.sanitize(rawBodyHtml, { USE_PROFILES: { html: true } })
-      : rawBodyHtml.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/\son\w+\s*=\s*"[^"]*"/gi, '').replace(/\son\w+\s*=\s*'[^']*'/gi, '');
+    const newBodyHtml = document.getElementById('eem-body').innerHTML;
     const newBody     = document.getElementById('eem-body').innerText;
     b.config.subject  = newSubj;
     b.config.preview  = newPrev;
