@@ -38,7 +38,8 @@ Spotrank est une **agence de marketing local** qui aide des contractors américa
 - Visio : Zoom API (meetings, scheduler, webhooks)
 - Paiement : Stripe (abonnements $297/mo, MRR tracking)
 - CRM client : LeadConnector / GoHighLevel (GHL) pour les sous-comptes clients
-- Hébergement : Netlify — déployé sur https://leafy-otter-8c951e.netlify.app/
+- Hébergement dashboard : **Vercel** — déployé sur https://spotrank-dashboard.vercel.app/ (auto-deploy sur chaque push GitHub)
+- Hébergement sites clients : **GitHub Pages** — repos publics dans org Spotrank-agency
 - IA : Anthropic API (claude-sonnet-4-20250514)
 
 ## Configuration API centralisée (SPOT_API)
@@ -558,7 +559,7 @@ Champ `githubRepo` ajouté dans le modèle client (ex: `'spotrank-agency/elite-p
 | Contact | `contact` |
 
 ## Notes techniques
-- `fetch()` requiert un serveur HTTP (Netlify / localhost) — en `file://` le fallback affiche un toast d'instruction manuelle
+- `fetch()` requiert un serveur HTTP (Vercel / localhost) — en `file://` le fallback affiche un toast d'instruction manuelle
 - Tous les champs interpolés dans les templates HTML passent par `safeHTML()` (C1 maintenu)
 - En prod : le fetch devra pointer vers le repo GitHub du client (API GitHub Raw ou Supabase Storage)
 
@@ -629,23 +630,36 @@ Permettre d'éditer les sites des clients directement dans `claude.ai/design`, e
 | Contact | `contact` |
 
 ## Convention GitHub
-- Organisation : `spotrank-agency` (privée)
-- Format repo : `spotrank-agency/nom-du-client` (ex: `spotrank-agency/elite-plumbing-co`)
+- Organisation : `Spotrank-agency`
+- Repo dashboard : `spotrank-dashboard` (public — connecté à Vercel, auto-deploy)
+- Repos clients : `{slug-client}` (publics — requis pour GitHub Pages free plan)
 - Les fichiers HTML du client sont dans la branche `main` à la racine du repo
-- Déploiement : Netlify connecté au repo → auto-deploy sur push `main`
+- Déploiement dashboard : **Vercel** connecté au repo → auto-deploy sur push `main`
+- Déploiement clients : **GitHub Pages** activé automatiquement (branche `main`, root `/`)
+- Push direct depuis Claude.ai : via git clone + push avec token GitHub (zéro terminal côté Max)
 
 ---
 
-# 22. INTÉGRATION GITHUB PAGES — 2026-04-19
+# 22. INTÉGRATION GITHUB PAGES + VERCEL — 2026-04-20
 
-## Ce qui a été implémenté
+## Infrastructure validée
+
+### Dashboard (Vercel)
+- URL : `https://spotrank-dashboard.vercel.app/spotrank-dashboard.html`
+- Auto-deploy sur chaque push GitHub (pas de limite de builds)
+- Migration depuis Netlify (limite 300 builds/mois atteinte)
+
+### Sites clients (GitHub Pages)
+- URL pattern : `https://spotrank-agency.github.io/{slug}/`
+- Repos publics dans org Spotrank-agency (requis pour GitHub Pages free plan)
+- Template : `template-01-prolocal.html` avec 37+ variables injectées
 
 ### Configuration
 ```js
 const GITHUB_CONFIG = {
-  org:          'Spotrank-agency',        // Organisation GitHub
-  branch:       'main',                   // Branche de déploiement
-  templateFile: 'template-01-prolocal',  // Template HTML par défaut
+  org:          'Spotrank-agency',
+  branch:       'main',
+  templateFile: 'template-01-prolocal',
   apiBase:      'https://api.github.com',
 };
 ```
@@ -654,24 +668,45 @@ const GITHUB_CONFIG = {
 - `githubHeaders()` — headers Bearer avec PAT
 - `githubRepoSlug(client)` — "Elite Plumbing Co." → `elite-plumbing-co`
 - `githubFullRepo(client)` — `Spotrank-agency/elite-plumbing-co`
-- `createClientRepo(clientId)` — crée le repo privé dans l'org
-- `pushClientTemplate(clientId)` — push index.html avec données client injectées
-- `enableGithubPages(clientId)` — active Pages sur branche main
+- `createClientRepo(clientId)` — crée le repo **public** dans l'org
+- `pushClientTemplate(clientId)` — push index.html avec 37+ custom values injectées
+- `enableGithubPages(clientId)` — active Pages sur branche main (retry 3x, délai 3s)
 - `setCustomDomain(clientId, domain)` — configure domaine custom
 - `rollbackClientSite(clientId)` — revient au commit précédent
-- `deployClientSite(clientId)` — orchestre les 3 étapes en séquence
+- `deployClientSite(clientId)` — orchestre les 3 étapes avec délais + retry
 
-### Workflow de déploiement complet
+### Pipeline de déploiement automatique
 1. Clic "Créer & Déployer" → `deployClientSite(id)`
-2. Crée repo `Spotrank-agency/nom-client` (privé)
-3. Push `index.html` avec en-tête contextuel (client, date, repo)
-4. Active GitHub Pages → URL : `https://spotrank-agency.github.io/nom-client/`
-5. Si domaine custom → `setCustomDomain()` → met à jour `c.siteUrl`
+2. Crée repo public `Spotrank-agency/slug-client` → attend 3s
+3. Fetch template → injecte 37+ custom values → push `index.html` → attend 3s
+4. Active GitHub Pages (retry 3x) → URL : `https://spotrank-agency.github.io/slug/`
+5. Met à jour `c.siteUrl` + `c.siteUp = true` dans le dashboard
+
+### Variables injectées dans le template
+official_business_name, business_phone, business_phone_raw, business_initial,
+city_primary, trade, trade_headline, contact_email, current_website_url,
+about, about_short, about_title, services, services_short, services_cards,
+service_areas, service_areas_short, what_makes_you_stand_out, hours,
+return_offer, return_offer_question, shipping_address, gmb_profile_url,
+gmb_rating, gmb_review_count, response_time, response_hours, jobs_completed,
+years_experience, year_founded, year, color_theme, faq_items, ghl_form_action,
+hero_img, about_img, gallery_1..gallery_5
+
+### Tokens configurés (localStorage)
+- **GitHub PAT** : Settings → Intégrations & API (scopes: repo, workflow, write:org, pages)
+- **Cloudflare API Token** : Settings → Intégrations & API (permissions: Zone:Read + DNS:Edit)
 
 ### UI
 - Bouton **"Créer & Déployer"** (premier deploy) ou **"Redéployer"** (update)
 - Bouton **"↩ Rollback"** visible si repo lié
-- Champ GitHub Token dans Settings → Intégrations & API (🐙)
+- Bouton **"Ouvrir"** → lien vers l'URL GitHub Pages du client
+- Toast vert "Pages déjà actif ✓" si Pages déjà activé (plus de toast orange)
+
+### TODO — Cloudflare DNS
+- Coder le bouton "Configurer domaine" dans la fiche client → Site & Formulaires
+- Créer le CNAME automatiquement via l'API Cloudflare
+- Configurer le domaine custom sur GitHub Pages en 1 clic
+- Token Cloudflare déjà configuré dans Settings
 
 ---
 
@@ -800,7 +835,7 @@ Nouvel onglet dans Settings > sidenav "Flows clients" :
 
 ## Auto-deploy dashboard
 - Repo : github.com/Spotrank-agency/spotrank-dashboard (public)
-- Netlify : spotrank-dashboard.netlify.app — auto-deploy sur chaque push
+- Vercel : spotrank-dashboard.vercel.app — auto-deploy sur chaque push
 - Push direct depuis Claude.ai via git (token GitHub intégré)
 
 ## Tokens configurés
