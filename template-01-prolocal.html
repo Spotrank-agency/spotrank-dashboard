@@ -607,17 +607,15 @@ nav {
 }
 .reviews-see-all:hover { text-decoration: underline; }
 
-/* Horizontal scroll cards */
+/* Horizontal scroll cards — mobile par défaut */
 .reviews-scroll {
-  display: flex; gap: 14px;
-  overflow-x: auto; scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; padding-bottom: 4px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
 }
-.reviews-scroll::-webkit-scrollbar { display: none; }
 
 .review-card {
-  flex: 0 0 calc(25% - 12px); scroll-snap-align: start;
+  scroll-snap-align: start;
   background: var(--light);
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -980,6 +978,13 @@ nav {
   .reviews-score-num { font-size: 22px; }
   .reviews-score-stars { font-size: 14px; }
   .reviews-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .reviews-scroll {
+    display: flex;
+    overflow-x: auto; scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; padding-bottom: 4px;
+  }
+  .reviews-scroll::-webkit-scrollbar { display: none; }
   .map-embed {
     height: 280px;
   }
