@@ -8371,6 +8371,7 @@ function renderSheetTab(tab) {
     const GROUPS = [
       { title: 'Identité', keys: ['full_name','official_business_name','business_tax_id','business_phone','current_website_url'] },
       { title: 'Business', keys: ['about','service_areas','services','what_makes_you_stand_out','hours','return_offer','service_radius'] },
+      { title: 'Reviews Google', keys: ['review_1','review_2','review_3','review_4','review_5'] },
       { title: 'Réseaux sociaux', keys: ['instagram_url','facebook_url','bbb_link','tiktok_url','yelp_url'] },
       { title: 'Autres', keys: ['shipping_address','company_logo_url','photos_email'] },
     ];
@@ -10435,7 +10436,32 @@ async function pushClientTemplate(clientId) {
       'color_theme':            clientTheme(c.trade),  // 'blue' | 'green' | 'orange' → data-theme="X" dans le template
       'faq_items':              faqItems,
       'ghl_form_action':        '#',
+      'reviews_json':           buildReviewsJson(cb),
     };
+
+    /**
+     * buildReviewsJson(cb) — Construit le JSON des avis Google depuis les custom values.
+     * Format custom value: "Nom | Texte de l'avis | Note (1-5) | Date relative"
+     * Ex: "Sarah M. | Outstanding service, came out same day | 5 | 2 weeks ago"
+     * Option B (futur) : remplacer par un fetch Google Places API.
+     */
+    function buildReviewsJson(cb) {
+      var reviews = [];
+      for (var i = 1; i <= 5; i++) {
+        var raw = cb['review_' + i];
+        if (!raw) continue;
+        var parts = raw.split('|').map(function(p) { return p.trim(); });
+        if (parts.length >= 2) {
+          reviews.push({
+            author: parts[0] || 'Customer',
+            text: parts[1] || '',
+            rating: parseInt(parts[2]) || 5,
+            date: parts[3] || '',
+          });
+        }
+      }
+      return JSON.stringify(reviews);
+    }
 
     // Remplacer toutes les {{variables}} dans le HTML
     html = html.replace(/\{\{(\w+)\}\}/g, function(match, key) {

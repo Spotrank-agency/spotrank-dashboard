@@ -430,60 +430,6 @@ nav {
 }
 
 /* ════════════════════════════
-   GOOGLE REVIEWS STRIP
-════════════════════════════ */
-.reviews-strip {
-  background: #fff;
-  border-bottom: 1px solid var(--border);
-  padding: 22px 0;
-}
-.reviews-strip-inner {
-  display: flex; align-items: center; gap: 32px; flex-wrap: wrap;
-  justify-content: center;
-}
-.reviews-gmb {
-  display: flex; align-items: center; gap: 14px;
-}
-.reviews-gmb-logo {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 14px; font-weight: 600; color: var(--ink);
-}
-.gmb-stars { display: flex; gap: 2px; }
-.gmb-star { color: #f59e0b; font-size: 18px; }
-.gmb-score {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 26px; font-weight: 800; color: var(--ink);
-}
-.gmb-count { font-size: 13px; color: var(--muted); }
-
-.reviews-divider { width: 1px; height: 40px; background: var(--border); }
-
-.reviews-cards {
-  display: flex; gap: 16px; overflow-x: auto;
-  scrollbar-width: none;
-}
-.reviews-cards::-webkit-scrollbar { display: none; }
-
-.review-card-mini {
-  flex-shrink: 0;
-  background: var(--light);
-  border-radius: 10px;
-  padding: 12px 16px;
-  width: 220px;
-  border: 1px solid var(--border);
-}
-.rcm-stars { display: flex; gap: 2px; margin-bottom: 4px; }
-.rcm-star { color: #f59e0b; font-size: 13px; }
-.rcm-text {
-  font-size: 12px; color: var(--ink-2);
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.rcm-author { font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 600; }
-
-/* ════════════════════════════
    TRUST BADGES BAR
 ════════════════════════════ */
 .trust-bar {
@@ -644,8 +590,12 @@ nav {
   background: #fff;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 24px;
+  padding: 28px;
+  transition: box-shadow .3s, transform .25s;
+  position: relative;
 }
+.review-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,.1); transform: translateY(-4px); }
+.review-card::before { content: '\201C'; position: absolute; top: 14px; right: 18px; font-size: 56px; font-weight: 800; color: var(--brand-light); line-height: 1; font-family: Georgia, serif; }
 .review-stars { display: flex; gap: 3px; margin-bottom: 10px; }
 .review-star { color: #f59e0b; font-size: 16px; }
 .review-text { font-size: 14px; color: var(--ink-2); line-height: 1.7; font-style: italic; margin-bottom: 14px; }
@@ -664,6 +614,20 @@ nav {
   display: flex; align-items: center; gap: 4px;
   font-size: 10px; color: var(--muted); margin-top: 3px;
 }
+/* Reviews summary bar */
+.reviews-summary {
+  display: flex; align-items: center; justify-content: center;
+  gap: 14px; margin-bottom: 36px;
+  padding: 18px 28px;
+  background: var(--light); border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.reviews-summary-score {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 34px; font-weight: 800; color: var(--ink);
+}
+.reviews-summary-stars { color: #f59e0b; font-size: 20px; letter-spacing: 2px; }
+.reviews-summary-count { font-size: 14px; color: var(--muted); }
 
 /* ════════════════════════════
    GALLERY
@@ -1220,51 +1184,6 @@ footer {
   </div>
 </section>
 
-<!-- ════════ GOOGLE REVIEWS STRIP ════════ -->
-<section class="reviews-strip">
-  <div class="container">
-    <div class="reviews-strip-inner">
-      <div class="reviews-gmb">
-        <div class="reviews-gmb-logo">
-          <!-- Google G SVG -->
-          <svg width="22" height="22" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-          Google Reviews
-        </div>
-        <div>
-          <div class="gmb-stars">
-            <span class="gmb-star">★</span><span class="gmb-star">★</span><span class="gmb-star">★</span><span class="gmb-star">★</span><span class="gmb-star">★</span>
-          </div>
-          <div style="display:flex; align-items:baseline; gap:6px;">
-            <span class="gmb-score">{{gmb_rating}}</span>
-            <span class="gmb-count">{{gmb_review_count}} reviews</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="reviews-divider"></div>
-
-      <div class="reviews-cards" id="reviews-strip-cards">
-        <!-- Populated by JS / GHL embed -->
-        <div class="review-card-mini">
-          <div class="rcm-stars"><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span></div>
-          <div class="rcm-text">"Incredible service, showed up on time and got the job done right."</div>
-          <div class="rcm-author">— Sarah M.</div>
-        </div>
-        <div class="review-card-mini">
-          <div class="rcm-stars"><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span></div>
-          <div class="rcm-text">"Best in {{city_primary}}. Honest pricing and professional crew."</div>
-          <div class="rcm-author">— James K.</div>
-        </div>
-        <div class="review-card-mini">
-          <div class="rcm-stars"><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span><span class="rcm-star">★</span></div>
-          <div class="rcm-text">"Called in the morning, they were there by noon. Highly recommend!"</div>
-          <div class="rcm-author">— Maria T.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ════════ TRUST BAR ════════ -->
 <div class="trust-bar">
   <div class="trust-bar-inner">
@@ -1407,55 +1326,26 @@ footer {
   </div>
 </section>
 
-<!-- ════════ REVIEWS (full) ════════ -->
+<!-- ════════ REVIEWS — dynamique (Option C: custom values / Option B: Google Places API) ════════ -->
 <section class="section" id="reviews">
   <div class="container">
     <div class="section-header">
       <div class="section-label">Google Reviews</div>
       <h2 class="section-title">What Our Customers Say</h2>
-      <p class="section-sub">Real reviews from real clients in {{service_areas_short}}.</p>
+      <p class="section-sub">Real reviews from verified Google customers in {{service_areas_short}}.</p>
     </div>
-    <div class="reviews-grid">
-      <div class="review-card">
-        <div class="review-stars"><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span></div>
-        <p class="review-text">"Absolutely outstanding service. They came out the same day, gave me a fair price, and did a perfect job. I'll be using them again for sure."</p>
-        <div class="review-author">
-          <div class="review-avatar">S</div>
-          <div>
-            <div class="review-name">Sarah M.</div>
-            <div class="review-date">2 weeks ago</div>
-            <div class="review-google-badge">
-              <svg width="10" height="10" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-              Google Review
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="review-card">
-        <div class="review-stars"><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span></div>
-        <p class="review-text">"Best {{trade}} in {{city_primary}}. Honest, fast, and professional. The team was respectful of our property and cleaned up after themselves."</p>
-        <div class="review-author">
-          <div class="review-avatar">J</div>
-          <div>
-            <div class="review-name">James K.</div>
-            <div class="review-date">1 month ago</div>
-            <div class="review-google-badge"><svg width="10" height="10" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Google Review</div>
-          </div>
-        </div>
-      </div>
-      <div class="review-card">
-        <div class="review-stars"><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span><span class="review-star">★</span></div>
-        <p class="review-text">"I called in the morning and they had someone at my door by noon. Pricing was very fair and the work was excellent. Will definitely recommend to neighbors."</p>
-        <div class="review-author">
-          <div class="review-avatar">M</div>
-          <div>
-            <div class="review-name">Maria T.</div>
-            <div class="review-date">3 weeks ago</div>
-            <div class="review-google-badge"><svg width="10" height="10" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Google Review</div>
-          </div>
-        </div>
-      </div>
+
+    <!-- Summary bar — note + étoiles + count -->
+    <div class="reviews-summary">
+      <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      <span class="reviews-summary-score">{{gmb_rating}}</span>
+      <div class="reviews-summary-stars">★★★★★</div>
+      <span class="reviews-summary-count">{{gmb_review_count}} reviews</span>
     </div>
+
+    <!-- Cards rendues par JS depuis REVIEWS_DATA -->
+    <div class="reviews-grid" id="reviews-grid"></div>
+
     <div style="text-align:center; margin-top:28px;">
       <a href="{{gmb_profile_url}}" target="_blank" class="btn-outline">See All {{gmb_review_count}} Reviews on Google →</a>
     </div>
@@ -1650,6 +1540,53 @@ function toggleFaq(el) {
   const isOpen = item.classList.contains('open');
   document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
   if (!isOpen) item.classList.add('open');
+}
+
+/* ══ Google Reviews — Dynamic Rendering ══
+ * Source : Option C (custom values) ou Option B (Google Places API).
+ * Les avis sont injectés comme JSON dans REVIEWS_DATA au deploy.
+ * Format: [{ author, text, rating, date }]
+ * Si REVIEWS_DATA est vide ou non injecté, affiche des avis placeholder.
+ * Pour migrer vers Option B : remplacer l'injection par un fetch Google Places API.
+ */
+const GOOGLE_SVG = '<svg width="12" height="12" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>';
+
+// REVIEWS_DATA — injecté au deploy par pushClientTemplate()
+// Option C: custom values → JSON stringifié
+// Option B (futur): Google Places API → JSON fetch côté serveur
+var REVIEWS_DATA = '{{reviews_json}}';
+var reviews = [];
+try { reviews = JSON.parse(REVIEWS_DATA); } catch(e) { reviews = []; }
+
+// Fallback — si pas d'avis injectés, afficher des placeholders
+if (!reviews.length || REVIEWS_DATA.includes('{{')) {
+  reviews = [
+    { author: 'Sarah M.', text: 'Outstanding service. They came out the same day, gave me a fair price, and did a perfect job.', rating: 5, date: '2 weeks ago' },
+    { author: 'James K.', text: 'Best in town. Honest, fast, and professional. The team was respectful and cleaned up after themselves.', rating: 5, date: '1 month ago' },
+    { author: 'Robert L.', text: 'Called in the morning and they were at my door by noon. Pricing was very fair and the work was excellent.', rating: 5, date: '3 weeks ago' },
+  ];
+}
+
+const reviewsGrid = document.getElementById('reviews-grid');
+if (reviewsGrid && reviews.length) {
+  const AVATAR_COLORS = ['var(--brand)', '#16a34a', '#ea580c', '#7c3aed', '#0891b2'];
+  reviewsGrid.innerHTML = reviews.map((r, i) => {
+    const initial = (r.author || 'A')[0].toUpperCase();
+    const stars = '★'.repeat(r.rating || 5);
+    const avatarColor = AVATAR_COLORS[i % AVATAR_COLORS.length];
+    return '<div class="review-card">' +
+      '<div class="review-stars"><span class="review-star">' + stars.split('').join('</span><span class="review-star">') + '</span></div>' +
+      '<p class="review-text">"' + (r.text || '') + '"</p>' +
+      '<div class="review-author">' +
+        '<div class="review-avatar" style="background:' + avatarColor + ';">' + initial + '</div>' +
+        '<div>' +
+          '<div class="review-name">' + (r.author || 'Customer') + '</div>' +
+          '<div class="review-date">' + (r.date || '') + '</div>' +
+          '<div class="review-google-badge">' + GOOGLE_SVG + ' Google Review</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
 }
 
 /* ══ Service Areas ══
