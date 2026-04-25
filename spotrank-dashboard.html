@@ -8370,7 +8370,7 @@ function renderSheetTab(tab) {
   else if (tab === 'custom-b') {
     const GROUPS = [
       { title: 'Identité', keys: ['full_name','official_business_name','business_tax_id','business_phone','current_website_url'] },
-      { title: 'Business', keys: ['about','service_areas','services','what_makes_you_stand_out','hours','return_offer'] },
+      { title: 'Business', keys: ['about','service_areas','services','what_makes_you_stand_out','hours','return_offer','service_radius'] },
       { title: 'Réseaux sociaux', keys: ['instagram_url','facebook_url','bbb_link','tiktok_url','yelp_url'] },
       { title: 'Autres', keys: ['shipping_address','company_logo_url','photos_email'] },
     ];
@@ -10421,6 +10421,8 @@ async function pushClientTemplate(clientId) {
       'return_offer':           cb.return_offer || '',
       'return_offer_question':  cb.return_offer ? 'Yes! ' + cb.return_offer : 'Contact us for special offers.',
       'shipping_address':       cb.shipping_address || '',
+      'business_address':       cb.shipping_address || c.city || '',
+      'service_radius':         cb.service_radius || '15',
       'gmb_profile_url':        cb.current_website_url || '#',
       'gmb_rating':             '4.8',
       'gmb_review_count':       '47',

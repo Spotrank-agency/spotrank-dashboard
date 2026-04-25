@@ -51,6 +51,8 @@
      {{faq_items}}              — FAQ (format JSON ou texte structuré)
      {{return_offer}}           — Offre de retour (ex: "Free inspection on return")
      {{return_offer_question}}  — Question retour (ex: "Not satisfied?")
+     {{service_radius}}         — Rayon d'action en miles (ex: "15") — défaut 15 si vide
+     {{business_address}}       — Adresse physique (ex: "2800 N Florida Ave, Tampa, FL 33602")
      {{contact_email}}          — Email de contact
 
  COLOR THEMES (auto-sélectionné par l'IA selon le trade) :
@@ -881,17 +883,18 @@ nav {
   position: relative;
 }
 
-/* Cercle de rayon d'action — overlay semi-transparent sur la carte */
+/* Cercle de rayon d'action — taille définie dynamiquement par JS selon {{service_radius}} */
 .map-radius {
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  width: 220px; height: 220px;
+  width: 200px; height: 200px;
   border-radius: 50%;
-  border: 3px solid rgba(220, 38, 38, .7);
-  background: radial-gradient(circle, rgba(220, 38, 38, .12) 0%, rgba(220, 38, 38, .04) 60%, transparent 70%);
+  border: 2.5px solid rgba(220, 38, 38, .6);
+  background: radial-gradient(circle, rgba(220, 38, 38, .1) 0%, rgba(220, 38, 38, .03) 60%, transparent 70%);
   pointer-events: none;
   z-index: 2;
+  transition: width .3s, height .3s;
 }
 /* Point central du rayon */
 .map-radius::after {
@@ -1540,13 +1543,14 @@ footer {
     <div class="service-areas-grid">
 
       <!-- Colonne 1 : Google Maps Embed -->
-      <div class="map-container">
-        <div class="map-radius">
-          <div class="map-radius-label">Service Area</div>
+      <div class="map-container" data-radius="{{service_radius}}">
+        <div class="map-radius" id="map-radius">
+          <div class="map-radius-label" id="map-radius-label">{{service_radius}} mi radius</div>
         </div>
         <iframe 
           class="map-embed"
-          src="https://www.google.com/maps?q={{official_business_name}}+{{city_primary}}&output=embed&z=11"
+          id="map-embed"
+          src="https://www.google.com/maps?q={{business_address}}+{{city_primary}}&output=embed&z=11"
           loading="lazy"
           referrerpolicy="no-referrer-when-downgrade"
           title="Service area map for {{official_business_name}}">
@@ -1665,6 +1669,73 @@ if (areasContainer && areasList.length && !serviceAreasRaw.includes('{{')) {
     <div class="area-chip">${area}</div>
   `).join('');
 }
+
+/* ══ Service Radius — Carte + Cercle dynamique ══
+ * Lit {{service_radius}} depuis data-radius sur .map-container.
+ * Calcule le zoom Google Maps et la taille du cercle CSS
+ * en fonction du rayon d'action du contractor (en miles).
+ * Le centre est automatiquement l'adresse du business (via l'embed Google Maps).
+ */
+(function() {
+  const mapContainer = document.querySelector('.map-container');
+  const mapEmbed     = document.getElementById('map-embed');
+  const mapRadius    = document.getElementById('map-radius');
+  const radiusLabel  = document.getElementById('map-radius-label');
+  if (!mapContainer || !mapEmbed) return;
+
+  // Lire le rayon depuis le data attribute (injecté via {{service_radius}})
+  let radiusMiles = parseFloat(mapContainer.getAttribute('data-radius'));
+  if (isNaN(radiusMiles) || radiusMiles <= 0) radiusMiles = 15; // défaut 15 miles
+
+  // Mapping rayon (miles) → zoom Google Maps
+  // Plus le rayon est grand, plus on dézoome
+  const RADIUS_TO_ZOOM = [
+    { max: 3,  zoom: 14 },
+    { max: 5,  zoom: 13 },
+    { max: 10, zoom: 12 },
+    { max: 15, zoom: 11 },
+    { max: 25, zoom: 10 },
+    { max: 40, zoom: 9  },
+    { max: 60, zoom: 8  },
+    { max: 100,zoom: 7  },
+  ];
+  let zoom = 11; // défaut
+  for (let i = 0; i < RADIUS_TO_ZOOM.length; i++) {
+    if (radiusMiles <= RADIUS_TO_ZOOM[i].max) { zoom = RADIUS_TO_ZOOM[i].zoom; break; }
+  }
+
+  // Mapping rayon → taille du cercle CSS (en px)
+  // Le cercle doit couvrir visuellement le bon % de la carte
+  const RADIUS_TO_SIZE = [
+    { max: 3,  size: 120 },
+    { max: 5,  size: 160 },
+    { max: 10, size: 200 },
+    { max: 15, size: 220 },
+    { max: 25, size: 240 },
+    { max: 40, size: 260 },
+    { max: 60, size: 280 },
+    { max: 100,size: 300 },
+  ];
+  let circleSize = 220;
+  for (let i = 0; i < RADIUS_TO_SIZE.length; i++) {
+    if (radiusMiles <= RADIUS_TO_SIZE[i].max) { circleSize = RADIUS_TO_SIZE[i].size; break; }
+  }
+
+  // Appliquer le zoom à l'iframe
+  const currentSrc = mapEmbed.src;
+  mapEmbed.src = currentSrc.replace(/z=\d+/, 'z=' + zoom);
+
+  // Appliquer la taille au cercle
+  if (mapRadius) {
+    mapRadius.style.width  = circleSize + 'px';
+    mapRadius.style.height = circleSize + 'px';
+  }
+
+  // Mettre à jour le label
+  if (radiusLabel) {
+    radiusLabel.textContent = radiusMiles + ' mi radius';
+  }
+})();
 
 /* ══ Services Grid ══
  * {{services}} est injecté comme chaîne CSV à l'export.
