@@ -796,11 +796,11 @@ nav {
 
 /* ════════════════════════════
    SERVICE AREAS — OPTION 3 LAYOUT
-   Grid 3 colonnes : Business Info | Map | Areas
+   Grid 2 colonnes : Map | Areas
 ════════════════════════════ */
 .service-areas-grid {
   display: grid;
-  grid-template-columns: 280px 1fr 280px;
+  grid-template-columns: 1fr 1fr;
   gap: 28px;
   align-items: start;
   margin-top: 48px;
@@ -927,21 +927,13 @@ nav {
     gap: 32px;
   }
 
-  /* Ordre mobile : Map → Areas → Business Card */
+  /* Ordre mobile : Map → Areas */
   .map-container {
     order: 1;
   }
   
   .areas-container {
     order: 2;
-  }
-  
-  .business-info-card {
-    order: 3;
-  }
-
-  .business-info-card,
-  .areas-container {
     position: static;
   }
 
@@ -1507,50 +1499,10 @@ footer {
       <p class="section-sub">We serve homeowners and businesses throughout the following areas.</p>
     </div>
     
-    <!-- Grid 3 colonnes : Business Info | Map | Areas -->
+    <!-- Grid 2 colonnes : Map | Areas -->
     <div class="service-areas-grid">
-      
-      <!-- Colonne 1 : Business Information Card -->
-      <div class="business-info-card">
-        <h3 class="business-card-title">{{official_business_name}}</h3>
-        
-        <div class="business-info-item">
-          <div class="business-info-label">
-            <svg class="business-info-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-              <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-            Main Office
-          </div>
-          <div class="business-info-value">{{business_address}}</div>
-        </div>
 
-        <div class="business-info-item">
-          <div class="business-info-label">
-            <svg class="business-info-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-            </svg>
-            Phone
-          </div>
-          <div class="business-info-value">
-            <a href="tel:{{business_phone_raw}}" class="business-phone-link">{{business_phone}}</a><br>
-            <span class="business-info-note">24/7 Emergency Service</span>
-          </div>
-        </div>
-
-        <div class="business-info-item">
-          <div class="business-info-label">
-            <svg class="business-info-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 6v6l4 2"/>
-            </svg>
-            Hours
-          </div>
-          <div class="business-info-value business-hours">{{hours}}</div>
-        </div>
-      </div>
-
-      <!-- Colonne 2 : Google Maps Embed -->
+      <!-- Colonne 1 : Google Maps Embed -->
       <div class="map-container">
         <iframe 
           class="map-embed"
@@ -1561,7 +1513,7 @@ footer {
         </iframe>
       </div>
 
-      <!-- Colonne 3 : Cities We Serve (stack vertical) -->
+      <!-- Colonne 2 : Cities We Serve (stack vertical) -->
       <div class="areas-container">
         <h3 class="areas-section-title">Cities We Serve</h3>
         <div class="areas-vertical" id="areas-vertical">
